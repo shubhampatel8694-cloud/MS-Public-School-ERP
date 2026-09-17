@@ -14,6 +14,10 @@ class DBCursor:
         self.cursor = cursor
 
     def execute(self, query, params=None):
+        # 🛡️ MAGIC SHIELD: Auto-Align Columns for Frontend (Fixes Name/Class mix-up & Crash!)
+        if "SELECT *" in query.upper() and "STUDENT_MASTER" in query.upper():
+            query = query.replace("*", "roll_no, name, class, father_name, transport, medium, mother_name, dob, sch_no", 1)
+            
         pg_query = query.replace('?', '%s')
         if params:
             self.cursor.execute(pg_query, params)
@@ -54,12 +58,14 @@ try:
 except Exception as e:
     st.error(f"Database Connection Failed: {e}")
 
-# 🛡️ BULLETPROOF PANDAS OVERRIDE (Handles all SQL types & parameters)
+# 🛡️ BULLETPROOF PANDAS OVERRIDE
 _original_read_sql_query = pd.read_sql_query
 
 def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
     try:
-        # If connection is our custom DBConn, use its SQLAlchemy engine
+        if "SELECT *" in sql.upper() and "STUDENT_MASTER" in sql.upper():
+            sql = sql.replace("*", "roll_no, name, class, father_name, transport, medium, mother_name, dob, sch_no", 1)
+            
         engine = getattr(con, 'engine', con)
         if isinstance(sql, str):
             pg_sql = sql.replace('?', '%s')
@@ -67,7 +73,6 @@ def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
         return _original_read_sql_query(sql, con, params=params, *args, **kwargs)
     except Exception as e:
         try:
-            # Fallback manual execution via psycopg2 cursor
             pg_query = sql.replace('?', '%s')
             cur = conn.cursor()
             if params:
@@ -148,21 +153,16 @@ c.execute('''CREATE TABLE IF NOT EXISTS admit_timetable (
 )''')
 
 # ==========================================
-# ⚙️ DEFAULT SETTINGS
-# ==========================================
-# ==========================================
 # ⚙️ AUTO-HEAL & DEFAULT SETTINGS
 # ==========================================
 exam_list = ["UNIT TEST I", "HALF YEARLY EXAM", "UNIT TEST II", "ANNUAL EXAM"]
 
-# 1. Default Classes
 c_list = ["L.K.G", "U.K.G", "1", "2", "3", "4", "5", "6", "7", "8"]
 for cls in c_list:
     c.execute("SELECT COUNT(*) FROM fee_structure WHERE class=?", (cls,))
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO fee_structure (class, reg_fee, adm_fee, tuition, q_exam, h_exam, y_exam, van_fee, eng_fee, other_fee) VALUES (?, 0, 0, 0, 0, 0, 0, 0, 0, 0)", (cls,))
 
-# 2. Auto-Heal Dynamic Classes (Prevents App Crash)
 c.execute("SELECT DISTINCT class FROM student_master")
 for row in c.fetchall():
     active_class = row[0]
