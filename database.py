@@ -150,11 +150,24 @@ c.execute('''CREATE TABLE IF NOT EXISTS admit_timetable (
 # ==========================================
 # ⚙️ DEFAULT SETTINGS
 # ==========================================
-c_list = ["L.K.G", "U.K.G", "1", "2", "3", "4", "5", "6", "7", "8"]
+# ==========================================
+# ⚙️ AUTO-HEAL & DEFAULT SETTINGS
+# ==========================================
 exam_list = ["UNIT TEST I", "HALF YEARLY EXAM", "UNIT TEST II", "ANNUAL EXAM"]
 
-c.execute("SELECT COUNT(*) FROM fee_structure")
-if c.fetchone()[0] == 0:
-    for cls in c_list:
+# 1. Default Classes
+c_list = ["L.K.G", "U.K.G", "1", "2", "3", "4", "5", "6", "7", "8"]
+for cls in c_list:
+    c.execute("SELECT COUNT(*) FROM fee_structure WHERE class=?", (cls,))
+    if c.fetchone()[0] == 0:
         c.execute("INSERT INTO fee_structure (class, reg_fee, adm_fee, tuition, q_exam, h_exam, y_exam, van_fee, eng_fee, other_fee) VALUES (?, 0, 0, 0, 0, 0, 0, 0, 0, 0)", (cls,))
-        conn.commit()
+
+# 2. Auto-Heal Dynamic Classes (Prevents App Crash)
+c.execute("SELECT DISTINCT class FROM student_master")
+for row in c.fetchall():
+    active_class = row[0]
+    c.execute("SELECT COUNT(*) FROM fee_structure WHERE class=?", (active_class,))
+    if c.fetchone()[0] == 0:
+        c.execute("INSERT INTO fee_structure (class, reg_fee, adm_fee, tuition, q_exam, h_exam, y_exam, van_fee, eng_fee, other_fee) VALUES (?, 0, 0, 0, 0, 0, 0, 0, 0, 0)", (active_class,))
+        
+conn.commit()
