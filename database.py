@@ -1,13 +1,13 @@
 import psycopg2
 import streamlit as st
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 # 👇 अपना पूलर्स लिंक यहाँ डालें (पासवर्ड का @ %40 होना चाहिए)
 DB_URI = "postgresql://postgres.bddsmybawhqwnleqtzsf:Msps%40larawak2026@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
 
 # ==========================================
-# 🪄 BULLETPROOF PANDAS & SQLITE-TO-PG BRIDGE
+# 🪄 BULLETPROOF DATABASE & PANDAS BRIDGE
 # ==========================================
 class DBCursor:
     def __init__(self, cursor):
@@ -54,19 +54,32 @@ try:
 except Exception as e:
     st.error(f"Database Connection Failed: {e}")
 
-# 🛡️ PANDAS SAFETY OVERRIDE (Never fails)
+# 🛡️ BULLETPROOF PANDAS OVERRIDE (Handles all SQL types & parameters)
 _original_read_sql_query = pd.read_sql_query
 
-def safe_read_sql_query(sql, con, *args, **kwargs):
+def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
     try:
-        return _original_read_sql_query(sql, con, *args, **kwargs)
-    except Exception:
-        pg_query = sql.replace('?', '%s')
-        cur = conn.cursor()
-        cur.execute(pg_query)
-        data = cur.fetchall()
-        columns = [desc[0] for desc in cur.description] if cur.description else []
-        return pd.DataFrame(data, columns=columns)
+        # If connection is our custom DBConn, use its SQLAlchemy engine
+        engine = getattr(con, 'engine', con)
+        if isinstance(sql, str):
+            pg_sql = sql.replace('?', '%s')
+            return pd.read_sql(text(pg_sql) if params else pg_sql, engine, params=params, *args, **kwargs)
+        return _original_read_sql_query(sql, con, params=params, *args, **kwargs)
+    except Exception as e:
+        try:
+            # Fallback manual execution via psycopg2 cursor
+            pg_query = sql.replace('?', '%s')
+            cur = conn.cursor()
+            if params:
+                cur.execute(pg_query, params)
+            else:
+                cur.execute(pg_query)
+            data = cur.fetchall()
+            columns = [desc[0] for desc in cur.description] if cur.description else []
+            return pd.DataFrame(data, columns=columns)
+        except Exception as ex:
+            st.error(f"SQL Error: {ex}")
+            return pd.DataFrame()
 
 pd.read_sql_query = safe_read_sql_query
 
