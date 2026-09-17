@@ -111,7 +111,6 @@ pd.read_sql_query = safe_read_sql_query
 # 🏗️ INITIALIZE CLOUD DATABASE TABLES (Safe Mode)
 # ==========================================
 try:
-    # 🛡️ Force Read-Write mode to clear any leftover Read-Only state from Pandas
     c.execute("SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE")
     
     c.execute('''CREATE TABLE IF NOT EXISTS student_master (
@@ -138,7 +137,6 @@ try:
         d6 TEXT, s6 TEXT, d7 TEXT, s7 TEXT, d8 TEXT, s8 TEXT, d9 TEXT, s9 TEXT, d10 TEXT, s10 TEXT
     )''')
 except Exception:
-    # अगर कनेक्शन अभी भी Read-Only है, तो इग्नोर कर दें क्योंकि टेबल्स क्लाउड पर पहले से मौजूद हैं!
     pass
 
 # ==========================================
@@ -146,7 +144,9 @@ except Exception:
 # ==========================================
 try:
     exam_list = ["UNIT TEST I", "HALF YEARLY EXAM", "UNIT TEST II", "ANNUAL EXAM"]
-    c_list = ["L.K.G", "U.K.G", "1", "2", "3", "4", "5", "6", "7", "8"]
+    
+    # 👇 MASTER CLASS LIST UPDATED (NUR TO 12th)
+    c_list = ["NUR", "L.K.G", "U.K.G", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
     
     for cls in c_list:
         c.execute("SELECT COUNT(*) FROM fee_structure WHERE class=?", (cls,))
