@@ -1,12 +1,11 @@
 import psycopg2
 import streamlit as st
 
-# 👇 नीचे दी गई लाइन के अंदर अपना कॉपी किया हुआ Supabase URI लिंक पेस्ट करें
-# [YOUR-PASSWORD] को मिटाकर अपना असली पासवर्ड लिखें (ब्रैकेट हटा दें)
-DB_URI = "postgresql://postgres.bddsmybawhqwnleqtzsf:Msps%40larawak2026@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+# 👇 अपना पूलर्स लिंक यहाँ डालें (पासवर्ड का @ %40 होना चाहिए)
+DB_URI = "postgresql://postgres.bddsmybawhqwnleqtzsf:Msps%40larawak@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
 
 # ==========================================
-# 🪄 MAGIC WRAPPER (SQLite to PostgreSQL Converter)
+# 🪄 MAGIC WRAPPER (Pandas & PostgreSQL Compatible)
 # ==========================================
 class DBCursor:
     def __init__(self, cursor):
@@ -25,6 +24,9 @@ class DBCursor:
     def fetchall(self):
         return self.cursor.fetchall()
 
+    def __getattr__(self, name):
+        return getattr(self.cursor, name)
+
 class DBConn:
     def __init__(self, uri):
         self.conn = psycopg2.connect(uri)
@@ -36,7 +38,9 @@ class DBConn:
     def commit(self):
         self.conn.commit()
 
-# Fast Cloud Connection
+    def __getattr__(self, name):
+        return getattr(self.conn, name)
+
 @st.cache_resource
 def init_connection():
     return DBConn(DB_URI)
@@ -85,7 +89,6 @@ c.execute('''CREATE TABLE IF NOT EXISTS fee_log (
     collected_by TEXT
 )''')
 
-# PostgreSQL uses SERIAL for auto-increment IDs
 c.execute('''CREATE TABLE IF NOT EXISTS student_charges (
     id SERIAL PRIMARY KEY,
     roll_no INTEGER,
@@ -122,4 +125,4 @@ c.execute("SELECT COUNT(*) FROM fee_structure")
 if c.fetchone()[0] == 0:
     for cls in c_list:
         c.execute("INSERT INTO fee_structure (class, reg_fee, adm_fee, tuition, q_exam, h_exam, y_exam, van_fee, eng_fee, other_fee) VALUES (?, 0, 0, 0, 0, 0, 0, 0, 0, 0)", (cls,))
-    conn.commit()
+        conn.commit()
