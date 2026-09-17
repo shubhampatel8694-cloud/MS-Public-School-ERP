@@ -3,7 +3,7 @@ import streamlit as st
 
 # 👇 नीचे दी गई लाइन के अंदर अपना कॉपी किया हुआ Supabase URI लिंक पेस्ट करें
 # [YOUR-PASSWORD] को मिटाकर अपना असली पासवर्ड लिखें (ब्रैकेट हटा दें)
-DB_URI = "postgresql://postgres:Msps%40larawak2026@db.bddsmybawhqwnleqtzsf.supabase.co:5432/postgres"
+DB_URI = "postgresql://postgres.bddsmybawhqwnleqtzsf:Msps%40larawak2026@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
 
 # ==========================================
 # 🪄 MAGIC WRAPPER (SQLite to PostgreSQL Converter)
