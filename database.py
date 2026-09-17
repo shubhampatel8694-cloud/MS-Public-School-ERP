@@ -108,7 +108,7 @@ def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
 pd.read_sql_query = safe_read_sql_query
 
 # ==========================================
-# 🏗️ INITIALIZE CLOUD DATABASE TABLES (Safe Mode)
+# 🏗️ INITIALIZE CLOUD DATABASE TABLES 
 # ==========================================
 try:
     c.execute("SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE")
@@ -136,6 +136,11 @@ try:
         d1 TEXT, s1 TEXT, d2 TEXT, s2 TEXT, d3 TEXT, s3 TEXT, d4 TEXT, s4 TEXT, d5 TEXT, s5 TEXT,
         d6 TEXT, s6 TEXT, d7 TEXT, s7 TEXT, d8 TEXT, s8 TEXT, d9 TEXT, s9 TEXT, d10 TEXT, s10 TEXT
     )''')
+    
+    # 👇 NEW TABLE FOR PUBLIC NOTICES
+    c.execute('''CREATE TABLE IF NOT EXISTS school_notices (
+        id SERIAL PRIMARY KEY, date TEXT, title TEXT, content TEXT, is_active INTEGER DEFAULT 1
+    )''')
 except Exception:
     pass
 
@@ -144,8 +149,6 @@ except Exception:
 # ==========================================
 try:
     exam_list = ["UNIT TEST I", "HALF YEARLY EXAM", "UNIT TEST II", "ANNUAL EXAM"]
-    
-    # 👇 MASTER CLASS LIST UPDATED (NUR TO 12th)
     c_list = ["NUR", "L.K.G", "U.K.G", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
     
     for cls in c_list:
