@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 DB_URI = "postgresql://postgres.bddsmybawhqwnleqtzsf:Msps%40larawak2026@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
 
 # ==========================================
-# 🪄 MAGIC DATAFRAME (Fixes ALL KeyError crashes forever!)
+# 🪄 MAGIC DATAFRAME (Fixes KeyError crashes)
 # ==========================================
 class MagicDataFrame(pd.DataFrame):
     @property
@@ -16,10 +16,8 @@ class MagicDataFrame(pd.DataFrame):
         
     def __getitem__(self, key):
         try:
-            # पहले नॉर्मल तरीके से ढूँढने की कोशिश करें
             return super().__getitem__(key)
         except KeyError as e:
-            # 🛡️ MAGIC: अगर नाम मैच नहीं हुआ (जैसे 'Class' vs 'class'), तो यह ऑटोमैटिक सही कर देगा!
             if isinstance(key, str):
                 lk = key.lower()
                 sk = lk.replace(' ', '_')
@@ -85,7 +83,14 @@ def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
         else:
             df = _original_read_sql_query(sql, con, params=params, *args, **kwargs)
         
-        df.__class__ = MagicDataFrame  # Injecting the Magic Shield 🛡️
+        # 🧹 DUPLICATE COLUMN FIX: Converts lowercase DB outputs back to Title Case!
+        rename_map = {
+            'total': 'Total', 'cash': 'Cash', 'online_upi': 'Online_UPI', 
+            'bank': 'Bank', 'cheque': 'Cheque'
+        }
+        df = df.rename(columns=rename_map)
+        
+        df.__class__ = MagicDataFrame  
         return df
     except Exception as e:
         try:
@@ -96,6 +101,14 @@ def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
             data = cur.fetchall()
             columns = [desc[0] for desc in cur.description] if cur.description else []
             df = pd.DataFrame(data, columns=columns)
+            
+            # 🧹 DUPLICATE COLUMN FIX (Fallback)
+            rename_map = {
+                'total': 'Total', 'cash': 'Cash', 'online_upi': 'Online_UPI', 
+                'bank': 'Bank', 'cheque': 'Cheque'
+            }
+            df = df.rename(columns=rename_map)
+            
             df.__class__ = MagicDataFrame
             return df
         except Exception as ex:
@@ -105,13 +118,13 @@ def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
 pd.read_sql_query = safe_read_sql_query
 
 # ==========================================
-# 🚨 SMART SCHEMA RESET (Ensures exact SQLite Column Order)
+# 🚨 SMART SCHEMA RESET
 # ==========================================
 try:
     c.execute("SELECT column_name FROM information_schema.columns WHERE table_name='student_master' AND ordinal_position=2")
     res = c.fetchone()
     if res and res[0] != 'name':
-        c.execute("DROP TABLE student_master CASCADE") # Fixes column order permanently
+        c.execute("DROP TABLE student_master CASCADE") 
 except:
     pass
 
