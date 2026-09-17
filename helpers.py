@@ -40,6 +40,9 @@ def get_student_financials(roll, current_m_idx):
     cls, transport, medium = stu[2], stu[4], stu[5]
     c.execute("SELECT * FROM fee_structure WHERE class=?", (cls,))
     fs = c.fetchone()
+    if fs is None:
+        fs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # 🛡️ Safety Shield: अगर फीस नहीं है, तो 0 मान लें
+    payable = fs[1] + fs[2] + fs[9] + (fs[3] * current_m_idx)
     payable = fs[1] + fs[2] + fs[9] + (fs[3] * current_m_idx) 
     if current_m_idx >= 4: payable += fs[4] 
     if current_m_idx >= 7: payable += fs[5]
