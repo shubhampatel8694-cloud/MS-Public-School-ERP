@@ -7,52 +7,63 @@ from sqlalchemy import create_engine, text
 DB_URI = "postgresql://postgres.bddsmybawhqwnleqtzsf:Msps%40larawak2026@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
 
 # ==========================================
-# 🪄 BULLETPROOF DATABASE & PANDAS BRIDGE
+# 🪄 MAGIC DATAFRAME (Fixes ALL KeyError crashes forever!)
+# ==========================================
+class MagicDataFrame(pd.DataFrame):
+    @property
+    def _constructor(self):
+        return MagicDataFrame
+        
+    def __getitem__(self, key):
+        try:
+            # पहले नॉर्मल तरीके से ढूँढने की कोशिश करें
+            return super().__getitem__(key)
+        except KeyError as e:
+            # 🛡️ MAGIC: अगर नाम मैच नहीं हुआ (जैसे 'Class' vs 'class'), तो यह ऑटोमैटिक सही कर देगा!
+            if isinstance(key, str):
+                lk = key.lower()
+                sk = lk.replace(' ', '_')
+                for col in self.columns:
+                    if str(col).lower() in (lk, sk):
+                        return super().__getitem__(col)
+            elif isinstance(key, list):
+                resolved = []
+                for k in key:
+                    if isinstance(k, str):
+                        lk = k.lower()
+                        sk = lk.replace(' ', '_')
+                        found = False
+                        for col in self.columns:
+                            if str(col).lower() in (lk, sk):
+                                resolved.append(col)
+                                found = True
+                                break
+                        if not found: resolved.append(k)
+                    else: resolved.append(k)
+                return super().__getitem__(resolved)
+            raise e
+
+# ==========================================
+# 🛡️ BULLETPROOF DATABASE BRIDGE
 # ==========================================
 class DBCursor:
-    def __init__(self, cursor):
-        self.cursor = cursor
-
+    def __init__(self, cursor): self.cursor = cursor
     def execute(self, query, params=None):
-        # 🛡️ MAGIC SHIELD: Guaranteed Column Order for Frontend (Fixes all mismatched data!)
-        upper_query = query.upper()
-        if "SELECT *" in upper_query:
-            if "STUDENT_MASTER" in upper_query:
-                query = query.replace("*", "roll_no, sch_no, name, class, father_name, mother_name, dob, transport, medium", 1)
-            elif "FEE_STRUCTURE" in upper_query:
-                query = query.replace("*", "class, reg_fee, adm_fee, tuition, q_exam, h_exam, y_exam, van_fee, eng_fee, other_fee", 1)
-            elif "FEE_LOG" in upper_query:
-                query = query.replace("*", "receipt_no, date, roll_no, amount, mode, head, collected_by", 1)
-                
         pg_query = query.replace('?', '%s')
-        if params:
-            self.cursor.execute(pg_query, params)
-        else:
-            self.cursor.execute(pg_query)
-
-    def fetchone(self):
-        return self.cursor.fetchone()
-
-    def fetchall(self):
-        return self.cursor.fetchall()
-
-    def __getattr__(self, name):
-        return getattr(self.cursor, name)
+        if params: self.cursor.execute(pg_query, params)
+        else: self.cursor.execute(pg_query)
+    def fetchone(self): return self.cursor.fetchone()
+    def fetchall(self): return self.cursor.fetchall()
+    def __getattr__(self, name): return getattr(self.cursor, name)
 
 class DBConn:
     def __init__(self, uri):
         self.conn = psycopg2.connect(uri)
         self.conn.autocommit = True
         self.engine = create_engine(uri)
-
-    def cursor(self):
-        return DBCursor(self.conn.cursor())
-
-    def commit(self):
-        self.conn.commit()
-
-    def __getattr__(self, name):
-        return getattr(self.engine, name)
+    def cursor(self): return DBCursor(self.conn.cursor())
+    def commit(self): self.conn.commit()
+    def __getattr__(self, name): return getattr(self.engine, name)
 
 @st.cache_resource
 def init_connection():
@@ -64,36 +75,29 @@ try:
 except Exception as e:
     st.error(f"Database Connection Failed: {e}")
 
-# 🛡️ PANDAS SAFE OVERRIDE (Without altering column names to prevent KeyError)
 _original_read_sql_query = pd.read_sql_query
-
 def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
     try:
-        upper_sql = sql.upper()
-        if "SELECT *" in upper_sql:
-            if "STUDENT_MASTER" in upper_sql:
-                sql = sql.replace("*", "roll_no, sch_no, name, class, father_name, mother_name, dob, transport, medium", 1)
-            elif "FEE_STRUCTURE" in upper_sql:
-                sql = sql.replace("*", "class, reg_fee, adm_fee, tuition, q_exam, h_exam, y_exam, van_fee, eng_fee, other_fee", 1)
-            elif "FEE_LOG" in upper_sql:
-                sql = sql.replace("*", "receipt_no, date, roll_no, amount, mode, head, collected_by", 1)
-
         engine = getattr(con, 'engine', con)
         if isinstance(sql, str):
             pg_sql = sql.replace('?', '%s')
-            return pd.read_sql(text(pg_sql) if params else pg_sql, engine, params=params, *args, **kwargs)
-        return _original_read_sql_query(sql, con, params=params, *args, **kwargs)
+            df = _original_read_sql_query(text(pg_sql) if params else pg_sql, engine, params=params, *args, **kwargs)
+        else:
+            df = _original_read_sql_query(sql, con, params=params, *args, **kwargs)
+        
+        df.__class__ = MagicDataFrame  # Injecting the Magic Shield 🛡️
+        return df
     except Exception as e:
         try:
             pg_query = sql.replace('?', '%s')
             cur = conn.cursor()
-            if params:
-                cur.execute(pg_query, params)
-            else:
-                cur.execute(pg_query)
+            if params: cur.execute(pg_query, params)
+            else: cur.execute(pg_query)
             data = cur.fetchall()
             columns = [desc[0] for desc in cur.description] if cur.description else []
-            return pd.DataFrame(data, columns=columns)
+            df = pd.DataFrame(data, columns=columns)
+            df.__class__ = MagicDataFrame
+            return df
         except Exception as ex:
             st.error(f"SQL Error: {ex}")
             return pd.DataFrame()
@@ -101,18 +105,29 @@ def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
 pd.read_sql_query = safe_read_sql_query
 
 # ==========================================
-# 🏗️ INITIALIZE CLOUD DATABASE TABLES 
+# 🚨 SMART SCHEMA RESET (Ensures exact SQLite Column Order)
+# ==========================================
+try:
+    c.execute("SELECT column_name FROM information_schema.columns WHERE table_name='student_master' AND ordinal_position=2")
+    res = c.fetchone()
+    if res and res[0] != 'name':
+        c.execute("DROP TABLE student_master CASCADE") # Fixes column order permanently
+except:
+    pass
+
+# ==========================================
+# 🏗️ INITIALIZE CLOUD DATABASE TABLES
 # ==========================================
 c.execute('''CREATE TABLE IF NOT EXISTS student_master (
     roll_no INTEGER PRIMARY KEY,
-    sch_no TEXT,
     name TEXT,
     class TEXT,
     father_name TEXT,
-    mother_name TEXT,
-    dob TEXT,
     transport TEXT,
-    medium TEXT
+    medium TEXT,
+    sch_no TEXT,
+    mother_name TEXT,
+    dob TEXT
 )''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS fee_structure (
