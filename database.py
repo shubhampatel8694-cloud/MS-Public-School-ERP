@@ -14,10 +14,6 @@ class DBCursor:
         self.cursor = cursor
 
     def execute(self, query, params=None):
-        # 🛡️ MAGIC SHIELD: Auto-Align Columns for Frontend (Fixes Name/Class mix-up & Crash!)
-        if "SELECT *" in query.upper() and "STUDENT_MASTER" in query.upper():
-            query = query.replace("*", "roll_no, name, class, father_name, transport, medium, mother_name, dob, sch_no", 1)
-            
         pg_query = query.replace('?', '%s')
         if params:
             self.cursor.execute(pg_query, params)
@@ -58,49 +54,59 @@ try:
 except Exception as e:
     st.error(f"Database Connection Failed: {e}")
 
-# 🛡️ BULLETPROOF PANDAS OVERRIDE
+# 🛡️ PANDAS KEY-ERROR FIXER (Auto-converts lowercase back to Title Case for UI)
 _original_read_sql_query = pd.read_sql_query
 
 def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
     try:
-        if "SELECT *" in sql.upper() and "STUDENT_MASTER" in sql.upper():
-            sql = sql.replace("*", "roll_no, name, class, father_name, transport, medium, mother_name, dob, sch_no", 1)
-            
         engine = getattr(con, 'engine', con)
         if isinstance(sql, str):
             pg_sql = sql.replace('?', '%s')
-            return pd.read_sql(text(pg_sql) if params else pg_sql, engine, params=params, *args, **kwargs)
-        return _original_read_sql_query(sql, con, params=params, *args, **kwargs)
+            df = pd.read_sql(text(pg_sql) if params else pg_sql, engine, params=params, *args, **kwargs)
+        else:
+            df = _original_read_sql_query(sql, con, params=params, *args, **kwargs)
+        
+        # जादुई डिक्शनरी: यह क्लाउड के नामों को वापस आपके पुराने ऐप वाले नामों में बदल देगी
+        renames = {
+            'roll_no': 'Roll No', 'receipt_no': 'Receipt No', 'sch_no': 'Sch No',
+            'father_name': 'Father Name', 'mother_name': 'Mother Name', 'dob': 'DOB',
+            'van_fee': 'Van Fee', 'eng_fee': 'Eng Fee', 'other_fee': 'Other Fee',
+            'reg_fee': 'Reg Fee', 'adm_fee': 'Adm Fee', 'q_exam': 'Q Exam',
+            'h_exam': 'H Exam', 'y_exam': 'Y Exam', 'item_name': 'Item Name',
+            'collected_by': 'Collected By', 'ut1': 'UT1', 'ut2': 'UT2', 'hy': 'HY'
+        }
+        df.columns = [renames.get(col, col.title()) for col in df.columns]
+        return df
     except Exception as e:
-        try:
-            pg_query = sql.replace('?', '%s')
-            cur = conn.cursor()
-            if params:
-                cur.execute(pg_query, params)
-            else:
-                cur.execute(pg_query)
-            data = cur.fetchall()
-            columns = [desc[0] for desc in cur.description] if cur.description else []
-            return pd.DataFrame(data, columns=columns)
-        except Exception as ex:
-            st.error(f"SQL Error: {ex}")
-            return pd.DataFrame()
+        st.error(f"Pandas SQL Error: {e}")
+        return pd.DataFrame()
 
 pd.read_sql_query = safe_read_sql_query
 
 # ==========================================
-# 🏗️ INITIALIZE CLOUD DATABASE TABLES
+# 🚨 SMART SCHEMA RESET (Fixes the Name/Class Mix-up automatically)
+# ==========================================
+try:
+    c.execute("SELECT column_name FROM information_schema.columns WHERE table_name='student_master' AND ordinal_position=2")
+    res = c.fetchone()
+    if res and res[0] == 'sch_no':
+        c.execute("DROP TABLE student_master") # पुराने गलत ढांचे को डिलीट करता है
+except:
+    pass
+
+# ==========================================
+# 🏗️ INITIALIZE CLOUD DATABASE TABLES (With Correct Column Order)
 # ==========================================
 c.execute('''CREATE TABLE IF NOT EXISTS student_master (
     roll_no INTEGER PRIMARY KEY,
-    sch_no TEXT,
     name TEXT,
     class TEXT,
     father_name TEXT,
-    mother_name TEXT,
-    dob TEXT,
     transport TEXT,
-    medium TEXT
+    medium TEXT,
+    sch_no TEXT,
+    mother_name TEXT,
+    dob TEXT
 )''')
 
 c.execute('''CREATE TABLE IF NOT EXISTS fee_structure (
