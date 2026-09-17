@@ -1,11 +1,13 @@
 import psycopg2
 import streamlit as st
+import pandas as pd
+from sqlalchemy import create_engine
 
 # 👇 अपना पूलर्स लिंक यहाँ डालें (पासवर्ड का @ %40 होना चाहिए)
-DB_URI = "postgresql://postgres.bddsmybawhqwnleqtzsf:Msps%40larawak@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+DB_URI = "postgresql://postgres.bddsmybawhqwnleqtzsf:Msps%40larawak2026@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
 
 # ==========================================
-# 🪄 MAGIC WRAPPER (Pandas & PostgreSQL Compatible)
+# 🪄 BULLETPROOF PANDAS & SQLITE-TO-PG BRIDGE
 # ==========================================
 class DBCursor:
     def __init__(self, cursor):
@@ -31,6 +33,7 @@ class DBConn:
     def __init__(self, uri):
         self.conn = psycopg2.connect(uri)
         self.conn.autocommit = True
+        self.engine = create_engine(uri)
 
     def cursor(self):
         return DBCursor(self.conn.cursor())
@@ -39,7 +42,7 @@ class DBConn:
         self.conn.commit()
 
     def __getattr__(self, name):
-        return getattr(self.conn, name)
+        return getattr(self.engine, name)
 
 @st.cache_resource
 def init_connection():
@@ -50,6 +53,22 @@ try:
     c = conn.cursor()
 except Exception as e:
     st.error(f"Database Connection Failed: {e}")
+
+# 🛡️ PANDAS SAFETY OVERRIDE (Never fails)
+_original_read_sql_query = pd.read_sql_query
+
+def safe_read_sql_query(sql, con, *args, **kwargs):
+    try:
+        return _original_read_sql_query(sql, con, *args, **kwargs)
+    except Exception:
+        pg_query = sql.replace('?', '%s')
+        cur = conn.cursor()
+        cur.execute(pg_query)
+        data = cur.fetchall()
+        columns = [desc[0] for desc in cur.description] if cur.description else []
+        return pd.DataFrame(data, columns=columns)
+
+pd.read_sql_query = safe_read_sql_query
 
 # ==========================================
 # 🏗️ INITIALIZE CLOUD DATABASE TABLES
