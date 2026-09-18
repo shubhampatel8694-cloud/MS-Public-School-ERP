@@ -10,7 +10,7 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 ADAPTIVE CSS: PREMIUM LOGIN & HOVER EFFECTS
+# 🎨 ADAPTIVE CSS: PREMIUM UI & HOVER EFFECTS
 # ==========================================
 page_bg_css = """
 <style>
@@ -110,8 +110,11 @@ div[data-testid="stButton"] button:hover {
 }
 [data-testid="stForm"]:hover { transform: translateY(-3px); }
 
-/* Hide Radio Button Label in Login */
-[data-testid="stRadio"] label { display: none; }
+/* Make Radio Buttons Look Clean */
+div[role="radiogroup"] {
+    justify-content: center;
+    margin-bottom: 15px;
+}
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
@@ -254,7 +257,8 @@ if not st.session_state.logged_in:
             st.markdown(f"<div style='text-align: center; margin-top: -10px;'><img src='{LOGO_BASE64}' width='100'></div>", unsafe_allow_html=True)
             st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-top: 10px; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
             
-            login_type = st.radio("Select Portal Access", ["Student Portal", "Teacher Portal", "Admin Portal"], horizontal=True)
+            # 👇 FIXED RADIO BUTTONS: 'label_visibility="collapsed"' ensures the title hides, but options remain!
+            login_type = st.radio("Select Portal Access", ["Admin Portal", "Teacher Portal", "Student Portal"], horizontal=True, label_visibility="collapsed")
             
             with st.form("login_form"):
                 if login_type == "Admin Portal":
