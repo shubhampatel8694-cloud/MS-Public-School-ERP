@@ -10,7 +10,7 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 ADAPTIVE CSS: PREMIUM UI & HOVER EFFECTS
+# 🎨 ADAPTIVE CSS: FIXED SIDEBAR & PREMIUM UI
 # ==========================================
 page_bg_css = """
 <style>
@@ -27,13 +27,13 @@ page_bg_css = """
 .nav-links span { cursor: pointer; transition: color 0.3s; opacity: 0.9;}
 .nav-links span:hover { color: #0ea5e9; opacity: 1;}
 
-/* 🌟 STANDOUT BUTTONS (Gradient & Standard) 🌟 */
+/* 🌟 STANDOUT BUTTONS 🌟 */
 div[data-testid="stButton"] button {
     background: linear-gradient(45deg, #e11d48, #be123c) !important; 
     color: #ffffff !important; 
     border: none !important;
     border-radius: 8px !important; 
-    font-weight: 800 !important; 
+    font-weight: 700 !important; 
     letter-spacing: 0.5px;
     padding: 0.6rem 1.5rem !important;
     box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4) !important; 
@@ -46,7 +46,23 @@ div[data-testid="stButton"] button:hover {
     background: linear-gradient(45deg, #be123c, #9f1239) !important;
 }
 
-/* 🌟 CONTENT BOXES (Adaptive Background) 🌟 */
+/* 🌟 SIDEBAR MODERN TABS (FIXED) 🌟 */
+[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child { display: none !important; }
+[data-testid="stSidebar"] div[role="radiogroup"] label {
+    background-color: transparent !important; border: 1px solid rgba(130, 130, 130, 0.3) !important;
+    padding: 10px 15px !important; margin-bottom: 8px !important; border-radius: 8px !important;
+    width: 100% !important; transition: all 0.3s ease !important; display: block !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+    background-color: rgba(14, 165, 233, 0.1) !important; border-color: #0ea5e9 !important; transform: translateX(5px) !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
+    background: linear-gradient(45deg, #e11d48, #be123c) !important; border-color: #be123c !important; transform: translateX(8px) !important;
+    box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3) !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 700 !important; }
+
+/* Content Boxes */
 .content-box {
     background-color: var(--secondary-background-color);
     border: 1px solid rgba(130, 130, 130, 0.2); 
@@ -62,56 +78,56 @@ div[data-testid="stButton"] button:hover {
 }
 
 /* Hero Section */
-.hero-welcome { color: #0ea5e9; font-weight: bold; font-size: 15px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
-.hero-title { font-size: 48px; color: var(--text-color); font-weight: 900; margin: 0; line-height: 1.2;}
+.hero-welcome { color: #0ea5e9; font-weight: 700; font-size: 15px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
+.hero-title { font-size: 48px; color: var(--text-color); font-weight: 700; margin: 0; line-height: 1.2;}
 .hero-subtitle { font-size: 22px; color: var(--text-color); margin: 15px 0 15px 0; font-weight: 500; opacity: 0.9;}
 .hero-desc { font-size: 15px; color: var(--text-color); max-width: 650px; line-height: 1.6; opacity: 0.7; margin-bottom: 0;}
 
 /* Features Row */
 .feature-card { display: flex; align-items: center; gap: 15px; padding: 15px; height: 100%;}
 .f-icon-wrap { min-width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white;}
-.f-title { font-size: 16px; font-weight: 800; color: var(--text-color); margin: 0 0 2px 0;}
+.f-title { font-size: 16px; font-weight: 700; color: var(--text-color); margin: 0 0 2px 0;}
 .f-text { font-size: 13px; color: var(--text-color); opacity: 0.7; margin: 0; line-height: 1.3;}
 
 /* Side Cards Headers */
 .side-card-header { border-bottom: 2px solid rgba(130, 130, 130, 0.2); padding-bottom: 12px; margin-bottom: 20px;}
-.side-card-header h3 { color: var(--text-color); margin:0; font-size: 18px; font-weight: bold;}
+.side-card-header h3 { color: var(--text-color); margin:0; font-size: 18px; font-weight: 700;}
 
 /* Notice Items */
 .notice-item { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-start; border-bottom: 1px dashed rgba(130, 130, 130, 0.3); padding-bottom: 15px; transition: all 0.3s ease;}
 .notice-item:hover { transform: translateX(5px); }
 .notice-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
 .notice-date { background: var(--background-color); border: 1px solid rgba(130, 130, 130, 0.3); border-radius: 6px; padding: 6px; text-align: center; min-width: 55px;}
-.nd-day { font-size: 16px; font-weight: 900; color: var(--text-color); margin:0; line-height:1;}
-.nd-mon { font-size: 11px; color: #e11d48; margin:0; text-transform: uppercase; font-weight: bold;}
-.nt-title { font-weight: bold; color: var(--text-color); margin: 0 0 4px 0; font-size: 14px;}
+.nd-day { font-size: 16px; font-weight: 700; color: var(--text-color); margin:0; line-height:1;}
+.nd-mon { font-size: 11px; color: #e11d48; margin:0; text-transform: uppercase; font-weight: 700;}
+.nt-title { font-weight: 700; color: var(--text-color); margin: 0 0 4px 0; font-size: 14px;}
 .nt-desc { font-size: 13px; color: var(--text-color); opacity:0.8; margin:0; line-height: 1.4;}
 
 /* Admin Contact Details */
-.admin-title { font-size: 14px; font-weight: 800; color: var(--text-color); opacity:0.9; margin: 0 0 2px 0; }
+.admin-title { font-size: 14px; font-weight: 700; color: var(--text-color); opacity:0.9; margin: 0 0 2px 0; }
 .admin-text { font-size: 15px; color: var(--text-color); opacity:0.8; margin: 0 0 15px 0; font-weight: 500;}
 .wa-btn {
-    display: inline-block; background-color: #25D366; color: white !important; font-weight: bold;
+    display: inline-block; background-color: #25D366; color: white !important; font-weight: 700;
     padding: 10px 15px; border-radius: 8px; text-decoration: none; text-align: center; width: 100%;
     margin-top: 5px; transition: all 0.3s;
 }
 .wa-btn:hover { background-color: #128C7E; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
 
-/* 🌟 LOGIN FORM PREMIUM DESIGN 🌟 */
+/* Login Form Styling */
 [data-testid="stForm"] {
     background-color: var(--secondary-background-color); 
     padding: 40px 30px; 
     border-radius: 15px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important; 
     border: 1px solid rgba(130, 130, 130, 0.2); 
-    border-top: 5px solid #e11d48; /* Red Accent Top */
+    border-top: 5px solid #e11d48; 
     transition: transform 0.3s ease;
     margin-top: 10px;
 }
 [data-testid="stForm"]:hover { transform: translateY(-3px); }
 
-/* Make Radio Buttons Look Clean */
-div[role="radiogroup"] {
+/* Main Area Radio Buttons (Login Selection) */
+.main div[role="radiogroup"] {
     justify-content: center;
     margin-bottom: 15px;
 }
@@ -140,8 +156,8 @@ if not st.session_state.logged_in:
             <div style="display: flex; align-items: center; margin-top: 10px;">
                 <img src='{LOGO_BASE64}' width='65' style='margin-right: 15px;'>
                 <div>
-                    <h2 style='margin:0; font-weight:900; font-size:22px; color: var(--text-color);'>M.S. PUBLIC SCHOOL</h2>
-                    <p style='margin:0; color:#0ea5e9; font-size:11px; font-weight:bold; letter-spacing: 2px;'>LEARN | LEAD | GROW</p>
+                    <h2 style='margin:0; font-weight:800; font-size:22px; color: var(--text-color);'>M.S. PUBLIC SCHOOL</h2>
+                    <p style='margin:0; color:#0ea5e9; font-size:11px; font-weight:700; letter-spacing: 2px;'>LEARN | LEAD | GROW</p>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -218,7 +234,7 @@ if not st.session_state.logged_in:
                         notices_html += f'<div><p class="nt-title">{n[1]}</p><p class="nt-desc">{n[2]}</p></div>'
                         notices_html += '</div>'
                 else:
-                    notices_html += '<p style="color:#16a34a; font-weight:bold;">✨ No new notices at the moment.</p>'
+                    notices_html += '<p style="color:#16a34a; font-weight:700;">✨ No new notices at the moment.</p>'
             except:
                 notices_html += '<p style="color:#eab308;">Notice board is currently being initialized.</p>'
             notices_html += '</div>'
@@ -227,7 +243,7 @@ if not st.session_state.logged_in:
             admin_html = '<div class="content-box" style="border-top: 3px solid #0ea5e9;">'
             admin_html += '<div class="side-card-header"><h3>📞 Administration</h3></div>'
             admin_html += '<p class="admin-title">👨‍💼 School Manager</p>'
-            admin_html += '<p class="admin-text" style="color:#0ea5e9; font-weight:bold;">Mr. Ram Prasad Patel</p>'
+            admin_html += '<p class="admin-text" style="color:#0ea5e9; font-weight:700;">Mr. Ram Prasad Patel</p>'
             admin_html += '<p class="admin-title">📱 Contact Numbers</p>'
             admin_html += '<p class="admin-text">+91 6307210754 <br> +91 9455587731</p>'
             admin_html += '<p class="admin-title">✉️ Official Email</p>'
@@ -255,14 +271,14 @@ if not st.session_state.logged_in:
         colA, colB, colC = st.columns([1, 1.5, 1])
         with colB:
             st.markdown(f"<div style='text-align: center; margin-top: -10px;'><img src='{LOGO_BASE64}' width='100'></div>", unsafe_allow_html=True)
-            st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-top: 10px; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
             
-            # 👇 FIXED RADIO BUTTONS: 'label_visibility="collapsed"' ensures the title hides, but options remain!
+            st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-top: 10px; margin-bottom: 25px; font-weight: 700; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
+            
             login_type = st.radio("Select Portal Access", ["Admin Portal", "Teacher Portal", "Student Portal"], horizontal=True, label_visibility="collapsed")
             
             with st.form("login_form"):
                 if login_type == "Admin Portal":
-                    st.markdown("<h3 style='text-align: center; color: #e11d48; margin-bottom: 25px;'>👨‍💻 Secure Admin Access</h3>", unsafe_allow_html=True)
+                    st.markdown("<h3 style='text-align: center; color: #e11d48; margin-bottom: 25px; font-weight: 700;'>👨‍💻 Secure Admin Access</h3>", unsafe_allow_html=True)
                     username = st.text_input("Admin Username / Mobile", placeholder="Enter your ID...")
                     password = st.text_input("Password", type="password", placeholder="Enter Password...")
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -273,7 +289,7 @@ if not st.session_state.logged_in:
                         else: st.error("❌ Invalid Admin Credentials!")
                 
                 elif login_type == "Teacher Portal":
-                    st.markdown("<h3 style='text-align: center; color: #0ea5e9; margin-bottom: 25px;'>👨‍🏫 Teacher Dashboard</h3>", unsafe_allow_html=True)
+                    st.markdown("<h3 style='text-align: center; color: #0ea5e9; margin-bottom: 25px; font-weight: 700;'>👨‍🏫 Teacher Dashboard</h3>", unsafe_allow_html=True)
                     t_id = st.text_input("Teacher ID", placeholder="Enter your Login ID...")
                     t_pass = st.text_input("Password", type="password", placeholder="Enter Password...")
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -286,7 +302,7 @@ if not st.session_state.logged_in:
                         else: st.error("❌ Invalid Teacher ID or Password!")
                 
                 else:
-                    st.markdown("<h3 style='text-align: center; color: #16a34a; margin-bottom: 25px;'>🎓 Student Dashboard</h3>", unsafe_allow_html=True)
+                    st.markdown("<h3 style='text-align: center; color: #16a34a; margin-bottom: 25px; font-weight: 700;'>🎓 Student Dashboard</h3>", unsafe_allow_html=True)
                     s_roll = st.number_input("Roll No", min_value=1, step=1)
                     s_dob_obj = st.date_input("Date of Birth", value=datetime(2015, 1, 1), min_value=datetime(1990, 1, 1), max_value=datetime.today())
                     st.markdown("<br>", unsafe_allow_html=True)
