@@ -72,7 +72,8 @@ if not st.session_state.logged_in:
         st.markdown("<hr style='margin-top: 0px;'>", unsafe_allow_html=True)
         
         try:
-            c.execute("SELECT date, title, content FROM school_notices WHERE is_active=1 ORDER BY id DESC")
+            # 🛡️ Bulletproof Aliased Query
+            c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC")
             notices = c.fetchall()
             if notices:
                 for n in notices: st.info(f"**🗓️ {n[0]} | {n[1]}**\n\n{n[2]}")
@@ -156,11 +157,38 @@ elif st.session_state.role == "Student":
         else: c3.success(f"Advance Rcvd: ₹{adv:,}")
         st.write("---")
         st.write("📋 **Recent Payments**")
-        c.execute('''SELECT receipt_no, date, amount, mode, head FROM fee_log WHERE roll_no=? ORDER BY date DESC''')
+        
+        # 🛡️ Bulletproof Aliased Query to fix 'UndefinedColumn'
+        c.execute('''SELECT f.receipt_no, f.date, f.amount, f.mode, f.head FROM fee_log f WHERE f.roll_no=? ORDER BY f.date DESC''', (stu[0],))
         logs = c.fetchall()
         if logs: st.dataframe(pd.DataFrame(logs, columns=["Receipt No", "Date", "Amount", "Mode", "Fee Head"]), use_container_width=True, hide_index=True)
         else: st.warning("No payments recorded yet.")
-        # ... Detailed Fee Table Code Continues (omitted here as it is already managed inside the tabs naturally)
+
+        st.write("---")
+        st.write("📊 **Detailed Month-by-Month Statement**")
+        c.execute("SELECT * FROM fee_structure WHERE class=?", (stu[2],))
+        fs = c.fetchone()
+        heads = [('Registration Fee', fs[1], 1), ('Admission Fee', fs[2], 1), ('Other Fee', fs[9], 1)]
+        c.execute("SELECT item_name, amount FROM student_charges WHERE roll_no=?", (stu[0],))
+        for item in c.fetchall(): heads.append((f"{item[0]} (EXTRA)", item[1], 1))
+        heads.extend([('April Tuition', fs[3], 1), ('May Tuition', fs[3], 2), ('June Tuition', fs[3], 3), ('July Tuition', fs[3], 4), ('Quarterly Exam', fs[4], 4), ('August Tuition', fs[3], 5), ('September Tuition', fs[3], 6), ('October Tuition', fs[3], 7), ('Half-Yearly Exam', fs[5], 7), ('November Tuition', fs[3], 8), ('December Tuition', fs[3], 9), ('January Tuition', fs[3], 10), ('February Tuition', fs[3], 11), ('March Tuition', fs[3], 12), ('Yearly Exam', fs[6], 12)])
+        
+        pool = paid; table_data = []
+        for h_name, base_amt, m_idx in heads:
+            amt = base_amt
+            if "Tuition" in h_name:
+                if stu[4] == "Van": amt += fs[7]
+                if stu[5] == "ENGLISH": amt += fs[8]
+            paid_here = min(amt, max(0, pool))
+            pool -= paid_here
+            if amt <= 0: status = "-"
+            elif paid_here >= amt: status = "🟢 Paid"
+            elif paid_here > 0: status = "🟡 Partial"
+            elif m_idx <= current_m_idx: status = "🔴 Due"
+            else: status = "⚪ Upcoming"
+            curr_due = max(0, amt - paid_here) if m_idx <= current_m_idx else 0
+            table_data.append([h_name.upper(), f"₹{amt:,}", f"₹{paid_here:,}", status, f"₹{curr_due:,}"])
+        st.dataframe(pd.DataFrame(table_data, columns=["Fee Head / Month", "Payable", "Paid", "Status", "Current Due"]), use_container_width=True, hide_index=True)
 
     with tab2:
         st.subheader("Your Exam Marks")
