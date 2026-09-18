@@ -97,31 +97,26 @@ div[data-testid="stButton"] button:hover {
 }
 .wa-btn:hover { background-color: #128C7E; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
 
-/* 🌟 TRUE CARD LOGIN STRUCTURE 🌟 */
-.login-card-container {
-    background-color: var(--secondary-background-color);
-    padding: 40px 30px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    border: 1px solid rgba(130, 130, 130, 0.15);
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
+/* 🌟 LOGIN FORM PREMIUM DESIGN 🌟 */
 [data-testid="stForm"] {
-    background-color: transparent;
-    padding: 0;
-    border: none;
-    box-shadow: none !important;
+    background-color: var(--secondary-background-color); 
+    padding: 30px 40px; 
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important; 
+    border: 1px solid rgba(130, 130, 130, 0.15); 
+    transition: transform 0.3s ease;
+    margin-top: 10px;
 }
+[data-testid="stForm"]:hover { transform: translateY(-2px); }
 
 /* Make Radio Buttons Look Clean & Centered */
 div[role="radiogroup"] {
     justify-content: center;
-    margin-bottom: 20px;
-    margin-top: 10px;
+    margin-bottom: 5px;
+    margin-top: 15px;
 }
 
-/* Customizing Input Labels */
+/* Customizing Input Labels to look like the design */
 .stTextInput label, .stNumberInput label, .stDateInput label {
     font-weight: 700 !important;
     color: var(--text-color) !important;
@@ -256,7 +251,7 @@ if not st.session_state.logged_in:
 
     else:
         # ==========================================
-        # 🔐 TRUE CARD LOGIN SCREEN
+        # 🔐 PREMIUM OFFICIAL LOGIN SCREEN
         # ==========================================
         col_back, col_space = st.columns([1, 8])
         with col_back:
@@ -266,12 +261,12 @@ if not st.session_state.logged_in:
                 
         colA, colB, colC = st.columns([1, 1.2, 1])
         with colB:
-            st.markdown("<div class='login-card-container'>", unsafe_allow_html=True)
-            
+            # Recreated the exact Header from the image
             st.markdown("<div style='text-align: center; margin-top: -10px;'><h1 style='font-size: 55px; margin-bottom: 0px;'>🎓</h1></div>", unsafe_allow_html=True)
             st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-top: 0px; margin-bottom: 5px; font-weight: 900; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center; color: #64748b; font-size: 15px; margin-bottom: 10px;'>Please login to continue to your account</p>", unsafe_allow_html=True)
             
+            # Sorted Order: Student -> Teacher -> Admin
             login_type = st.radio("Select Portal Access", ["Student Portal", "Teacher Portal", "Admin Portal"], horizontal=True, label_visibility="collapsed")
             
             with st.form("login_form"):
@@ -300,7 +295,7 @@ if not st.session_state.logged_in:
                             st.session_state.logged_in = True; st.session_state.role = "Teacher"; st.session_state.user_data = tch; force_rerun()
                         else: st.error("❌ Invalid Teacher ID or Password!")
                         
-                else: 
+                else: # Admin Portal
                     username = st.text_input("👤 Admin ID / Mobile", placeholder="Enter your Admin ID")
                     password = st.text_input("🔒 Password", type="password", placeholder="Enter your Password")
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -309,8 +304,6 @@ if not st.session_state.logged_in:
                         if username in ADMIN_USERS and password == ADMIN_USERS[username]:
                             st.session_state.logged_in = True; st.session_state.role = "Admin"; st.session_state.admin_id = username; force_rerun()
                         else: st.error("❌ Invalid Admin Credentials!")
-            
-            st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
 # 🎓 STUDENT PORTAL
