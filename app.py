@@ -10,7 +10,7 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 ADAPTIVE CSS: DARK INPUTS & 3D GLOW HOVER
+# 🎨 ADAPTIVE CSS: 3D GLOW HOVER & FIXED GAPS
 # ==========================================
 page_bg_css = """
 <style>
@@ -47,35 +47,21 @@ div[data-testid="stFormSubmitButton"] button:hover {
     background: linear-gradient(45deg, #be123c, #9f1239) !important; border-color: #ff4d6d !important;
 }
 
-/* 🌟 FIXED INPUT FIELDS (DARK BOXES WITH WHITE TEXT) 🌟 */
-.stTextInput input, .stNumberInput input, .stDateInput div[data-baseweb="input"], .stTextArea textarea, div[data-baseweb="select"] > div {
-    background-color: rgba(0, 0, 0, 0.4) !important; /* Deep Dark Box */
-    border: 1px solid rgba(14, 165, 233, 0.5) !important; 
+/* 🌟 FIXED INPUT FIELDS (Black Text & Bright Cells) 🌟 */
+.stTextInput input, .stNumberInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"] > div {
+    background-color: #ffffff !important; 
+    border: 2px solid rgba(255, 255, 255, 0.3) !important; 
     border-radius: 8px !important;
-    color: #ffffff !important; /* WHITE TEXT */
-    -webkit-text-fill-color: #ffffff !important;
-    font-weight: 700 !important; 
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5) !important;
+    color: #000000 !important; 
+    font-weight: 800 !important; 
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1) !important;
     transition: all 0.3s ease !important;
+    padding: 10px !important;
 }
 .stTextInput input:focus, .stNumberInput input:focus, div[data-baseweb="select"] > div:focus-within {
-    border-color: #38bdf8 !important;
-    background-color: rgba(0, 0, 0, 0.7) !important;
+    border-color: #0ea5e9 !important;
     box-shadow: 0 0 15px rgba(14, 165, 233, 0.8) !important;
 }
-
-/* Ensure the calendar popup remains readable with black text */
-div[data-baseweb="calendar"] *, div[data-baseweb="calendar"] span, div[data-baseweb="calendar"] div { 
-    color: #000000 !important; 
-    -webkit-text-fill-color: #000000 !important; 
-}
-
-/* Force date input segments to be bright white */
-div[data-testid="stDateInput"] div, div[data-testid="stDateInput"] span, div[data-testid="stDateInput"] input {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-}
-
 .st-emotion-cache-1104ue2, .st-emotion-cache-16idsys p { color: rgba(255,255,255,0.7) !important; }
 
 /* 🌟 FORMS & CARDS (3D Edges & Glowing Hover) 🌟 */
@@ -117,6 +103,17 @@ div[role="radiogroup"] label:hover { border-color: #0ea5e9 !important; box-shado
 div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 800 !important; letter-spacing: 0.5px;}
 
 .stTextInput label, .stNumberInput label, .stDateInput label { font-weight: 700 !important; font-size: 15px !important; opacity: 0.9; color: #ffffff !important; margin-bottom: 5px !important;}
+
+/* 🔥 ABSOLUTE FINAL FIX FOR DATE OF BIRTH WHITE TEXT ISSUE 🔥 */
+div[data-baseweb="input"],
+div[data-baseweb="input"] *,
+div[data-baseweb="input"] span,
+div[data-baseweb="base-input"] *,
+div[data-baseweb="calendar"] *,
+div[data-baseweb="calendar"] span {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+}
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
@@ -166,7 +163,7 @@ if not st.session_state.logged_in:
                 
         st.markdown("<hr style='border:1px solid rgba(255,255,255,0.15); margin: 25px 0 35px 0;'>", unsafe_allow_html=True)
                 
-        # --- MAIN CONTENT ---
+        # --- MAIN CONTENT (FIXED GAP USING gap="large") ---
         col_main, col_side = st.columns([1.5, 1], gap="large")
         
         with col_main:
@@ -179,6 +176,7 @@ if not st.session_state.logged_in:
             </div>
             """, unsafe_allow_html=True)
             
+            # Sub-columns for features also use gap="large"
             f1, f2 = st.columns(2, gap="large")
             features = [
                 ("👨‍🏫", "#2563eb", "Qualified Teachers", "Experienced and dedicated faculty members."),
@@ -264,10 +262,7 @@ if not st.session_state.logged_in:
             with st.form("login_form"):
                 if login_type == "Student Portal":
                     s_roll = st.number_input("👤 Roll No", min_value=1, step=1)
-                    
-                    # 🔥 ADDED format="DD-MM-YYYY" (DASH INSTEAD OF SLASH) 🔥
-                    s_dob_obj = st.date_input("📅 Date of Birth (Click Calendar Icon 👉)", value=datetime(2015, 1, 1), min_value=datetime(1990, 1, 1), max_value=datetime.today(), format="DD-MM-YYYY")
-                    
+                    s_dob_obj = st.date_input("📅 Date of Birth (Click Calendar Icon 👉)", value=datetime(2015, 1, 1), min_value=datetime(1990, 1, 1), max_value=datetime.today(), format="DD/MM/YYYY")
                     st.markdown("<br>", unsafe_allow_html=True)
                     submit = st.form_submit_button("Login ➔", use_container_width=True)
                     if submit:
