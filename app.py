@@ -52,7 +52,7 @@ div[data-testid="stFormSubmitButton"] button:hover {
     background-color: #ffffff !important; 
     border: 2px solid rgba(255, 255, 255, 0.3) !important; 
     border-radius: 8px !important;
-    color: #000000 !important; /* BLACK TEXT */
+    color: #000000 !important; 
     font-weight: 800 !important; 
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.1) !important;
     transition: all 0.3s ease !important;
@@ -61,20 +61,6 @@ div[data-testid="stFormSubmitButton"] button:hover {
 .stTextInput input:focus, .stNumberInput input:focus, div[data-baseweb="select"] > div:focus-within {
     border-color: #0ea5e9 !important;
     box-shadow: 0 0 15px rgba(14, 165, 233, 0.8) !important;
-}
-
-/* 🔥 ABSOLUTE BULLETPROOF FIX FOR DATE OF BIRTH & ALL INPUT TEXTS 🔥 */
-.stApp div[data-testid="stDateInput"] div[data-baseweb="input"] *,
-.stApp div[data-testid="stDateInput"] input,
-.stApp div[data-testid="stNumberInput"] div[data-baseweb="input"] *,
-.stApp div[data-testid="stTextInput"] div[data-baseweb="input"] * {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    font-weight: 800 !important;
-}
-div[data-baseweb="calendar"] *, div[data-baseweb="calendar"] span, div[data-baseweb="calendar"] div { 
-    color: #000000 !important; 
-    -webkit-text-fill-color: #000000 !important; 
 }
 .st-emotion-cache-1104ue2, .st-emotion-cache-16idsys p { color: rgba(255,255,255,0.7) !important; }
 
@@ -117,6 +103,17 @@ div[role="radiogroup"] label:hover { border-color: #0ea5e9 !important; box-shado
 div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 800 !important; letter-spacing: 0.5px;}
 
 .stTextInput label, .stNumberInput label, .stDateInput label { font-weight: 700 !important; font-size: 15px !important; opacity: 0.9; color: #ffffff !important; margin-bottom: 5px !important;}
+
+/* 🔥 ABSOLUTE FINAL FIX FOR DATE OF BIRTH WHITE TEXT ISSUE 🔥 */
+div[data-baseweb="input"],
+div[data-baseweb="input"] *,
+div[data-baseweb="input"] span,
+div[data-baseweb="base-input"] *,
+div[data-baseweb="calendar"] *,
+div[data-baseweb="calendar"] span {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+}
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
@@ -265,7 +262,7 @@ if not st.session_state.logged_in:
             with st.form("login_form"):
                 if login_type == "Student Portal":
                     s_roll = st.number_input("👤 Roll No", min_value=1, step=1)
-                    s_dob_obj = st.date_input("🔒 Date of Birth", value=datetime(2015, 1, 1), min_value=datetime(1990, 1, 1), max_value=datetime.today())
+                    s_dob_obj = st.date_input("📅 Date of Birth (Click Calendar Icon 👉)", value=datetime(2015, 1, 1), min_value=datetime(1990, 1, 1), max_value=datetime.today(), format="DD/MM/YYYY")
                     st.markdown("<br>", unsafe_allow_html=True)
                     submit = st.form_submit_button("Login ➔", use_container_width=True)
                     if submit:
