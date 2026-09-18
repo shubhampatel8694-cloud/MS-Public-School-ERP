@@ -105,9 +105,9 @@ div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; f
 
 .stTextInput label, .stNumberInput label, .stDateInput label { font-weight: 700 !important; font-size: 15px !important; opacity: 0.9; color: #ffffff !important; margin-bottom: 5px !important;}
 /* 🔥 FIX FOR DATE OF BIRTH WHITE TEXT ISSUE 🔥 */
-.stDateInput div[data-baseweb="input"] *, 
-.stDateInput div[data-baseweb="input"] input {
+.stDateInput input {
     color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
 }
 </style>
 """
