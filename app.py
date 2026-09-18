@@ -10,112 +10,116 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 ADAPTIVE CSS: DEEP 3D UI & BUG FIXES
+# 🎨 ADAPTIVE CSS: UNIFIED DARK ERP & 3D EDGES
 # ==========================================
 page_bg_css = """
 <style>
-/* Remove Streamlit Default Header Border & Gap */
-[data-testid="stHeader"] { background-color: transparent !important; box-shadow: none !important; border-bottom: none !important; }
+/* 🌟 UNIFIED APP BACKGROUND (LEFT = RIGHT) 🌟 */
+.stApp, [data-testid="stHeader"] { 
+    background-color: #0b214a !important; 
+}
+[data-testid="stSidebar"] { 
+    background-color: #0b214a !important; 
+    border-right: 1px solid rgba(255,255,255,0.1) !important; 
+}
+[data-testid="stHeader"] { box-shadow: none !important; border-bottom: none !important; }
 .block-container { max-width: 1300px; padding-top: 1.5rem !important; padding-left: 1rem; padding-right: 1rem; }
 
+/* Force Text to White/Light Grey for readability on Dark Blue */
+.stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp span, .stApp label, .stApp div { 
+    color: #f8fafc; 
+}
+
 /* Navbar Area */
-.nav-links { display: flex; gap: 25px; color: var(--text-color); font-weight: 600; font-size: 15px; margin-top: 25px; justify-content: center;}
-.nav-links span { cursor: pointer; transition: color 0.3s; opacity: 0.9;}
+.nav-links { display: flex; gap: 25px; font-weight: 600; font-size: 15px; margin-top: 25px; justify-content: center;}
+.nav-links span { cursor: pointer; transition: color 0.3s; opacity: 0.9; color: white;}
 .nav-links span:hover { color: #0ea5e9; opacity: 1;}
 
 /* 🌟 STANDARD BUTTONS 🌟 */
 div[data-testid="stButton"] button {
-    background-color: #0b214a !important; color: #ffffff !important; border: none !important; border-radius: 8px !important; 
+    background: linear-gradient(45deg, #e11d48, #be123c) !important; color: #ffffff !important; 
+    border: 1px solid rgba(255,255,255,0.2) !important; border-radius: 8px !important; 
     font-weight: 700 !important; letter-spacing: 0.5px; padding: 0.6rem 1.5rem !important;
-    box-shadow: 0 4px 10px rgba(11, 33, 74, 0.2) !important; transition: all 0.3s ease !important; margin-top: 10px; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important; transition: all 0.3s ease !important; margin-top: 10px; 
 }
 div[data-testid="stButton"] button:hover {
-    transform: translateY(-2px) !important; box-shadow: 0 6px 15px rgba(11, 33, 74, 0.4) !important; background-color: #17366e !important;
+    transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(225, 29, 72, 0.6) !important;
+    background: linear-gradient(45deg, #be123c, #9f1239) !important; border-color: #e11d48 !important;
 }
 
-/* 🌟 CONTENT BOXES (For Landing Page) 🌟 */
-.content-box {
-    background-color: var(--secondary-background-color); border: 1px solid rgba(130, 130, 130, 0.2); 
-    border-radius: 12px; padding: 25px; transition: all 0.3s ease; margin-bottom: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+/* 🌟 INPUT FIELDS & DROP-DOWNS (Edges & Shadows) 🌟 */
+.stTextInput input, .stNumberInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"] > div {
+    background-color: rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.2) !important;
+    transition: all 0.3s ease !important;
 }
-.content-box:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #0ea5e9; }
-
-/* Hero Section */
-.hero-welcome { color: #0ea5e9; font-weight: 700; font-size: 15px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
-.hero-title { font-size: 48px; color: var(--text-color); font-weight: 700; margin: 0; line-height: 1.2;}
-.hero-subtitle { font-size: 22px; color: var(--text-color); margin: 15px 0 15px 0; font-weight: 500; opacity: 0.9;}
-.hero-desc { font-size: 15px; color: var(--text-color); max-width: 650px; line-height: 1.6; opacity: 0.7; margin-bottom: 0;}
-
-/* Features Row (Bug Fixed: Flex-Shrink added to prevent stretching) */
-.feature-card { display: flex; align-items: center; gap: 15px; padding: 15px; height: 100%;}
-.f-icon-wrap { width: 50px !important; height: 50px !important; min-width: 50px !important; min-height: 50px !important; flex-shrink: 0 !important; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white;}
-.f-title { font-size: 16px; font-weight: 700; color: var(--text-color); margin: 0 0 2px 0;}
-.f-text { font-size: 13px; color: var(--text-color); opacity: 0.7; margin: 0; line-height: 1.3;}
-
-/* Side Cards Headers */
-.side-card-header { border-bottom: 2px solid rgba(130, 130, 130, 0.2); padding-bottom: 12px; margin-bottom: 20px;}
-.side-card-header h3 { color: var(--text-color); margin:0; font-size: 18px; font-weight: 700;}
-
-/* Notice Items */
-.notice-item { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-start; border-bottom: 1px dashed rgba(130, 130, 130, 0.3); padding-bottom: 15px; transition: all 0.3s ease;}
-.notice-item:hover { transform: translateX(5px); }
-.notice-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
-.notice-date { background: var(--background-color); border: 1px solid rgba(130, 130, 130, 0.3); border-radius: 6px; padding: 6px; text-align: center; min-width: 55px;}
-.nd-day { font-size: 16px; font-weight: 700; color: var(--text-color); margin:0; line-height:1;}
-.nd-mon { font-size: 11px; color: #e11d48; margin:0; text-transform: uppercase; font-weight: 700;}
-.nt-title { font-weight: 700; color: var(--text-color); margin: 0 0 4px 0; font-size: 14px;}
-.nt-desc { font-size: 13px; color: var(--text-color); opacity:0.8; margin:0; line-height: 1.4;}
-
-/* Admin Contact Details */
-.admin-title { font-size: 14px; font-weight: 700; color: var(--text-color); opacity:0.9; margin: 0 0 2px 0; }
-.admin-text { font-size: 15px; color: var(--text-color); opacity:0.8; margin: 0 0 15px 0; font-weight: 500;}
-.wa-btn {
-    display: inline-block; background-color: #25D366; color: white !important; font-weight: 700; padding: 10px 15px; border-radius: 8px; text-decoration: none; text-align: center; width: 100%; margin-top: 5px; transition: all 0.3s;
+.stTextInput input:focus, .stNumberInput input:focus, div[data-baseweb="select"] > div:focus-within {
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 12px rgba(14, 165, 233, 0.5) !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
 }
-.wa-btn:hover { background-color: #128C7E; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
 
-/* 🌟 LOGIN FORM PREMIUM DESIGN 🌟 */
-.login-card-container {
-    background-color: var(--secondary-background-color); padding: 40px 30px; border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid rgba(130, 130, 130, 0.15); margin-top: 20px; margin-bottom: 20px;
+/* 🌟 FORMS, CARDS & CONTAINERS (3D Edges) 🌟 */
+[data-testid="stForm"], .content-box, .dash-card, .login-card-container, [data-testid="stDataFrame"] {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 12px !important;
+    padding: 25px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) !important;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
 }
-[data-testid="stForm"] { background-color: transparent; padding: 0; border: none; box-shadow: none !important; }
-.stTextInput label, .stNumberInput label, .stDateInput label { font-weight: 700 !important; opacity: 0.8; }
+[data-testid="stForm"]:hover, .content-box:hover, .dash-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+    border-color: rgba(14, 165, 233, 0.4) !important;
+}
 
-/* 🌟 RADIO BUTTON PILLS (Login Selection & Sidebar) 🌟 */
-div[role="radiogroup"] { gap: 10px; justify-content: center; margin-bottom: 20px; margin-top: 10px; }
-div[role="radiogroup"] label {
-    background-color: var(--secondary-background-color) !important; border: 1px solid rgba(130, 130, 130, 0.3) !important;
+/* Specific Spacing for elements */
+.dash-card { padding: 20px; display: flex; align-items: center; gap: 20px; margin-bottom: 15px;}
+.login-card-container { padding: 40px 30px; margin-top: 20px; margin-bottom: 20px; border-top: 5px solid #e11d48 !important;}
+[data-testid="stForm"] { margin-bottom: 20px; }
+
+/* 🌟 SIDEBAR & RADIO BUTTONS 🌟 */
+[data-testid="stSidebar"] div[role="radiogroup"] label, .main div[role="radiogroup"] label {
+    background-color: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important;
     padding: 10px 20px !important; border-radius: 8px !important; transition: all 0.3s ease !important; cursor: pointer !important;
 }
-div[role="radiogroup"] label:hover { border-color: #0ea5e9 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important; }
+div[role="radiogroup"] label:hover { border-color: #0ea5e9 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important; }
 .main div[role="radiogroup"] label:has(input:checked) {
-    background: linear-gradient(45deg, #e11d48, #be123c) !important; border-color: #be123c !important; transform: translateY(-2px) !important; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4) !important;
+    background: linear-gradient(45deg, #e11d48, #be123c) !important; border-color: #be123c !important; transform: translateY(-2px) !important; box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5) !important;
 }
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
-    background: linear-gradient(45deg, #0ea5e9, #0284c7) !important; border-color: #0ea5e9 !important; transform: translateX(5px) !important; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.4) !important;
+    background: linear-gradient(45deg, #0ea5e9, #0284c7) !important; border-color: #0ea5e9 !important; transform: translateX(5px) !important; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4) !important;
 }
-div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 700 !important; }
 
-/* 🌟 POST-LOGIN: INTERNAL DASHBOARD CARDS 🌟 */
-.dash-card {
-    background-color: var(--secondary-background-color); border: 1px solid rgba(130, 130, 130, 0.2); border-radius: 12px;
-    padding: 20px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.3s ease; margin-bottom: 15px;
-}
-.dash-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #0ea5e9;}
+/* Tabs Styling */
+button[data-baseweb="tab"] { background-color: transparent !important; border: none !important; color: rgba(255,255,255,0.6) !important; }
+button[data-baseweb="tab"][aria-selected="true"] { color: #0ea5e9 !important; border-bottom: 2px solid #0ea5e9 !important; }
+
+/* Typography Overrides */
+.hero-welcome { color: #0ea5e9 !important; font-weight: 700; font-size: 15px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
+.hero-title { font-size: 48px; font-weight: 700; margin: 0; line-height: 1.2; color: #ffffff !important;}
+.hero-subtitle { font-size: 22px; margin: 15px 0 15px 0; font-weight: 500; opacity: 0.9; color: #ffffff !important;}
+.hero-desc { font-size: 15px; line-height: 1.6; opacity: 0.7; max-width: 650px; margin-bottom: 0; color: #ffffff !important;}
+
+/* Icons and small texts */
+.f-icon-wrap { width: 50px !important; height: 50px !important; min-width: 50px !important; min-height: 50px !important; flex-shrink: 0 !important; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white;}
 .dash-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; flex-shrink: 0;}
-.dash-title { margin: 0; font-size: 14px; font-weight: 700; color: var(--text-color); opacity: 0.8;}
-.dash-val { margin: 0; font-size: 28px; font-weight: 900; color: var(--text-color);}
-.dash-trend { margin: 5px 0 0 0; font-size: 12px; font-weight: 700;}
+.side-card-header h3 { color: #ffffff !important; margin:0; font-size: 18px; font-weight: 700;}
+.notice-item { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-start; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 15px; transition: all 0.3s ease;}
+.notice-item:hover { transform: translateX(5px); }
+.notice-date { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; text-align: center; min-width: 55px;}
+.nd-mon { font-size: 11px; color: #e11d48 !important; margin:0; text-transform: uppercase; font-weight: 700;}
+.wa-btn { display: inline-block; background-color: #25D366; color: white !important; font-weight: 700; padding: 10px 15px; border-radius: 8px; text-decoration: none; text-align: center; width: 100%; margin-top: 5px; transition: all 0.3s; }
+.wa-btn:hover { background-color: #128C7E; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); }
 
-/* Dataframe Card Effect */
-[data-testid="stDataFrame"] { background-color: var(--secondary-background-color); padding: 15px; border-radius: 12px; border: 1px solid rgba(130, 130, 130, 0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-
-/* Sidebar Styling */
-[data-testid="stSidebar"] { background-color: #0b214a !important; }
-[data-testid="stSidebar"] * { color: #ffffff !important; }
-[data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.1) !important; }
+/* Make Radio Buttons Look Clean & Centered */
+div[role="radiogroup"] { justify-content: center; margin-bottom: 20px; margin-top: 10px; }
+.stTextInput label, .stNumberInput label, .stDateInput label { font-weight: 700 !important; opacity: 0.8; color: #ffffff !important; }
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
@@ -141,7 +145,7 @@ if not st.session_state.logged_in:
             <div style="display: flex; align-items: center; margin-top: 10px;">
                 <img src='{LOGO_BASE64}' width='65' style='margin-right: 15px;'>
                 <div>
-                    <h2 style='margin:0; font-weight:800; font-size:22px; color: var(--text-color);'>M.S. PUBLIC SCHOOL</h2>
+                    <h2 style='margin:0; font-weight:800; font-size:22px; color: #ffffff;'>M.S. PUBLIC SCHOOL</h2>
                     <p style='margin:0; color:#0ea5e9; font-size:11px; font-weight:700; letter-spacing: 2px;'>LEARN | LEAD | GROW</p>
                 </div>
             </div>
@@ -163,7 +167,7 @@ if not st.session_state.logged_in:
                 st.session_state.show_login = True
                 force_rerun()
                 
-        st.markdown("<hr style='border:1px solid rgba(130,130,130,0.2); margin: 15px 0 30px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1); margin: 15px 0 30px 0;'>", unsafe_allow_html=True)
                 
         # --- MAIN CONTENT ---
         col_main, col_space, col_side = st.columns([1.6, 0.1, 1])
@@ -193,15 +197,15 @@ if not st.session_state.logged_in:
                     <div class="content-box feature-card" style="padding: 15px; margin-bottom: 15px;">
                         <div class="f-icon-wrap" style="background-color: {color};">{icon}</div>
                         <div>
-                            <p style="font-size: 16px; font-weight: 700; margin: 0 0 2px 0;">{title}</p>
-                            <p style="font-size: 13px; opacity: 0.7; margin: 0;">{text}</p>
+                            <p style="font-size: 16px; font-weight: 700; margin: 0 0 2px 0; color: #ffffff;">{title}</p>
+                            <p style="font-size: 13px; opacity: 0.7; margin: 0; color: #ffffff;">{text}</p>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
 
         with col_side:
             notices_html = '<div class="content-box" style="border-top: 3px solid #e11d48;">'
-            notices_html += '<h3 style="margin-top:0; border-bottom: 2px solid rgba(130,130,130,0.2); padding-bottom: 10px;">📢 Latest News & Updates</h3>'
+            notices_html += '<h3 style="margin-top:0; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: #ffffff;">📢 Latest News & Updates</h3>'
             try:
                 c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC LIMIT 4")
                 notices = c.fetchall()
@@ -213,9 +217,9 @@ if not st.session_state.logged_in:
                             mon = d_obj.strftime("%b")
                         except:
                             day, mon = "00", "---"
-                        notices_html += f'<div style="display:flex; gap:15px; border-bottom:1px dashed rgba(130,130,130,0.3); padding:10px 0; transition: transform 0.3s ease;" onmouseover="this.style.transform=\'translateX(5px)\'" onmouseout="this.style.transform=\'translateX(0)\'">'
-                        notices_html += f'<div style="background:var(--background-color); border:1px solid rgba(130,130,130,0.3); border-radius:6px; padding:5px; text-align:center; min-width:50px;"><p style="margin:0; font-weight:900; font-size:16px;">{day}</p><p style="margin:0; font-size:11px; color:#e11d48; font-weight:bold;">{mon}</p></div>'
-                        notices_html += f'<div><p style="margin:0 0 4px 0; font-weight:700; font-size:14px;">{n[1]}</p><p style="margin:0; font-size:12px; opacity:0.8;">{n[2]}</p></div>'
+                        notices_html += f'<div class="notice-item">'
+                        notices_html += f'<div class="notice-date"><p style="margin:0; font-weight:900; font-size:16px; color:#ffffff;">{day}</p><p class="nd-mon">{mon}</p></div>'
+                        notices_html += f'<div><p style="margin:0 0 4px 0; font-weight:700; font-size:14px; color:#ffffff;">{n[1]}</p><p style="margin:0; font-size:12px; opacity:0.7; color:#ffffff;">{n[2]}</p></div>'
                         notices_html += '</div>'
                 else:
                     notices_html += '<p style="color:#16a34a; font-weight:700;">✨ No new notices at the moment.</p>'
@@ -225,19 +229,19 @@ if not st.session_state.logged_in:
             st.markdown(notices_html, unsafe_allow_html=True)
             
             admin_html = '<div class="content-box" style="border-top: 3px solid #0ea5e9;">'
-            admin_html += '<div class="side-card-header"><h3>📞 Administration</h3></div>'
-            admin_html += '<p class="admin-title">👨‍💼 School Manager</p>'
-            admin_html += '<p class="admin-text" style="color:#0ea5e9; font-weight:700;">Mr. Ram Prasad Patel</p>'
-            admin_html += '<p class="admin-title">📱 Contact Numbers</p>'
-            admin_html += '<p class="admin-text">+91 6307210754 <br> +91 9455587731</p>'
-            admin_html += '<p class="admin-title">✉️ Official Email</p>'
-            admin_html += '<p class="admin-text">mspslarawak@gmail.com</p>'
+            admin_html += '<h3 style="margin-top:0; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: #ffffff;">📞 Administration</h3>'
+            admin_html += '<p style="font-size:14px; font-weight:700; opacity:0.9; margin:0 0 2px 0;">👨‍💼 School Manager</p>'
+            admin_html += '<p style="font-size:15px; color:#0ea5e9; font-weight:700; margin:0 0 15px 0;">Mr. Ram Prasad Patel</p>'
+            admin_html += '<p style="font-size:14px; font-weight:700; opacity:0.9; margin:0 0 2px 0;">📱 Contact Numbers</p>'
+            admin_html += '<p style="font-size:15px; opacity:0.8; margin:0 0 15px 0;">+91 6307210754 <br> +91 9455587731</p>'
+            admin_html += '<p style="font-size:14px; font-weight:700; opacity:0.9; margin:0 0 2px 0;">✉️ Official Email</p>'
+            admin_html += '<p style="font-size:15px; opacity:0.8; margin:0 0 15px 0;">mspslarawak@gmail.com</p>'
             admin_html += '<a href="https://whatsapp.com/channel/0029VbBKarY8fewxeFBwEy1A" target="_blank" class="wa-btn">🟢 Join Official WhatsApp</a>'
             admin_html += '</div>'
             st.markdown(admin_html, unsafe_allow_html=True)
 
         st.markdown(
-            '<div style="text-align:center; margin-top:40px; padding: 20px; border-top: 1px solid rgba(130,130,130,0.2); opacity: 0.7; font-size:14px;">'
+            '<div style="text-align:center; margin-top:40px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); opacity: 0.6; font-size:14px;">'
             '<p style="margin:0;">© 2026 M.S. Public School. All Rights Reserved. | Designed for Enterprise ERP System</p></div>', 
             unsafe_allow_html=True
         )
@@ -257,8 +261,8 @@ if not st.session_state.logged_in:
             st.markdown("<div class='login-card-container'>", unsafe_allow_html=True)
             
             st.markdown("<div style='text-align: center; margin-top: -10px;'><h1 style='font-size: 55px; margin-bottom: 0px;'>🎓</h1></div>", unsafe_allow_html=True)
-            st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-top: 0px; margin-bottom: 5px; font-weight: 900; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
-            st.markdown("<p style='text-align: center; color: #64748b; font-size: 15px; margin-bottom: 10px;'>Please login to continue to your account</p>", unsafe_allow_html=True)
+            st.markdown("<h2 style='text-align: center; color: #ffffff; margin-top: 0px; margin-bottom: 5px; font-weight: 900; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 15px; margin-bottom: 10px;'>Please login to continue to your account</p>", unsafe_allow_html=True)
             
             # Sorted Order: Student -> Teacher -> Admin (With Pill CSS)
             login_type = st.radio("Select Portal Access", ["Student Portal", "Teacher Portal", "Admin Portal"], horizontal=True, label_visibility="collapsed")
@@ -302,7 +306,7 @@ if not st.session_state.logged_in:
             st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
-# 🎓 STUDENT PORTAL (Now with 3D Dashboard Cards)
+# 🎓 STUDENT PORTAL
 # ==========================================
 elif st.session_state.role == "Student":
     stu = st.session_state.user_data
@@ -313,23 +317,23 @@ elif st.session_state.role == "Student":
     if st.sidebar.button("🚪 Secure Logout", use_container_width=True):
         st.session_state.logged_in = False; st.session_state.role = None; st.session_state.user_data = None; force_rerun()
 
-    st.markdown("<h2 style='margin-bottom:20px;'>🎓 Student Dashboard</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='margin-bottom:20px; color:#ffffff;'>🎓 Student Dashboard</h2>", unsafe_allow_html=True)
     tab1, tab2 = st.tabs(["💰 Fee Details", "📝 Exam Results"])
     
     with tab1:
         pay, paid, due, adv, _ = get_student_financials(stu[0], current_m_idx)
         
-        # 3D Dashboard Cards replacing flat info boxes
+        # 3D Dashboard Cards
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.markdown(f'<div class="dash-card" style="border-left: 5px solid #3b82f6;"><div class="dash-icon" style="background:#eff6ff; color:#3b82f6;">📊</div><div><p class="dash-title">Total Expected</p><p class="dash-val">₹ {pay:,}</p></div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="dash-card" style="border-left: 5px solid #3b82f6;"><div class="dash-icon" style="background:rgba(59, 130, 246, 0.2); color:#3b82f6;">📊</div><div><p class="dash-title">Total Expected</p><p class="dash-val">₹ {pay:,}</p></div></div>', unsafe_allow_html=True)
         with c2:
-            st.markdown(f'<div class="dash-card" style="border-left: 5px solid #10b981;"><div class="dash-icon" style="background:#ecfdf5; color:#10b981;">✅</div><div><p class="dash-title">Total Paid</p><p class="dash-val">₹ {paid:,}</p></div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="dash-card" style="border-left: 5px solid #10b981;"><div class="dash-icon" style="background:rgba(16, 185, 129, 0.2); color:#10b981;">✅</div><div><p class="dash-title">Total Paid</p><p class="dash-val">₹ {paid:,}</p></div></div>', unsafe_allow_html=True)
         with c3:
             if due > 0:
-                st.markdown(f'<div class="dash-card" style="border-left: 5px solid #ef4444;"><div class="dash-icon" style="background:#fef2f2; color:#ef4444;">⚠</div><div><p class="dash-title">Current Due</p><p class="dash-val">₹ {due:,}</p></div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="dash-card" style="border-left: 5px solid #ef4444;"><div class="dash-icon" style="background:rgba(239, 68, 68, 0.2); color:#ef4444;">⚠</div><div><p class="dash-title">Current Due</p><p class="dash-val">₹ {due:,}</p></div></div>', unsafe_allow_html=True)
             else:
-                st.markdown(f'<div class="dash-card" style="border-left: 5px solid #10b981;"><div class="dash-icon" style="background:#ecfdf5; color:#10b981;">🌟</div><div><p class="dash-title">Advance Rcvd</p><p class="dash-val">₹ {adv:,}</p></div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="dash-card" style="border-left: 5px solid #10b981;"><div class="dash-icon" style="background:rgba(16, 185, 129, 0.2); color:#10b981;">🌟</div><div><p class="dash-title">Advance Rcvd</p><p class="dash-val">₹ {adv:,}</p></div></div>', unsafe_allow_html=True)
 
         st.write("### 📋 Recent Payments")
         c.execute('''SELECT f.receipt_no, f.date, f.amount, f.mode, f.head FROM fee_log f WHERE f.roll_no=? ORDER BY f.date DESC''', (stu[0],))
@@ -382,7 +386,7 @@ elif st.session_state.role == "Teacher":
     tch = st.session_state.user_data
     st.sidebar.markdown(f"<div style='text-align: center;'><img src='{LOGO_BASE64}' width='80'></div>", unsafe_allow_html=True)
     st.sidebar.markdown(f"<h3 style='text-align:center; color:white;'>👨‍🏫 {tch[2]}</h3>", unsafe_allow_html=True)
-    st.sidebar.markdown(f"<p style='text-align:center; color:gray;'>ID: {tch[1]}</p>", unsafe_allow_html=True)
+    st.sidebar.markdown(f"<p style='text-align:center; color:rgba(255,255,255,0.7);'>ID: {tch[1]}</p>", unsafe_allow_html=True)
     
     if st.sidebar.button("🚪 Secure Logout", use_container_width=True):
         st.session_state.logged_in = False; st.session_state.role = None; st.session_state.user_data = None; force_rerun()
@@ -414,8 +418,8 @@ elif st.session_state.role == "Admin":
     current_m_idx = get_current_m_idx()
 
     if active_module == "📊 Dashboard":
-        st.markdown("<h2 style='margin-bottom:0;'>🏫 M.S. Public School - Enterprise ERP</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #64748b; font-size:15px;'>Welcome to M.S. Public School Analytics Dashboard! 📈</p>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin-bottom:0; color:#ffffff;'>🏫 M.S. Public School - Enterprise ERP</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='color: rgba(255,255,255,0.7); font-size:15px;'>Welcome to M.S. Public School Analytics Dashboard! 📈</p>", unsafe_allow_html=True)
         
         c.execute("SELECT COUNT(*) FROM student_master")
         tot_stu = c.fetchone()[0] or 0
@@ -426,7 +430,7 @@ elif st.session_state.role == "Admin":
         with m1:
             st.markdown(f"""
             <div class="dash-card" style="border-left: 5px solid #3b82f6;">
-                <div class="dash-icon" style="background:#eff6ff; color:#3b82f6;">👥</div>
+                <div class="dash-icon" style="background:rgba(59, 130, 246, 0.2); color:#3b82f6;">👥</div>
                 <div>
                     <p class="dash-title">Total Students</p>
                     <p class="dash-val">{tot_stu}</p>
@@ -437,7 +441,7 @@ elif st.session_state.role == "Admin":
         with m2:
             st.markdown(f"""
             <div class="dash-card" style="border-left: 5px solid #10b981;">
-                <div class="dash-icon" style="background:#ecfdf5; color:#10b981;">₹</div>
+                <div class="dash-icon" style="background:rgba(16, 185, 129, 0.2); color:#10b981;">₹</div>
                 <div>
                     <p class="dash-title">Total Collected</p>
                     <p class="dash-val">₹ {tot_fee:,}</p>
@@ -448,7 +452,7 @@ elif st.session_state.role == "Admin":
         with m3:
             st.markdown(f"""
             <div class="dash-card" style="border-left: 5px solid #ef4444;">
-                <div class="dash-icon" style="background:#fef2f2; color:#ef4444;">⚠</div>
+                <div class="dash-icon" style="background:rgba(239, 68, 68, 0.2); color:#ef4444;">⚠</div>
                 <div>
                     <p class="dash-title">Total Pending Due</p>
                     <p class="dash-val">₹ --</p>
@@ -460,16 +464,15 @@ elif st.session_state.role == "Admin":
         st.info("💡 **Tip:** Switch to the 'Fee Management' or 'Result & Admit Card' tabs from the left sidebar to manage core operations.")
 
     elif active_module == "💰 Fee Management":
-        st.title("💰 Fee Management System")
+        st.markdown("<h2 style='color:#ffffff;'>💰 Fee Management System</h2>", unsafe_allow_html=True)
         show_fee_management(current_m_idx)
         
     elif active_module == "📝 Result & Admit Card":
-        st.title("📝 Result & Admit Card")
+        st.markdown("<h2 style='color:#ffffff;'>📝 Result & Admit Card</h2>", unsafe_allow_html=True)
         show_exam_management()
         
     elif active_module == "📢 Manage Notices":
-        st.title("📢 Manage Notices")
-        st.subheader("Publish & Manage School Notices")
+        st.markdown("<h2 style='color:#ffffff;'>📢 Manage Notices</h2>", unsafe_allow_html=True)
         with st.form("add_notice_form", clear_on_submit=True):
             st.write("**Post a new announcement**")
             n_title = st.text_input("Notice Title (e.g., Holiday Alert, Exam Dates)")
@@ -491,7 +494,7 @@ elif st.session_state.role == "Admin":
                 conn.commit(); st.error(f"Notice Deleted!"); force_rerun()
                 
     elif active_module == "👨‍🏫 Manage Teachers":
-        st.title("👨‍🏫 Manage Teachers")
+        st.markdown("<h2 style='color:#ffffff;'>👨‍🏫 Add & Manage Teaching Staff</h2>", unsafe_allow_html=True)
         tab1, tab2 = st.tabs(["➕ Add New Teacher", "📋 View / Delete Teachers"])
         with tab1:
             with st.form("add_teacher_form", clear_on_submit=True):
