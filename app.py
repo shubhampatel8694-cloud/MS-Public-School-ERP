@@ -104,8 +104,8 @@ div[role="radiogroup"] label:hover { border-color: #0ea5e9 !important; box-shado
 div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 800 !important; letter-spacing: 0.5px;}
 
 .stTextInput label, .stNumberInput label, .stDateInput label { font-weight: 700 !important; font-size: 15px !important; opacity: 0.9; color: #ffffff !important; margin-bottom: 5px !important;}
-/* 🔥 FIX FOR DATE OF BIRTH WHITE TEXT ISSUE 🔥 */
-.stDateInput input {
+/* 🔥 FINAL FIX FOR DATE OF BIRTH WHITE TEXT ISSUE 🔥 */
+div[data-testid="stDateInput"] div[data-baseweb] * {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
 }
