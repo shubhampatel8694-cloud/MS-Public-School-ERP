@@ -62,7 +62,20 @@ div[data-testid="stFormSubmitButton"] button:hover {
     border-color: #0ea5e9 !important;
     box-shadow: 0 0 15px rgba(14, 165, 233, 0.8) !important;
 }
-div[data-baseweb="calendar"] * { color: #000000 !important; }
+
+/* 🔥 ABSOLUTE BULLETPROOF FIX FOR DATE OF BIRTH & ALL INPUT TEXTS 🔥 */
+.stApp div[data-testid="stDateInput"] div[data-baseweb="input"] *,
+.stApp div[data-testid="stDateInput"] input,
+.stApp div[data-testid="stNumberInput"] div[data-baseweb="input"] *,
+.stApp div[data-testid="stTextInput"] div[data-baseweb="input"] * {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-weight: 800 !important;
+}
+div[data-baseweb="calendar"] *, div[data-baseweb="calendar"] span, div[data-baseweb="calendar"] div { 
+    color: #000000 !important; 
+    -webkit-text-fill-color: #000000 !important; 
+}
 .st-emotion-cache-1104ue2, .st-emotion-cache-16idsys p { color: rgba(255,255,255,0.7) !important; }
 
 /* 🌟 FORMS & CARDS (3D Edges & Glowing Hover) 🌟 */
@@ -104,11 +117,6 @@ div[role="radiogroup"] label:hover { border-color: #0ea5e9 !important; box-shado
 div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 800 !important; letter-spacing: 0.5px;}
 
 .stTextInput label, .stNumberInput label, .stDateInput label { font-weight: 700 !important; font-size: 15px !important; opacity: 0.9; color: #ffffff !important; margin-bottom: 5px !important;}
-/* 🔥 FINAL FIX FOR DATE OF BIRTH WHITE TEXT ISSUE 🔥 */
-div[data-testid="stDateInput"] div[data-baseweb] * {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-}
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
