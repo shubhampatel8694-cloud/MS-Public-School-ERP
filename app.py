@@ -24,43 +24,45 @@ footer { visibility: hidden !important; display: none !important; }
 [data-testid="stSidebar"] { background-color: #0b214a !important; border-right: 1px solid rgba(255,255,255,0.1) !important; }
 .block-container { max-width: 1300px; padding-top: 2rem !important; padding-left: 1rem; padding-right: 1rem; }
 
-/* Force General Text to White */
-.stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp span, .stApp label, .stApp div { color: #f8fafc; }
+/* Force Labels and Headings to White */
+p, h1, h2, h3, h4, h5, label, .st-emotion-cache-16idsys p { color: #f8fafc !important; }
 
 /* Navbar Area */
 .nav-links { display: flex; gap: 25px; font-weight: 600; font-size: 15px; margin-top: 25px; justify-content: center;}
 .nav-links span { cursor: pointer; transition: color 0.3s; opacity: 0.9; color: white;}
 .nav-links span:hover { color: #0ea5e9; opacity: 1;}
 
-/* 🌟 STANDARD BUTTONS 🌟 */
-div[data-testid="stButton"] button {
+/* 🌟 STANDARD & FORM BUTTONS (Fixed Login Button) 🌟 */
+div[data-testid="stButton"] button, 
+div[data-testid="stFormSubmitButton"] button {
     background: linear-gradient(45deg, #e11d48, #be123c) !important; color: #ffffff !important; 
     border: 1px solid rgba(255,255,255,0.2) !important; border-radius: 8px !important; 
     font-weight: 700 !important; letter-spacing: 0.5px; padding: 0.6rem 1.5rem !important;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important; transition: all 0.3s ease !important; margin-top: 10px; 
 }
-div[data-testid="stButton"] button:hover {
+div[data-testid="stButton"] button:hover, 
+div[data-testid="stFormSubmitButton"] button:hover {
     transform: translateY(-3px) !important; box-shadow: 0 8px 25px rgba(225, 29, 72, 0.6) !important;
     background: linear-gradient(45deg, #be123c, #9f1239) !important; border-color: #e11d48 !important;
 }
 
-/* 🌟 FIXED INPUT FIELDS (Visible Text & Bright Cells) 🌟 */
+/* 🌟 FIXED INPUT FIELDS (Black Text & Bright Cells) 🌟 */
 .stTextInput input, .stNumberInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"] > div {
-    background-color: rgba(255, 255, 255, 0.1) !important; /* Lighter Background */
-    border: 1px solid rgba(255, 255, 255, 0.3) !important; /* Brighter Border */
+    background-color: #ffffff !important; 
+    border: 2px solid rgba(255, 255, 255, 0.3) !important; 
     border-radius: 8px !important;
-    color: #ffffff !important; /* Pure White Text */
-    font-weight: 600 !important;
+    color: #000000 !important; /* 🖤 FIXED: BLACK TEXT 🖤 */
+    font-weight: 800 !important; /* Thicker text for better visibility */
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.1) !important;
     transition: all 0.3s ease !important;
 }
 .stTextInput input:focus, .stNumberInput input:focus, div[data-baseweb="select"] > div:focus-within {
     border-color: #0ea5e9 !important;
     box-shadow: 0 0 12px rgba(14, 165, 233, 0.6) !important;
-    background-color: rgba(255, 255, 255, 0.15) !important;
 }
-/* Helper text "Press Enter to apply" color fix */
-.st-emotion-cache-1104ue2, .st-emotion-cache-16idsys p { color: rgba(255,255,255,0.7) !important; }
+
+/* Fix DatePicker Calendar Popup (Ensuring text is black inside calendar) */
+div[data-baseweb="calendar"] * { color: #000000 !important; }
 
 /* 🌟 FORMS & CARDS (3D Edges) 🌟 */
 [data-testid="stForm"], .content-box, .dash-card, [data-testid="stDataFrame"] {
@@ -73,11 +75,6 @@ div[data-testid="stButton"] button:hover {
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
 }
 [data-testid="stForm"] { border-top: 4px solid #e11d48 !important; margin-top: 15px !important; }
-
-/* Typography */
-.hero-title { font-size: 48px; font-weight: 700; margin: 0; line-height: 1.2; color: #ffffff !important;}
-.hero-subtitle { font-size: 22px; margin: 15px 0 15px 0; font-weight: 500; opacity: 0.9; color: #ffffff !important;}
-.side-card-header h3 { color: #ffffff !important; margin:0; font-size: 18px; font-weight: 700; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
 
 /* Sidebar & Radio Buttons */
 div[role="radiogroup"] { justify-content: center; margin-bottom: 10px; margin-top: 10px; }
@@ -92,7 +89,9 @@ div[role="radiogroup"] label:hover { border-color: #0ea5e9 !important; box-shado
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
     background: linear-gradient(45deg, #0ea5e9, #0284c7) !important; border-color: #0ea5e9 !important; transform: translateX(5px) !important; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4) !important;
 }
+div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 700 !important; }
 
+/* Labels styling */
 .stTextInput label, .stNumberInput label, .stDateInput label { font-weight: 700 !important; opacity: 0.9; color: #ffffff !important; }
 </style>
 """
@@ -168,7 +167,7 @@ if not st.session_state.logged_in:
                 target_col = f1 if i % 2 == 0 else f2
                 with target_col:
                     st.markdown(f"""
-                    <div class="content-box" style="display: flex; align-items: center; gap: 15px; padding: 15px; margin-bottom: 15px;">
+                    <div class="content-box feature-card" style="padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
                         <div style="background-color: {color}; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">{icon}</div>
                         <div>
                             <p style="font-size: 16px; font-weight: 700; margin: 0 0 2px 0; color: #ffffff;">{title}</p>
@@ -179,7 +178,7 @@ if not st.session_state.logged_in:
 
         with col_side:
             notices_html = '<div class="content-box" style="border-top: 3px solid #e11d48;">'
-            notices_html += '<div class="side-card-header"><h3>📢 Latest News & Updates</h3></div>'
+            notices_html += '<h3 style="margin-top:0; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: #ffffff;">📢 Latest News & Updates</h3>'
             try:
                 c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC LIMIT 4")
                 notices = c.fetchall()
@@ -203,7 +202,7 @@ if not st.session_state.logged_in:
             st.markdown(notices_html, unsafe_allow_html=True)
             
             admin_html = '<div class="content-box" style="border-top: 3px solid #0ea5e9;">'
-            admin_html += '<div class="side-card-header"><h3>📞 Administration</h3></div>'
+            admin_html += '<h3 style="margin-top:0; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: #ffffff;">📞 Administration</h3>'
             admin_html += '<p style="font-size:14px; font-weight:700; opacity:0.9; margin:0 0 2px 0;">👨‍💼 School Manager</p>'
             admin_html += '<p style="font-size:15px; color:#0ea5e9; font-weight:700; margin:0 0 15px 0;">Mr. Ram Prasad Patel</p>'
             admin_html += '<p style="font-size:14px; font-weight:700; opacity:0.9; margin:0 0 2px 0;">📱 Contact Numbers</p>'
@@ -240,7 +239,6 @@ if not st.session_state.logged_in:
             # Sorted Order: Student -> Teacher -> Admin (With Pill CSS)
             login_type = st.radio("Select Portal Access", ["Student Portal", "Teacher Portal", "Admin Portal"], horizontal=True, label_visibility="collapsed")
             
-            # The Form container itself is styled via CSS [data-testid="stForm"] to act as the exact card.
             with st.form("login_form"):
                 if login_type == "Student Portal":
                     s_roll = st.number_input("👤 Roll No", min_value=1, step=1)
