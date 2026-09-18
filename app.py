@@ -9,18 +9,18 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 CLEAN PREMIUM CSS (NO HEAVY GLOW)
+# 🎨 CLEAN FIXED CSS (NO THEME ISSUES)
 # ==========================================
 page_bg_css = """
 <style>
 /* Reset and Streamlit Overrides */
-.block-container { max-width: 1250px; padding-top: 0rem !important; padding-left: 1rem; padding-right: 1rem; }
+.block-container { max-width: 1300px; padding-top: 0rem !important; padding-left: 1rem; padding-right: 1rem; }
 header {visibility: hidden;}
 #MainMenu {visibility: hidden;}
 
 /* Top Bar (Dark Blue) */
 .topbar { 
-    background-color: #0b214a; color: #e2e8f0; display: flex; justify-content: space-between; 
+    background-color: #0b214a; color: #ffffff; display: flex; justify-content: space-between; 
     padding: 8px 30px; font-size: 13px; margin: -50px -5rem 0 -5rem; 
 }
 .topbar-left span { margin-right: 20px; display: inline-block; }
@@ -28,7 +28,7 @@ header {visibility: hidden;}
 /* Navbar Area */
 .nav-links { display: flex; gap: 25px; color: #0b214a; font-weight: 600; font-size: 15px; margin-top: 25px; justify-content: center;}
 .nav-links span { cursor: pointer; transition: color 0.2s;}
-.nav-links span:hover { color: #ffc107; }
+.nav-links span:hover { color: #0ea5e9; }
 
 /* Official Login Button */
 div[data-testid="stButton"] button {
@@ -41,55 +41,56 @@ div[data-testid="stButton"] button:hover {
     background-color: #e0a800 !important; transform: translateY(-1px) !important;
 }
 
-/* Hero Section (No Photo, Soft Gradient) */
-.hero-section {
-    background: linear-gradient(120deg, #f0f7ff 0%, #ffffff 100%);
-    padding: 60px 50px; border-radius: 12px; margin-top: 10px; margin-bottom: 40px;
-    border: 1px solid #e2e8f0; text-align: left;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-}
+/* Hero Section */
+.hero-section { padding: 20px 10px 40px 10px; text-align: left; }
 .hero-welcome { color: #0ea5e9; font-weight: bold; font-size: 16px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
 .hero-title { font-size: 55px; color: #0b214a; font-weight: 900; margin: 0; line-height: 1.1;}
 .hero-subtitle { font-size: 26px; color: #334155; margin: 15px 0 20px 0; font-weight: 500;}
-.hero-desc { font-size: 16px; color: #64748b; max-width: 600px; line-height: 1.6; margin-bottom: 25px;}
-.hero-btns .btn1 { background: #0b214a; color: white; padding: 10px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-right: 15px; display: inline-block;}
-.hero-btns .btn2 { background: transparent; color: #0b214a; padding: 8px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; border: 2px solid #0b214a; display: inline-block;}
+.hero-desc { font-size: 16px; color: #64748b; max-width: 650px; line-height: 1.6; margin-bottom: 25px;}
 
 /* Features Row */
-.feature-card { text-align: center; padding: 10px; }
-.f-icon-wrap { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; font-size: 25px; color: white;}
-.f-title { font-size: 15px; font-weight: 800; color: #0b214a; margin: 0 0 5px 0;}
-.f-text { font-size: 12px; color: #64748b; margin: 0; line-height: 1.4;}
+.feature-card { text-align: left; padding: 10px; display: flex; align-items: center; gap: 15px; margin-bottom: 15px;}
+.f-icon-wrap { min-width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white;}
+.f-title { font-size: 16px; font-weight: 800; color: #0b214a; margin: 0 0 2px 0;}
+.f-text { font-size: 13px; color: #64748b; margin: 0; line-height: 1.3;}
 
-/* About Section */
-.about-label { color: #0ea5e9; font-weight: bold; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;}
-.about-title { color: #0b214a; font-size: 32px; font-weight: bold; margin: 5px 0 15px 0;}
-.about-text { color: #475569; font-size: 15px; line-height: 1.7; margin-bottom: 30px;}
-.stats-container { display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 20px;}
-.stat-box { text-align: center; }
-.stat-num { font-size: 28px; font-weight: 900; color: #0b214a; margin:0;}
-.stat-text { font-size: 13px; color: #64748b; margin:0;}
+/* Right Side Cards (Notices & Admin) */
+.side-card { 
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; 
+    padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px;
+}
+.side-card-header { border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 20px;}
+.side-card-header h3 { color: #0b214a; margin:0; font-size: 18px; font-weight: bold;}
 
-/* Notice Board */
-.notice-wrapper { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);}
-.notice-header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;}
-.notice-header h3 { color: #0b214a; margin:0; font-size: 20px; font-weight: bold;}
-.notice-item { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-start;}
-.notice-date { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; text-align: center; min-width: 60px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
-.nd-day { font-size: 18px; font-weight: 900; color: #0b214a; margin:0; line-height:1;}
-.nd-mon { font-size: 12px; color: #64748b; margin:0; text-transform: uppercase; font-weight: bold;}
-.nt-title { font-weight: bold; color: #0f172a; margin: 0 0 5px 0; font-size: 15px;}
-.nt-desc { font-size: 13px; color: #64748b; margin:0; line-height: 1.5;}
+/* Notice Items */
+.notice-item { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-start; border-bottom: 1px dashed #e2e8f0; padding-bottom: 15px;}
+.notice-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+.notice-date { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px; text-align: center; min-width: 55px;}
+.nd-day { font-size: 16px; font-weight: 900; color: #0b214a; margin:0; line-height:1;}
+.nd-mon { font-size: 11px; color: #dc2626; margin:0; text-transform: uppercase; font-weight: bold;}
+.nt-title { font-weight: bold; color: #0f172a; margin: 0 0 4px 0; font-size: 14px;}
+.nt-desc { font-size: 13px; color: #64748b; margin:0; line-height: 1.4;}
+
+/* Admin Contact Details */
+.admin-title { font-size: 15px; font-weight: 800; color: #0b214a; margin: 0 0 5px 0; }
+.admin-text { font-size: 14px; color: #475569; margin: 0 0 5px 0; font-weight: 500;}
+.wa-btn {
+    display: inline-block; background-color: #25D366; color: white !important; font-weight: bold;
+    padding: 10px 15px; border-radius: 5px; text-decoration: none; text-align: center; width: 100%;
+    margin-top: 10px; transition: 0.3s;
+}
+.wa-btn:hover { background-color: #128C7E; }
 
 /* Login Form Styling */
 [data-testid="stForm"] {
-    background-color: var(--secondary-background-color); padding: 30px; border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important; border-top: 4px solid #0b214a; transition: transform 0.3s ease;
+    background-color: #ffffff; padding: 30px; border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important; border-top: 4px solid #0b214a; 
 }
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
 
+# 🔄 SESSION STATE INIT
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.role = None
@@ -125,7 +126,7 @@ if not st.session_state.logged_in:
                 <img src='{LOGO_BASE64}' width='65' style='margin-right: 15px;'>
                 <div>
                     <h2 style='margin:0; color:#0b214a; font-weight:900; font-size:24px;'>M.S. PUBLIC SCHOOL</h2>
-                    <p style='margin:0; color:#0ea5e9; font-size:12px; font-weight:bold; letter-spacing: 2px;'>LEARN | GROW | SUCCEED</p>
+                    <p style='margin:0; color:#0ea5e9; font-size:12px; font-weight:bold; letter-spacing: 2px;'>LEARN | LEAD | GROW</p>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -133,7 +134,7 @@ if not st.session_state.logged_in:
         with col_nav:
             st.markdown("""
             <div class="nav-links">
-                <span style="color:#fff; background:#0b214a; padding: 5px 15px; border-radius: 5px;">Home</span>
+                <span style="border-bottom: 2px solid #0ea5e9; padding-bottom: 3px;">Home</span>
                 <span>About Us</span>
                 <span>Academics</span>
                 <span>Facilities</span>
@@ -146,68 +147,52 @@ if not st.session_state.logged_in:
                 st.session_state.show_login = True
                 force_rerun()
                 
-        # --- 3. HERO SECTION (Clean, No Photo) ---
-        st.markdown("""
-        <div class="hero-section">
-            <p class="hero-welcome">WELCOME TO</p>
-            <h1 class="hero-title">M.S. PUBLIC SCHOOL</h1>
-            <h2 class="hero-subtitle">Building Bright Futures<br>Through Quality Education</h2>
-            <p class="hero-desc">We provide a safe, supportive and inspiring environment where every child can learn, grow and achieve their dreams under expert guidance.</p>
-            <div class="hero-btns">
-                <span class="btn1">Explore More ➔</span>
-                <span class="btn2">Admission Open</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # --- 4. FEATURES ICONS ROW ---
-        f1, f2, f3, f4, f5 = st.columns(5)
-        features = [
-            ("👨‍🏫", "#2563eb", "Qualified Teachers", "Experienced and dedicated faculty members"),
-            ("📚", "#16a34a", "Modern Curriculum", "Focus on academics, values and life skills"),
-            ("🏛️", "#eab308", "Safe & Secure Campus", "A protective environment for every child"),
-            ("👥", "#7c3aed", "Holistic Development", "Sports, arts, culture and co-curricular activities"),
-            ("⭐", "#dc2626", "Excellent Results", "Consistent performance and bright future")
-        ]
-        
-        for col, (icon, color, title, text) in zip([f1, f2, f3, f4, f5], features):
-            with col:
-                st.markdown(f"""
-                <div class="feature-card">
-                    <div class="f-icon-wrap" style="background-color: {color};">{icon}</div>
-                    <p class="f-title">{title}</p>
-                    <p class="f-text">{text}</p>
-                </div>
-                """, unsafe_allow_html=True)
+        st.markdown("<hr style='border:1px solid #f1f5f9; margin: 15px 0 30px 0;'>", unsafe_allow_html=True)
                 
-        st.markdown("<hr style='border:1px solid #f1f5f9; margin: 30px 0;'>", unsafe_allow_html=True)
+        # --- 3. MAIN CONTENT (HERO LEFT, NOTICES RIGHT) ---
+        col_main, col_space, col_side = st.columns([1.6, 0.1, 1])
         
-        # --- 5. ABOUT & NOTICES SECTION ---
-        col_about, col_space, col_notices = st.columns([1.4, 0.1, 1])
-        
-        with col_about:
+        with col_main:
             st.markdown("""
-            <p class="about-label">ABOUT OUR SCHOOL</p>
-            <h2 class="about-title">Education for a Better Tomorrow</h2>
-            <p class="about-text">M.S. Public School is committed to providing high-quality education that builds strong character, sharp minds and positive values. Our mission is to nurture every child's potential and prepare them for a successful future in a changing world.</p>
-            <span style="background: #0b214a; color: white; padding: 8px 20px; border-radius: 4px; font-size: 14px; font-weight: bold;">Know More ➔</span>
-            
-            <div class="stats-container">
-                <div class="stat-box"><p class="stat-num">500+</p><p class="stat-text">Happy Students</p></div>
-                <div class="stat-box"><p class="stat-num">25+</p><p class="stat-text">Experienced Teachers</p></div>
-                <div class="stat-box"><p class="stat-num">15+</p><p class="stat-text">Years of Excellence</p></div>
+            <div class="hero-section">
+                <p class="hero-welcome">WELCOME TO</p>
+                <h1 class="hero-title">M.S. PUBLIC SCHOOL</h1>
+                <h2 class="hero-subtitle">Building Bright Futures Through Quality Education</h2>
+                <p class="hero-desc">We provide a safe, supportive and inspiring environment where every child can learn, grow and achieve their dreams under expert guidance. Our institution stands as a pillar of excellence in academics and character building.</p>
             </div>
             """, unsafe_allow_html=True)
+            
+            # --- FEATURES IN TWO COLUMNS UNDER HERO ---
+            f1, f2 = st.columns(2)
+            features = [
+                ("👨‍🏫", "#2563eb", "Qualified Teachers", "Experienced and dedicated faculty members guiding students."),
+                ("📚", "#16a34a", "Modern Curriculum", "Focus on academics, moral values, and essential life skills."),
+                ("🏛️", "#eab308", "Safe & Secure Campus", "A highly protective and nurturing environment for every child."),
+                ("⭐", "#dc2626", "Excellent Results", "Consistent top performance and a pathway to a bright future.")
+            ]
+            
+            for i, (icon, color, title, text) in enumerate(features):
+                target_col = f1 if i % 2 == 0 else f2
+                with target_col:
+                    st.markdown(f"""
+                    <div class="feature-card">
+                        <div class="f-icon-wrap" style="background-color: {color};">{icon}</div>
+                        <div>
+                            <p class="f-title">{title}</p>
+                            <p class="f-text">{text}</p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-        with col_notices:
-            notices_html = '<div class="notice-wrapper">'
-            notices_html += '<div class="notice-header"><h3>📢 Latest News & Updates</h3></div>'
+        with col_side:
+            # --- NOTICE BOARD (MOVED TO TOP RIGHT) ---
+            notices_html = '<div class="side-card" style="border-top: 4px solid #dc2626;">'
+            notices_html += '<div class="side-card-header"><h3>📢 Latest News & Updates</h3></div>'
             try:
                 c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC LIMIT 4")
                 notices = c.fetchall()
                 if notices:
                     for n in notices:
-                        # Format Date (Assuming YYYY-MM-DD)
                         try:
                             d_obj = datetime.strptime(n[0], "%Y-%m-%d")
                             day = d_obj.strftime("%d")
@@ -234,16 +219,37 @@ if not st.session_state.logged_in:
             
             notices_html += '</div>'
             st.markdown(notices_html, unsafe_allow_html=True)
+            
+            # --- ADMINISTRATION CONTACT ---
+            st.markdown("""
+            <div class="side-card" style="border-top: 4px solid #0b214a;">
+                <div class="side-card-header"><h3>📞 Administration</h3></div>
+                
+                <p class="admin-title">👨‍💼 School Manager</p>
+                <p class="admin-text" style="color:#0ea5e9; font-weight:bold;">Mr. Ram Prasad Patel</p>
+                <p class="admin-text">📞 +91 6307210754</p>
+                <p class="admin-text" style="margin-bottom:15px;">📞 +91 9455587731</p>
+                
+                <p class="admin-title">✉️ Official Email</p>
+                <p class="admin-text" style="margin-bottom:15px;">mspslarawak@gmail.com</p>
+                
+                <a href="https://whatsapp.com/channel/0029VbBKarY8fewxeFBwEy1A" target="_blank" class="wa-btn">
+                    🟢 Join Official WhatsApp
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
 
         # --- FOOTER ---
         st.markdown(
-            '<div style="text-align:center; margin-top:40px; padding: 20px; background-color: #f8fafc; color:#64748b; font-size:14px;">'
-            '<p style="margin:0;">© 2026 M.S. Public School. All Rights Reserved. | ERP System</p></div>', 
+            '<div style="text-align:center; margin-top:40px; padding: 20px; background-color: #f8fafc; color:#64748b; font-size:14px; border-top: 1px solid #e2e8f0;">'
+            '<p style="margin:0;">© 2026 M.S. Public School. All Rights Reserved. | Designed for Enterprise ERP System</p></div>', 
             unsafe_allow_html=True
         )
 
     else:
-        # --- LOGIN SYSTEM REMAINS THE SAME ---
+        # ==========================================
+        # 🔐 BULLETPROOF LOGIN SYSTEM
+        # ==========================================
         if st.button("⬅️ Back to Home"):
             st.session_state.show_login = False
             force_rerun()
