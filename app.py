@@ -124,15 +124,21 @@ div[data-testid="stDateInput"] input {
 div[data-baseweb="calendar"] * {
     color: #000000 !important;
 }
-/* 🔥 PREMIUM DARK THEME FOR ALL DATAFRAMES & TABLES 🔥 */
+/* 🔥 CLEAN LIGHT THEME TABLE (Halka White BG, Black Text, No Thick Border) 🔥 */
 [data-testid="stDataFrame"] {
-    border-radius: 12px !important;
+    padding: 0px !important; /* मोटा बॉर्डर/गैप हमेशा के लिए ख़त्म */
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin-bottom: 25px !important;
+}
+[data-testid="stDataFrame"] > div {
+    border-radius: 8px !important;
     overflow: hidden !important;
-    border: 1px solid rgba(14, 165, 233, 0.4) !important;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
-    filter: invert(0.92) hue-rotate(180deg) brightness(1.15) !important;
-    transition: all 0.3s ease !important;
-    margin-bottom: 20px !important;
+    border: 1px solid #94a3b8 !important; /* बहुत ही पतला और क्लीन ग्रे बॉर्डर */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3) !important;
+    /* डार्क कैनवास को क्लीन वाइट बैकग्राउंड और ब्लैक टेक्स्ट में बदलने की ट्रिक */
+    filter: invert(0.95) hue-rotate(180deg) brightness(1.05) !important;
 }
 </style>
 """
