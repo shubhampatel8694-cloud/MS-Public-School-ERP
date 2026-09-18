@@ -9,10 +9,11 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 BULLETPROOF UI CSS
+# 🎨 BULLETPROOF UI CSS & PREMIUM STYLING
 # ==========================================
 page_bg_css = """
 <style>
+/* Button Styling */
 div[data-testid="stButton"] button {
     background-color: #1F497D !important; color: #ffffff !important; border: none !important;
     border-radius: 8px !important; font-weight: 600 !important; padding: 0.5rem 1.5rem !important;
@@ -22,6 +23,15 @@ div[data-testid="stButton"] button:hover {
     background-color: #ff4b4b !important; transform: translateY(-3px) !important;
     box-shadow: 0 8px 15px rgba(255, 75, 75, 0.4) !important;
 }
+/* WhatsApp Custom Button */
+.wa-btn {
+    display: inline-block; background-color: #25D366; color: white !important; font-weight: bold;
+    padding: 10px 20px; border-radius: 8px; text-decoration: none; text-align: center; width: 100%;
+    box-shadow: 0 4px 6px rgba(37, 211, 102, 0.3); transition: all 0.3s ease; margin-bottom: 10px;
+}
+.wa-btn:hover { background-color: #128C7E; transform: translateY(-3px); box-shadow: 0 6px 12px rgba(37, 211, 102, 0.4); }
+
+/* Sidebar Tabs */
 [data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child { display: none !important; }
 [data-testid="stSidebar"] div[role="radiogroup"] label {
     background-color: transparent !important; border: 1px solid rgba(128, 128, 128, 0.3) !important;
@@ -35,12 +45,22 @@ div[data-testid="stButton"] button:hover {
     background-color: #1F497D !important; border-color: #1F497D !important; transform: translateX(8px) !important;
 }
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 800 !important; }
+
+/* Form 3D Effect */
 [data-testid="stForm"] {
     background-color: var(--secondary-background-color); padding: 30px; border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important; border: 1px solid rgba(128, 128, 128, 0.2); transition: transform 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important; border: 1px solid rgba(128, 128, 128, 0.2); transition: transform 0.3s ease;
 }
 [data-testid="stForm"]:hover { transform: translateY(-2px); }
 .stTextInput input:focus, .stNumberInput input:focus { border-color: #ff4b4b !important; box-shadow: 0 0 10px rgba(255, 75, 75, 0.25) !important; }
+
+/* Notice Card Style */
+.notice-card {
+    background-color: #ffffff; border-left: 6px solid #ff4b4b; padding: 20px; 
+    margin-bottom: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease;
+}
+.notice-card:hover { transform: scale(1.01); }
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
@@ -57,30 +77,73 @@ if 'logged_in' not in st.session_state:
 # ==========================================
 if not st.session_state.logged_in:
     if not st.session_state.show_login:
-        col_logo, col_space, col_btn = st.columns([1, 6, 1.5])
+        
+        # --- 1. TOP NAVBAR ---
+        col_logo, col_space, col_btn = st.columns([1, 7, 1.2])
         with col_logo:
-            st.markdown(f"<img src='{LOGO_BASE64}' width='70' style='margin-top:-10px;'>", unsafe_allow_html=True)
+            st.markdown(f"<img src='{LOGO_BASE64}' width='80' style='margin-top:-15px;'>", unsafe_allow_html=True)
         with col_btn:
             if st.button("Sign In ➔", use_container_width=True):
                 st.session_state.show_login = True
                 force_rerun()
                 
-        st.markdown("<h1 style='text-align: center; font-size: 55px; margin-top: 20px; font-weight: 900;'>M.S. PUBLIC SCHOOL</h1>", unsafe_allow_html=True)
-        st.markdown("<h3 style='text-align: center; color: #666; margin-bottom: 50px;'>Learn. Lead. Grow. Welcome to our Official Portal.</h3>", unsafe_allow_html=True)
+        # --- 2. HERO BANNER SECTION ---
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #1F497D, #3b6b9e); padding: 50px 20px; border-radius: 15px; color: white; text-align: center; margin-bottom: 35px; box-shadow: 0 10px 25px rgba(31,73,125,0.3);'>
+            <h1 style='font-size: 60px; margin: 0; font-weight: 900; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'>M.S. PUBLIC SCHOOL</h1>
+            <h3 style='margin: 15px 0 0 0; font-weight: 400; opacity: 0.9; font-size: 22px;'>Learn. Lead. Grow. | Welcome to our Official Portal.</h3>
+        </div>
+        """, unsafe_allow_html=True)
         
-        st.markdown("### 📢 Latest Notices & Updates")
-        st.markdown("<hr style='margin-top: 0px;'>", unsafe_allow_html=True)
+        # --- 3. NOTICE BOARD & CONTACT INFO (TWO COLUMNS) ---
+        col_notices, col_contact = st.columns([2, 1])
         
-        try:
-            # 🛡️ Bulletproof Aliased Query
-            c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC")
-            notices = c.fetchall()
-            if notices:
-                for n in notices: st.info(f"**🗓️ {n[0]} | {n[1]}**\n\n{n[2]}")
-            else:
-                st.success("✨ No new notices at the moment. Have a great day!")
-        except:
-            st.warning("Notice board is currently being initialized.")
+        with col_notices:
+            st.markdown("### 📢 Latest Notices & Updates")
+            st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px; border-top: 2px solid #1F497D;'>", unsafe_allow_html=True)
+            
+            try:
+                c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC")
+                notices = c.fetchall()
+                if notices:
+                    for n in notices:
+                        st.markdown(f"""
+                        <div class="notice-card">
+                            <h4 style='color: #1F497D; margin-top: 0; margin-bottom: 8px;'>🗓️ {n[0]} | {n[1]}</h4>
+                            <p style='color: #444; margin-bottom: 0; font-size: 15px; line-height: 1.5;'>{n[2]}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                else:
+                    st.success("✨ No new notices at the moment. Have a great day!")
+            except:
+                st.warning("Notice board is currently being initialized.")
+
+        with col_contact:
+            st.markdown("### 📞 Administration")
+            st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px; border-top: 2px solid #1F497D;'>", unsafe_allow_html=True)
+            
+            # Manager Card
+            st.info("**👨‍💼 School Manager**\n\n**Mr. Ram Prasad Patel**\n\n📞 +91 6307210754\n\n📞 +91 9455587731")
+            
+            # WhatsApp Button
+            st.markdown("""
+            <a href="https://whatsapp.com/channel/0029VbBKarY8fewxeFBwEy1A" target="_blank" class="wa-btn">
+                🟢 Join WhatsApp Channel
+            </a>
+            """, unsafe_allow_html=True)
+            
+            # Email Card
+            st.success("**✉️ Email Us**\n\nmspslarawak@gmail.com")
+            
+            # Location Card
+            st.warning("**📍 Location**\n\nLarawak, Kachhwa, Mirzapur\n\nUttar Pradesh - 231501")
+
+        # --- 4. FOOTER ---
+        st.markdown("""
+        <div style='text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; color: #888;'>
+            <p>© 2026 M.S. Public School. All Rights Reserved. | ERP System</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     else:
         if st.button("⬅️ Back to Home"):
@@ -158,7 +221,6 @@ elif st.session_state.role == "Student":
         st.write("---")
         st.write("📋 **Recent Payments**")
         
-        # 🛡️ Bulletproof Aliased Query to fix 'UndefinedColumn'
         c.execute('''SELECT f.receipt_no, f.date, f.amount, f.mode, f.head FROM fee_log f WHERE f.roll_no=? ORDER BY f.date DESC''', (stu[0],))
         logs = c.fetchall()
         if logs: st.dataframe(pd.DataFrame(logs, columns=["Receipt No", "Date", "Amount", "Mode", "Fee Head"]), use_container_width=True, hide_index=True)
