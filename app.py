@@ -10,7 +10,7 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 ADAPTIVE CSS: FIXED HEADER & STANDOUT BUTTON
+# 🎨 ADAPTIVE CSS: PREMIUM LOGIN & HOVER EFFECTS
 # ==========================================
 page_bg_css = """
 <style>
@@ -27,9 +27,9 @@ page_bg_css = """
 .nav-links span { cursor: pointer; transition: color 0.3s; opacity: 0.9;}
 .nav-links span:hover { color: #0ea5e9; opacity: 1;}
 
-/* 🌟 STANDOUT LOGIN BUTTON (Vibrant Gradient) 🌟 */
+/* 🌟 STANDOUT BUTTONS (Gradient & Standard) 🌟 */
 div[data-testid="stButton"] button {
-    background: linear-gradient(45deg, #e11d48, #be123c) !important; /* Standout Red/Rose Color */
+    background: linear-gradient(45deg, #e11d48, #be123c) !important; 
     color: #ffffff !important; 
     border: none !important;
     border-radius: 8px !important; 
@@ -38,7 +38,7 @@ div[data-testid="stButton"] button {
     padding: 0.6rem 1.5rem !important;
     box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4) !important; 
     transition: all 0.3s ease !important;
-    margin-top: 15px; 
+    margin-top: 10px; 
 }
 div[data-testid="stButton"] button:hover {
     transform: translateY(-3px) !important;
@@ -46,7 +46,7 @@ div[data-testid="stButton"] button:hover {
     background: linear-gradient(45deg, #be123c, #9f1239) !important;
 }
 
-/* 🌟 CONTENT BOXES (Halka Border + Adaptive Background) 🌟 */
+/* 🌟 CONTENT BOXES (Adaptive Background) 🌟 */
 .content-box {
     background-color: var(--secondary-background-color);
     border: 1px solid rgba(130, 130, 130, 0.2); 
@@ -83,7 +83,7 @@ div[data-testid="stButton"] button:hover {
 .notice-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
 .notice-date { background: var(--background-color); border: 1px solid rgba(130, 130, 130, 0.3); border-radius: 6px; padding: 6px; text-align: center; min-width: 55px;}
 .nd-day { font-size: 16px; font-weight: 900; color: var(--text-color); margin:0; line-height:1;}
-.nd-mon { font-size: 11px; color: #dc2626; margin:0; text-transform: uppercase; font-weight: bold;}
+.nd-mon { font-size: 11px; color: #e11d48; margin:0; text-transform: uppercase; font-weight: bold;}
 .nt-title { font-weight: bold; color: var(--text-color); margin: 0 0 4px 0; font-size: 14px;}
 .nt-desc { font-size: 13px; color: var(--text-color); opacity:0.8; margin:0; line-height: 1.4;}
 
@@ -97,12 +97,21 @@ div[data-testid="stButton"] button:hover {
 }
 .wa-btn:hover { background-color: #128C7E; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
 
-/* Login Form Styling */
+/* 🌟 LOGIN FORM PREMIUM DESIGN 🌟 */
 [data-testid="stForm"] {
-    background-color: var(--secondary-background-color); padding: 30px; border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important; border: 1px solid rgba(130, 130, 130, 0.3); transition: transform 0.3s ease;
+    background-color: var(--secondary-background-color); 
+    padding: 40px 30px; 
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important; 
+    border: 1px solid rgba(130, 130, 130, 0.2); 
+    border-top: 5px solid #e11d48; /* Red Accent Top */
+    transition: transform 0.3s ease;
+    margin-top: 10px;
 }
 [data-testid="stForm"]:hover { transform: translateY(-3px); }
+
+/* Hide Radio Button Label in Login */
+[data-testid="stRadio"] label { display: none; }
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
@@ -152,11 +161,10 @@ if not st.session_state.logged_in:
                 
         st.markdown("<hr style='border:1px solid rgba(130,130,130,0.2); margin: 15px 0 30px 0;'>", unsafe_allow_html=True)
                 
-        # --- MAIN CONTENT (HERO LEFT, NOTICES RIGHT) ---
+        # --- MAIN CONTENT ---
         col_main, col_space, col_side = st.columns([1.6, 0.1, 1])
         
         with col_main:
-            # Hero Section
             st.markdown("""
             <div class="content-box">
                 <p class="hero-welcome">WELCOME TO</p>
@@ -166,7 +174,6 @@ if not st.session_state.logged_in:
             </div>
             """, unsafe_allow_html=True)
             
-            # --- FEATURES IN TWO COLUMNS ---
             f1, f2 = st.columns(2)
             features = [
                 ("👨‍🏫", "#2563eb", "Qualified Teachers", "Experienced and dedicated faculty members."),
@@ -189,7 +196,6 @@ if not st.session_state.logged_in:
                     """, unsafe_allow_html=True)
 
         with col_side:
-            # --- NOTICE BOARD ---
             notices_html = '<div class="content-box" style="border-top: 3px solid #e11d48;">'
             notices_html += '<div class="side-card-header"><h3>📢 Latest News & Updates</h3></div>'
             try:
@@ -212,11 +218,9 @@ if not st.session_state.logged_in:
                     notices_html += '<p style="color:#16a34a; font-weight:bold;">✨ No new notices at the moment.</p>'
             except:
                 notices_html += '<p style="color:#eab308;">Notice board is currently being initialized.</p>'
-            
             notices_html += '</div>'
             st.markdown(notices_html, unsafe_allow_html=True)
             
-            # --- ADMINISTRATION CONTACT ---
             admin_html = '<div class="content-box" style="border-top: 3px solid #0ea5e9;">'
             admin_html += '<div class="side-card-header"><h3>📞 Administration</h3></div>'
             admin_html += '<p class="admin-title">👨‍💼 School Manager</p>'
@@ -229,7 +233,6 @@ if not st.session_state.logged_in:
             admin_html += '</div>'
             st.markdown(admin_html, unsafe_allow_html=True)
 
-        # --- FOOTER ---
         st.markdown(
             '<div style="text-align:center; margin-top:40px; padding: 20px; border-top: 1px solid rgba(130,130,130,0.2); opacity: 0.7; font-size:14px;">'
             '<p style="margin:0;">© 2026 M.S. Public School. All Rights Reserved. | Designed for Enterprise ERP System</p></div>', 
@@ -238,37 +241,39 @@ if not st.session_state.logged_in:
 
     else:
         # ==========================================
-        # 🔐 BULLETPROOF LOGIN SYSTEM
+        # 🔐 BULLETPROOF & PREMIUM LOGIN SYSTEM
         # ==========================================
-        if st.button("⬅️ Back to Home"):
-            st.session_state.show_login = False
-            force_rerun()
-            
-        colA, colB, colC = st.columns([1.5, 2, 1.5])
+        col_back, col_space = st.columns([1, 8])
+        with col_back:
+            if st.button("⬅️ Home", key="back_btn"):
+                st.session_state.show_login = False
+                force_rerun()
+                
+        colA, colB, colC = st.columns([1, 1.5, 1])
         with colB:
-            st.markdown(f"<div style='text-align: center;'><img src='{LOGO_BASE64}' width='120'></div>", unsafe_allow_html=True)
-            st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-bottom: 0px;'>OFFICIAL LOGIN PORTAL</h2><br>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: center; margin-top: -10px;'><img src='{LOGO_BASE64}' width='100'></div>", unsafe_allow_html=True)
+            st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-top: 10px; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
             
             login_type = st.radio("Select Portal Access", ["Student Portal", "Teacher Portal", "Admin Portal"], horizontal=True)
             
             with st.form("login_form"):
                 if login_type == "Admin Portal":
-                    st.info("👨‍💻 Secure Admin Access")
+                    st.markdown("<h3 style='text-align: center; color: #e11d48; margin-bottom: 25px;'>👨‍💻 Secure Admin Access</h3>", unsafe_allow_html=True)
                     username = st.text_input("Admin Username / Mobile", placeholder="Enter your ID...")
                     password = st.text_input("Password", type="password", placeholder="Enter Password...")
-                    col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
-                    with col_btn2: submit = st.form_submit_button("Secure Login ➔", use_container_width=True)
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    submit = st.form_submit_button("Secure Login ➔", use_container_width=True)
                     if submit:
                         if username in ADMIN_USERS and password == ADMIN_USERS[username]:
                             st.session_state.logged_in = True; st.session_state.role = "Admin"; st.session_state.admin_id = username; force_rerun()
                         else: st.error("❌ Invalid Admin Credentials!")
                 
                 elif login_type == "Teacher Portal":
-                    st.info("👨‍🏫 Teacher Dashboard Access")
+                    st.markdown("<h3 style='text-align: center; color: #0ea5e9; margin-bottom: 25px;'>👨‍🏫 Teacher Dashboard</h3>", unsafe_allow_html=True)
                     t_id = st.text_input("Teacher ID", placeholder="Enter your Login ID...")
                     t_pass = st.text_input("Password", type="password", placeholder="Enter Password...")
-                    col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
-                    with col_btn2: submit = st.form_submit_button("Secure Login ➔", use_container_width=True)
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    submit = st.form_submit_button("Secure Login ➔", use_container_width=True)
                     if submit:
                         c.execute("SELECT * FROM teacher_master WHERE teacher_id=? AND password=?", (t_id.strip(), t_pass.strip()))
                         tch = c.fetchone()
@@ -277,11 +282,11 @@ if not st.session_state.logged_in:
                         else: st.error("❌ Invalid Teacher ID or Password!")
                 
                 else:
-                    st.info("🎓 Student Dashboard Access")
+                    st.markdown("<h3 style='text-align: center; color: #16a34a; margin-bottom: 25px;'>🎓 Student Dashboard</h3>", unsafe_allow_html=True)
                     s_roll = st.number_input("Roll No", min_value=1, step=1)
                     s_dob_obj = st.date_input("Date of Birth", value=datetime(2015, 1, 1), min_value=datetime(1990, 1, 1), max_value=datetime.today())
-                    col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
-                    with col_btn2: submit = st.form_submit_button("View Profile ➔", use_container_width=True)
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    submit = st.form_submit_button("View Profile ➔", use_container_width=True)
                     if submit:
                         s_dob_str = s_dob_obj.strftime("%d-%m-%Y") 
                         c.execute("SELECT * FROM student_master WHERE roll_no=? AND dob=?", (s_roll, s_dob_str))
