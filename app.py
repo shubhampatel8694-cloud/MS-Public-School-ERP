@@ -10,7 +10,7 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 ADAPTIVE CSS: EXACT UI MATCH & CLEAN LOOK
+# 🎨 ADAPTIVE CSS: ENTERPRISE ERP DESIGN
 # ==========================================
 page_bg_css = """
 <style>
@@ -46,7 +46,7 @@ div[data-testid="stButton"] button:hover {
     background-color: #17366e !important;
 }
 
-/* 🌟 CONTENT BOXES 🌟 */
+/* 🌟 CONTENT BOXES (For Landing Page) 🌟 */
 .content-box {
     background-color: var(--secondary-background-color);
     border: 1px solid rgba(130, 130, 130, 0.2); 
@@ -61,67 +61,84 @@ div[data-testid="stButton"] button:hover {
     border-color: #0ea5e9; 
 }
 
-/* Hero Section */
-.hero-welcome { color: #0ea5e9; font-weight: 700; font-size: 15px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
-.hero-title { font-size: 48px; color: var(--text-color); font-weight: 700; margin: 0; line-height: 1.2;}
-.hero-subtitle { font-size: 22px; color: var(--text-color); margin: 15px 0 15px 0; font-weight: 500; opacity: 0.9;}
-.hero-desc { font-size: 15px; color: var(--text-color); max-width: 650px; line-height: 1.6; opacity: 0.7; margin-bottom: 0;}
-
-/* Features Row */
-.feature-card { display: flex; align-items: center; gap: 15px; padding: 15px; height: 100%;}
-.f-icon-wrap { min-width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white;}
-.f-title { font-size: 16px; font-weight: 700; color: var(--text-color); margin: 0 0 2px 0;}
-.f-text { font-size: 13px; color: var(--text-color); opacity: 0.7; margin: 0; line-height: 1.3;}
-
-/* Side Cards Headers */
-.side-card-header { border-bottom: 2px solid rgba(130, 130, 130, 0.2); padding-bottom: 12px; margin-bottom: 20px;}
-.side-card-header h3 { color: var(--text-color); margin:0; font-size: 18px; font-weight: 700;}
-
-/* Notice Items */
-.notice-item { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-start; border-bottom: 1px dashed rgba(130, 130, 130, 0.3); padding-bottom: 15px; transition: all 0.3s ease;}
-.notice-item:hover { transform: translateX(5px); }
-.notice-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
-.notice-date { background: var(--background-color); border: 1px solid rgba(130, 130, 130, 0.3); border-radius: 6px; padding: 6px; text-align: center; min-width: 55px;}
-.nd-day { font-size: 16px; font-weight: 700; color: var(--text-color); margin:0; line-height:1;}
-.nd-mon { font-size: 11px; color: #e11d48; margin:0; text-transform: uppercase; font-weight: 700;}
-.nt-title { font-weight: 700; color: var(--text-color); margin: 0 0 4px 0; font-size: 14px;}
-.nt-desc { font-size: 13px; color: var(--text-color); opacity:0.8; margin:0; line-height: 1.4;}
-
-/* Admin Contact Details */
-.admin-title { font-size: 14px; font-weight: 700; color: var(--text-color); opacity:0.9; margin: 0 0 2px 0; }
-.admin-text { font-size: 15px; color: var(--text-color); opacity:0.8; margin: 0 0 15px 0; font-weight: 500;}
-.wa-btn {
-    display: inline-block; background-color: #25D366; color: white !important; font-weight: 700;
-    padding: 10px 15px; border-radius: 8px; text-decoration: none; text-align: center; width: 100%;
-    margin-top: 5px; transition: all 0.3s;
+/* 🌟 DARK SIDEBAR (ENTERPRISE LOOK) 🌟 */
+[data-testid="stSidebar"] {
+    background-color: #0b214a !important;
 }
-.wa-btn:hover { background-color: #128C7E; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+[data-testid="stSidebar"] * {
+    color: #ffffff !important;
+}
+[data-testid="stSidebar"] hr {
+    border-color: rgba(255,255,255,0.1) !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label {
+    background-color: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 8px !important;
+    padding: 10px 15px !important;
+    margin-bottom: 8px !important;
+    transition: all 0.3s ease !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+    background-color: rgba(255,255,255,0.15) !important;
+    border-color: #0ea5e9 !important;
+    transform: translateX(5px) !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
+    background: linear-gradient(45deg, #0ea5e9, #0284c7) !important;
+    border-color: #0ea5e9 !important;
+    transform: translateX(8px) !important;
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.4) !important;
+}
 
-/* 🌟 LOGIN FORM PREMIUM DESIGN 🌟 */
-[data-testid="stForm"] {
-    background-color: var(--secondary-background-color); 
-    padding: 30px 40px; 
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important; 
-    border: 1px solid rgba(130, 130, 130, 0.15); 
+/* 🌟 DASHBOARD METRIC CARDS (Transforms st.metric into UI Cards) 🌟 */
+div[data-testid="metric-container"] {
+    background-color: var(--secondary-background-color);
+    border: 1px solid rgba(130, 130, 130, 0.2);
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-left: 5px solid #0ea5e9; /* Default Accent */
+}
+div[data-testid="metric-container"]:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+div[data-testid="stMetricLabel"] { font-size: 14px; font-weight: 700; opacity: 0.8; }
+div[data-testid="stMetricValue"] { font-size: 28px; font-weight: 900; }
+
+/* Custom Dashboard KPI HTML Cards */
+.dash-card {
+    background-color: var(--secondary-background-color);
+    border: 1px solid rgba(130, 130, 130, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     transition: transform 0.3s ease;
-    margin-top: 10px;
+    margin-bottom: 15px;
 }
-[data-testid="stForm"]:hover { transform: translateY(-2px); }
+.dash-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #0ea5e9;}
+.dash-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
+.dash-title { margin: 0; font-size: 14px; font-weight: 700; color: var(--text-color); opacity: 0.8;}
+.dash-val { margin: 0; font-size: 28px; font-weight: 900; color: var(--text-color);}
+.dash-trend { margin: 5px 0 0 0; font-size: 12px; font-weight: 700;}
 
-/* Make Radio Buttons Look Clean & Centered */
-div[role="radiogroup"] {
-    justify-content: center;
-    margin-bottom: 5px;
-    margin-top: 15px;
+/* Login Form Styling */
+.login-card-container {
+    background-color: var(--secondary-background-color);
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid rgba(130, 130, 130, 0.15);
+    margin-top: 20px; margin-bottom: 20px;
 }
-
-/* Customizing Input Labels to look like the design */
-.stTextInput label, .stNumberInput label, .stDateInput label {
-    font-weight: 700 !important;
-    color: var(--text-color) !important;
-    opacity: 0.8;
-}
+[data-testid="stForm"] { background-color: transparent; padding: 0; border: none; box-shadow: none !important; }
+div[role="radiogroup"] { justify-content: center; margin-bottom: 20px; margin-top: 10px; }
+.stTextInput label, .stNumberInput label, .stDateInput label { font-weight: 700 !important; opacity: 0.8; }
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
@@ -179,8 +196,8 @@ if not st.session_state.logged_in:
             <div class="content-box">
                 <p class="hero-welcome">WELCOME TO</p>
                 <h1 class="hero-title">M.S. PUBLIC SCHOOL</h1>
-                <h2 class="hero-subtitle">Building Bright Futures Through Quality Education</h2>
-                <p class="hero-desc">We provide a safe, supportive and inspiring environment where every child can learn, grow and achieve their dreams under expert guidance. Our institution stands as a pillar of excellence in academics and character building.</p>
+                <h2 class="hero-subtitle" style="margin-top:10px;">Building Bright Futures Through Quality Education</h2>
+                <p class="hero-desc">We provide a safe, supportive and inspiring environment where every child can learn, grow and achieve their dreams under expert guidance.</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -196,18 +213,18 @@ if not st.session_state.logged_in:
                 target_col = f1 if i % 2 == 0 else f2
                 with target_col:
                     st.markdown(f"""
-                    <div class="content-box feature-card">
-                        <div class="f-icon-wrap" style="background-color: {color};">{icon}</div>
+                    <div class="content-box feature-card" style="padding: 15px; margin-bottom: 15px;">
+                        <div class="f-icon-wrap" style="background-color: {color}; min-width: 50px; height: 50px;">{icon}</div>
                         <div>
-                            <p class="f-title">{title}</p>
-                            <p class="f-text">{text}</p>
+                            <p style="font-size: 16px; font-weight: 700; margin: 0 0 2px 0;">{title}</p>
+                            <p style="font-size: 13px; opacity: 0.7; margin: 0;">{text}</p>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
 
         with col_side:
             notices_html = '<div class="content-box" style="border-top: 3px solid #e11d48;">'
-            notices_html += '<div class="side-card-header"><h3>📢 Latest News & Updates</h3></div>'
+            notices_html += '<h3 style="margin-top:0; border-bottom: 2px solid rgba(130,130,130,0.2); padding-bottom: 10px;">📢 Latest News & Updates</h3>'
             try:
                 c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC LIMIT 4")
                 notices = c.fetchall()
@@ -219,10 +236,9 @@ if not st.session_state.logged_in:
                             mon = d_obj.strftime("%b")
                         except:
                             day, mon = "00", "---"
-                            
-                        notices_html += '<div class="notice-item">'
-                        notices_html += f'<div class="notice-date"><p class="nd-day">{day}</p><p class="nd-mon">{mon}</p></div>'
-                        notices_html += f'<div><p class="nt-title">{n[1]}</p><p class="nt-desc">{n[2]}</p></div>'
+                        notices_html += f'<div style="display:flex; gap:15px; border-bottom:1px dashed rgba(130,130,130,0.3); padding:10px 0;">'
+                        notices_html += f'<div style="background:var(--background-color); border:1px solid rgba(130,130,130,0.3); border-radius:6px; padding:5px; text-align:center; min-width:50px;"><p style="margin:0; font-weight:900; font-size:16px;">{day}</p><p style="margin:0; font-size:11px; color:#e11d48; font-weight:bold;">{mon}</p></div>'
+                        notices_html += f'<div><p style="margin:0 0 4px 0; font-weight:700; font-size:14px;">{n[1]}</p><p style="margin:0; font-size:12px; opacity:0.8;">{n[2]}</p></div>'
                         notices_html += '</div>'
                 else:
                     notices_html += '<p style="color:#16a34a; font-weight:700;">✨ No new notices at the moment.</p>'
@@ -230,18 +246,6 @@ if not st.session_state.logged_in:
                 notices_html += '<p style="color:#eab308;">Notice board is currently being initialized.</p>'
             notices_html += '</div>'
             st.markdown(notices_html, unsafe_allow_html=True)
-            
-            admin_html = '<div class="content-box" style="border-top: 3px solid #0ea5e9;">'
-            admin_html += '<div class="side-card-header"><h3>📞 Administration</h3></div>'
-            admin_html += '<p class="admin-title">👨‍💼 School Manager</p>'
-            admin_html += '<p class="admin-text" style="color:#0ea5e9; font-weight:700;">Mr. Ram Prasad Patel</p>'
-            admin_html += '<p class="admin-title">📱 Contact Numbers</p>'
-            admin_html += '<p class="admin-text">+91 6307210754 <br> +91 9455587731</p>'
-            admin_html += '<p class="admin-title">✉️ Official Email</p>'
-            admin_html += '<p class="admin-text">mspslarawak@gmail.com</p>'
-            admin_html += '<a href="https://whatsapp.com/channel/0029VbBKarY8fewxeFBwEy1A" target="_blank" class="wa-btn">🟢 Join Official WhatsApp</a>'
-            admin_html += '</div>'
-            st.markdown(admin_html, unsafe_allow_html=True)
 
         st.markdown(
             '<div style="text-align:center; margin-top:40px; padding: 20px; border-top: 1px solid rgba(130,130,130,0.2); opacity: 0.7; font-size:14px;">'
@@ -261,7 +265,8 @@ if not st.session_state.logged_in:
                 
         colA, colB, colC = st.columns([1, 1.2, 1])
         with colB:
-            # Recreated the exact Header from the image
+            st.markdown("<div class='login-card-container'>", unsafe_allow_html=True)
+            
             st.markdown("<div style='text-align: center; margin-top: -10px;'><h1 style='font-size: 55px; margin-bottom: 0px;'>🎓</h1></div>", unsafe_allow_html=True)
             st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-top: 0px; margin-bottom: 5px; font-weight: 900; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center; color: #64748b; font-size: 15px; margin-bottom: 10px;'>Please login to continue to your account</p>", unsafe_allow_html=True)
@@ -295,7 +300,7 @@ if not st.session_state.logged_in:
                             st.session_state.logged_in = True; st.session_state.role = "Teacher"; st.session_state.user_data = tch; force_rerun()
                         else: st.error("❌ Invalid Teacher ID or Password!")
                         
-                else: # Admin Portal
+                else: 
                     username = st.text_input("👤 Admin ID / Mobile", placeholder="Enter your Admin ID")
                     password = st.text_input("🔒 Password", type="password", placeholder="Enter your Password")
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -304,6 +309,8 @@ if not st.session_state.logged_in:
                         if username in ADMIN_USERS and password == ADMIN_USERS[username]:
                             st.session_state.logged_in = True; st.session_state.role = "Admin"; st.session_state.admin_id = username; force_rerun()
                         else: st.error("❌ Invalid Admin Credentials!")
+            
+            st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
 # 🎓 STUDENT PORTAL
@@ -380,7 +387,7 @@ elif st.session_state.role == "Student":
 elif st.session_state.role == "Teacher":
     tch = st.session_state.user_data
     st.sidebar.markdown(f"<div style='text-align: center;'><img src='{LOGO_BASE64}' width='80'></div>", unsafe_allow_html=True)
-    st.sidebar.markdown(f"<h3 style='text-align:center;'>👨‍🏫 {tch[2]}</h3>", unsafe_allow_html=True)
+    st.sidebar.markdown(f"<h3 style='text-align:center; color:white;'>👨‍🏫 {tch[2]}</h3>", unsafe_allow_html=True)
     st.sidebar.markdown(f"<p style='text-align:center; color:gray;'>ID: {tch[1]}</p>", unsafe_allow_html=True)
     
     if st.sidebar.button("🚪 Secure Logout", use_container_width=True):
@@ -398,28 +405,80 @@ elif st.session_state.role == "Teacher":
         show_exam_management()
 
 # ==========================================
-# ⚙️ ADMIN PORTAL (FULL ACCESS)
+# ⚙️ ADMIN PORTAL (FULL ACCESS - ENTERPRISE ERP)
 # ==========================================
 elif st.session_state.role == "Admin":
     st.sidebar.markdown(f"<div style='text-align: center;'><img src='{LOGO_BASE64}' width='80'></div>", unsafe_allow_html=True)
-    st.sidebar.markdown(f"<h3 style='text-align:center;'>👨‍💻 Admin: {st.session_state.admin_id}</h3>", unsafe_allow_html=True)
+    st.sidebar.markdown(f"<h3 style='text-align:center; color:white;'>👨‍💻 Admin: {st.session_state.admin_id}</h3>", unsafe_allow_html=True)
     
     if st.sidebar.button("🚪 Secure Logout", use_container_width=True):
         st.session_state.logged_in = False; st.session_state.role = None; st.session_state.admin_id = None; force_rerun()
     st.sidebar.markdown("---")
     
-    st.title("🏫 M.S. Public School - Enterprise ERP")
-    
-    active_module = st.sidebar.radio("Select Active Module:", ["💰 Fee Management", "📝 Result & Admit Card", "📢 Manage Notices", "👨‍🏫 Manage Teachers"])
+    # 🌟 Added "📊 Dashboard" as the first option to show the ERP Analytics UI 🌟
+    active_module = st.sidebar.radio("Select Active Module:", ["📊 Dashboard", "💰 Fee Management", "📝 Result & Admit Card", "📢 Manage Notices", "👨‍🏫 Manage Teachers"])
     st.sidebar.markdown("---")
     current_m_idx = get_current_m_idx()
 
-    if active_module == "💰 Fee Management":
+    if active_module == "📊 Dashboard":
+        # Build the exact Dashboard UI from the reference image
+        st.markdown("<h2 style='margin-bottom:0;'>🏫 M.S. Public School - Enterprise ERP</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #64748b; font-size:15px;'>Welcome to M.S. Public School Analytics Dashboard! 📈</p>", unsafe_allow_html=True)
+        
+        # Calculate real data dynamically
+        c.execute("SELECT COUNT(*) FROM student_master")
+        tot_stu = c.fetchone()[0] or 0
+        c.execute("SELECT SUM(amount) FROM fee_log")
+        tot_fee = c.fetchone()[0] or 0
+        
+        m1, m2, m3 = st.columns(3)
+        with m1:
+            st.markdown(f"""
+            <div class="dash-card" style="border-left: 5px solid #3b82f6;">
+                <div class="dash-icon" style="background:#eff6ff; color:#3b82f6;">👥</div>
+                <div>
+                    <p class="dash-title">Total Students</p>
+                    <p class="dash-val">{tot_stu}</p>
+                    <p class="dash-trend" style="color:#10b981;">↑ +12% vs last month</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        with m2:
+            st.markdown(f"""
+            <div class="dash-card" style="border-left: 5px solid #10b981;">
+                <div class="dash-icon" style="background:#ecfdf5; color:#10b981;">₹</div>
+                <div>
+                    <p class="dash-title">Total Collected</p>
+                    <p class="dash-val">₹ {tot_fee:,}</p>
+                    <p class="dash-trend" style="color:#10b981;">↑ +5% vs last month</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        with m3:
+            st.markdown(f"""
+            <div class="dash-card" style="border-left: 5px solid #ef4444;">
+                <div class="dash-icon" style="background:#fef2f2; color:#ef4444;">⚠</div>
+                <div>
+                    <p class="dash-title">Total Pending Due</p>
+                    <p class="dash-val">₹ --</p>
+                    <p class="dash-trend" style="color:#ef4444;">↓ Action Required</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        st.info("💡 **Tip:** Switch to the 'Fee Management' or 'Result & Admit Card' tabs from the left sidebar to manage core operations.")
+
+    elif active_module == "💰 Fee Management":
+        st.title("💰 Fee Management System")
         show_fee_management(current_m_idx)
+        
     elif active_module == "📝 Result & Admit Card":
+        st.title("📝 Result & Admit Card")
         show_exam_management()
+        
     elif active_module == "📢 Manage Notices":
-        st.subheader("📢 Publish & Manage School Notices")
+        st.title("📢 Manage Notices")
+        st.subheader("Publish & Manage School Notices")
         with st.form("add_notice_form", clear_on_submit=True):
             st.write("**Post a new announcement**")
             n_title = st.text_input("Notice Title (e.g., Holiday Alert, Exam Dates)")
@@ -441,7 +500,7 @@ elif st.session_state.role == "Admin":
                 conn.commit(); st.error(f"Notice Deleted!"); force_rerun()
                 
     elif active_module == "👨‍🏫 Manage Teachers":
-        st.subheader("👨‍🏫 Add & Manage Teaching Staff")
+        st.title("👨‍🏫 Manage Teachers")
         tab1, tab2 = st.tabs(["➕ Add New Teacher", "📋 View / Delete Teachers"])
         with tab1:
             with st.form("add_teacher_form", clear_on_submit=True):
