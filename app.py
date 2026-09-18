@@ -9,41 +9,32 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 OFFICIAL INSTITUTIONAL CSS & SOFT GLOW
+# 🎨 OFFICIAL INSTITUTIONAL CSS & THEME ADAPTATION
 # ==========================================
 page_bg_css = """
 <style>
-/* Streamlit Default Hiding */
-header {visibility: hidden;}
-#MainMenu {visibility: hidden;}
-.block-container {padding-top: 0rem !important; padding-left: 2rem; padding-right: 2rem;}
-
-/* Top Black/Dark Bar */
-.top-bar {
-    background-color: #333333; color: white; padding: 6px 20px; font-size: 13px;
-    display: flex; justify-content: space-between; align-items: center;
-    margin: -40px -2rem 15px -2rem; /* Stretch across screen */
-}
+/* Remove header hiding so Theme button is visible */
+.block-container {padding-top: 2rem !important; padding-left: 2rem; padding-right: 2rem;}
 
 /* Orange Navigation Bar */
 .nav-bar {
     background-color: #e67e22; padding: 12px 20px; color: white; font-weight: bold;
     font-size: 16px; border-radius: 4px; display: flex; gap: 25px;
-    box-shadow: 0 0 10px rgba(230, 126, 34, 0.4); /* Soft Glow */
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.4); 
     margin-bottom: 25px; margin-top: 10px;
 }
 .nav-item { cursor: pointer; color: white; text-decoration: none; transition: 0.3s; }
 .nav-item:hover { color: #f1c40f; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 
 /* Header Text Styling */
-.school-title { color: #c0392b; font-size: 34px; font-weight: bold; margin: 0; padding: 0; font-family: 'Arial', sans-serif; text-transform: uppercase;}
-.school-sub { color: #d35400; font-size: 18px; margin: 0; padding: 0; font-family: 'Arial', sans-serif;}
+.school-title { color: #e74c3c; font-size: 34px; font-weight: bold; margin: 0; padding: 0; font-family: 'Arial', sans-serif; text-transform: uppercase;}
+.school-sub { color: #e67e22; font-size: 18px; margin: 0; padding: 0; font-family: 'Arial', sans-serif;}
 
 /* Official Buttons */
 div[data-testid="stButton"] button {
     background-color: #17a2b8 !important; color: #ffffff !important; border: none !important;
     border-radius: 30px !important; font-weight: bold !important; padding: 0.5rem 1.5rem !important;
-    box-shadow: 0 0 10px rgba(23, 162, 184, 0.4) !important; /* Soft Glow on button */
+    box-shadow: 0 0 10px rgba(23, 162, 184, 0.4) !important; 
     transition: all 0.3s ease !important;
 }
 div[data-testid="stButton"] button:hover {
@@ -59,18 +50,20 @@ div[data-testid="stButton"] button:hover {
 }
 .wa-btn:hover { background-color: #128C7E; transform: translateY(-2px); box-shadow: 0 0 15px rgba(37, 211, 102, 0.5); }
 
-/* Official Cards (Notices & Contact) with Soft Glow */
+/* Official Cards adapting to Light/Dark Mode */
 .official-card {
-    background-color: #ffffff; padding: 25px; border-radius: 6px; 
-    border-top: 4px solid #e67e22; /* Orange top border */
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.08); /* Very Soft Glow/Shadow */
+    background-color: var(--secondary-background-color); 
+    color: var(--text-color);
+    padding: 25px; border-radius: 6px; 
+    border-top: 4px solid #e67e22; 
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); 
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .official-card:hover {
-    box-shadow: 0 0 20px rgba(230, 126, 34, 0.15); /* Orange soft glow on hover */
+    box-shadow: 0 0 20px rgba(230, 126, 34, 0.2); 
     transform: translateY(-2px);
 }
-.notice-item { border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 12px; }
+.notice-item { border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 12px; }
 .notice-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
 /* Login Form Styling */
@@ -95,16 +88,7 @@ if 'logged_in' not in st.session_state:
 if not st.session_state.logged_in:
     if not st.session_state.show_login:
         
-        # --- 1. TOP DARK BAR ---
-        current_date = datetime.today().strftime("%A, %B %d, %Y")
-        st.markdown(f"""
-        <div class="top-bar">
-            <div>🕒 {current_date}</div>
-            <div>SCREEN READER ACCESS &nbsp;|&nbsp; SKIP TO MAIN CONTENT &nbsp;|&nbsp; SITEMAP &nbsp;|&nbsp; HINDI</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # --- 2. HEADER SECTION (Logo + Title + Sign In) ---
+        # --- HEADER SECTION (Logo + Title + Sign In) ---
         col_logo, col_text, col_space, col_btn = st.columns([1, 6, 1, 1.5])
         with col_logo:
             st.markdown(f"<img src='{LOGO_BASE64}' width='100' style='margin-top:-10px;'>", unsafe_allow_html=True)
@@ -116,12 +100,12 @@ if not st.session_state.logged_in:
             </div>
             """, unsafe_allow_html=True)
         with col_btn:
-            st.markdown("<br>", unsafe_allow_html=True) # Spacer
+            st.markdown("<br>", unsafe_allow_html=True) 
             if st.button("🔑 Sign In System", use_container_width=True):
                 st.session_state.show_login = True
                 force_rerun()
                 
-        # --- 3. ORANGE NAVIGATION BAR ---
+        # --- ORANGE NAVIGATION BAR ---
         st.markdown("""
         <div class="nav-bar">
             <span class="nav-item">🏠 Home</span>
@@ -132,18 +116,18 @@ if not st.session_state.logged_in:
         </div>
         """, unsafe_allow_html=True)
         
-        # --- 4. NOTICES & CONTACT CARDS (WITH SOFT GLOW) ---
+        # --- NOTICES & CONTACT CARDS ---
         col_notices, col_space, col_contact = st.columns([2.5, 0.1, 1])
         
         with col_notices:
             notices_html = '<div class="official-card">'
-            notices_html += '<h3 style="color:#d35400; margin-top:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">📢 Latest Notices & Circulars</h3>'
+            notices_html += '<h3 style="color:#d35400; margin-top:0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">📢 Latest Notices & Circulars</h3>'
             try:
                 c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC")
                 notices = c.fetchall()
                 if notices:
                     for n in notices:
-                        notices_html += f'<div class="notice-item"><h4 style="color:#2980b9; margin:0 0 5px 0;">🗓️ {n[0]} | {n[1]}</h4><p style="color:#333; margin:0; font-size: 15px;">{n[2]}</p></div>'
+                        notices_html += f'<div class="notice-item"><h4 style="color:#2980b9; margin:0 0 5px 0;">🗓️ {n[0]} | {n[1]}</h4><p style="margin:0; font-size: 15px;">{n[2]}</p></div>'
                 else:
                     notices_html += '<p style="color:#27ae60; font-weight:bold; margin-top:15px;">✨ No active notices currently.</p>'
             except:
@@ -154,21 +138,21 @@ if not st.session_state.logged_in:
 
         with col_contact:
             contact_html = '<div class="official-card">'
-            contact_html += '<h3 style="color:#d35400; margin-top:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">📞 Contact Directory</h3>'
+            contact_html += '<h3 style="color:#d35400; margin-top:0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">📞 Contact Directory</h3>'
             contact_html += '<div style="margin-top: 15px;">'
-            contact_html += '<h5 style="color:#2c3e50; margin-bottom:2px;">👨‍💼 School Manager</h5>'
+            contact_html += '<h5 style="margin-bottom:2px;">👨‍💼 School Manager</h5>'
             contact_html += '<p style="color:#2980b9; font-weight:bold; margin:0;">Mr. Ram Prasad Patel</p>'
-            contact_html += '<p style="color:#555; margin:5px 0 0 0;">📞 +91 6307210754</p>'
-            contact_html += '<p style="color:#555; margin:0 0 15px 0;">📞 +91 9455587731</p>'
-            contact_html += '<h5 style="color:#2c3e50; margin-bottom:2px;">✉️ Support Email</h5>'
+            contact_html += '<p style="margin:5px 0 0 0;">📞 +91 6307210754</p>'
+            contact_html += '<p style="margin:0 0 15px 0;">📞 +91 9455587731</p>'
+            contact_html += '<h5 style="margin-bottom:2px;">✉️ Support Email</h5>'
             contact_html += '<p style="color:#2980b9; font-weight:bold; margin:0 0 20px 0;">mspslarawak@gmail.com</p>'
             contact_html += '<a href="https://whatsapp.com/channel/0029VbBKarY8fewxeFBwEy1A" target="_blank" class="wa-btn">🟢 Official WhatsApp</a>'
             contact_html += '</div></div>'
             st.markdown(contact_html, unsafe_allow_html=True)
 
-        # --- 5. FOOTER ---
+        # --- FOOTER ---
         st.markdown(
-            '<div style="text-align:center; margin-top:40px; padding: 20px; background-color: #f8f9fa; border-top: 1px solid #ddd; color:#666; font-size:14px;">'
+            '<div style="text-align:center; margin-top:40px; padding: 20px; background-color: var(--secondary-background-color); border-top: 1px solid var(--border-color); font-size:14px;">'
             '<p style="margin:0;">© 2026 M.S. Public School. All Rights Reserved. | Designed for Enterprise ERP System</p></div>', 
             unsafe_allow_html=True
         )
