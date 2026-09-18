@@ -136,10 +136,13 @@ try:
         d1 TEXT, s1 TEXT, d2 TEXT, s2 TEXT, d3 TEXT, s3 TEXT, d4 TEXT, s4 TEXT, d5 TEXT, s5 TEXT,
         d6 TEXT, s6 TEXT, d7 TEXT, s7 TEXT, d8 TEXT, s8 TEXT, d9 TEXT, s9 TEXT, d10 TEXT, s10 TEXT
     )''')
-    
-    # 👇 NEW TABLE FOR PUBLIC NOTICES
     c.execute('''CREATE TABLE IF NOT EXISTS school_notices (
         id SERIAL PRIMARY KEY, date TEXT, title TEXT, content TEXT, is_active INTEGER DEFAULT 1
+    )''')
+    
+    # 👇 NEW TABLE FOR TEACHER SYSTEM
+    c.execute('''CREATE TABLE IF NOT EXISTS teacher_master (
+        id SERIAL PRIMARY KEY, teacher_id TEXT UNIQUE, name TEXT, mobile TEXT, password TEXT
     )''')
 except Exception:
     pass

@@ -1,18 +1,21 @@
 import streamlit as st
-import plotly.express as px
 import pandas as pd
 from datetime import datetime
 import streamlit.components.v1 as components
+import plotly.express as px
 from database import conn, c, c_list
 from helpers import *
 
 def show_fee_management(current_m_idx):
-    menu = st.sidebar.radio("Fee Menu", ["📊 Dashboard", "⚙️ Setup Fee Structure", "👥 Student Master", "🎒 Assign Extra Items", "📝 Fee Collection & Print", "🔍 Student Statement", "📈 Class Statement", "📅 Daily Collection"])
+    
+    # 👇 TEACHER KO KYA DIKHEGA OR ADMIN KO KYA DIKHEGA (RBAC LOGIC)
+    if st.session_state.get('role') == 'Teacher':
+        menu = st.sidebar.radio("Teacher View (Statements Only)", ["🔍 Student Statement", "📈 Class Statement"])
+    else:
+        menu = st.sidebar.radio("Fee Menu", ["📊 Dashboard", "⚙️ Setup Fee Structure", "👥 Student Master", "🎒 Assign Extra Items", "📝 Fee Collection & Print", "🔍 Student Statement", "📈 Class Statement", "📅 Daily Collection"])
     
     if menu == "📊 Dashboard":
         st.subheader("Welcome to M.S. Public School Analytics Dashboard! 📈")
-        
-        # --- 1. DATA CALCULATION ---
         c.execute("SELECT SUM(amount) FROM fee_log")
         tot_col = c.fetchone()[0] or 0
         c.execute("SELECT roll_no FROM student_master")
@@ -20,26 +23,18 @@ def show_fee_management(current_m_idx):
         tot_expected = sum([get_student_financials(s[0], current_m_idx)[0] for s in all_students])
         tot_pending = max(0, tot_expected - tot_col)
         
-        # --- 2. TOP METRICS CARDS ---
         c1, c2, c3 = st.columns(3)
         c1.metric("👥 Total Students", f"{len(all_students)}")
         c2.metric("🟢 Total Collected", f"₹ {tot_col:,}")
         c3.metric("🔴 Total Pending Due", f"₹ {tot_pending:,}")
         
         st.markdown("---")
-        
-        # --- 3. CHARTS ROW 1 (Pie Chart & Line Chart) ---
         colA, colB = st.columns(2)
-        
         with colA:
             st.markdown("#### 💰 Fee Collection Status")
-            pie_data = pd.DataFrame({
-                'Status': ['Collected', 'Pending Due'],
-                'Amount': [tot_col, tot_pending]
-            })
+            pie_data = pd.DataFrame({'Status': ['Collected', 'Pending Due'], 'Amount': [tot_col, tot_pending]})
             if tot_col > 0 or tot_pending > 0:
-                fig_pie = px.pie(pie_data, values='Amount', names='Status', hole=0.5, 
-                                 color='Status', color_discrete_map={'Collected':'#28a745', 'Pending Due':'#dc3545'})
+                fig_pie = px.pie(pie_data, values='Amount', names='Status', hole=0.5, color='Status', color_discrete_map={'Collected':'#28a745', 'Pending Due':'#dc3545'})
                 fig_pie.update_layout(margin=dict(t=20, b=20, l=0, r=0))
                 st.plotly_chart(fig_pie, use_container_width=True)
             else:
@@ -47,15 +42,13 @@ def show_fee_management(current_m_idx):
                 
         with colB:
             st.markdown("#### 📈 Last 7 Days Collection Trend")
-            c.execute('''SELECT date, SUM(amount) as daily_total FROM fee_log 
-                         GROUP BY date ORDER BY date DESC LIMIT 7''')
+            c.execute('''SELECT date, SUM(amount) as daily_total FROM fee_log GROUP BY date ORDER BY date DESC LIMIT 7''')
             trend_data = c.fetchall()
             if trend_data:
                 df_trend = pd.DataFrame(trend_data, columns=['Date', 'Amount'])
                 df_trend['Date'] = pd.to_datetime(df_trend['Date'])
                 df_trend = df_trend.sort_values('Date')
-                fig_line = px.line(df_trend, x='Date', y='Amount', markers=True, text='Amount',
-                                   color_discrete_sequence=['#1F497D'])
+                fig_line = px.line(df_trend, x='Date', y='Amount', markers=True, text='Amount', color_discrete_sequence=['#1F497D'])
                 fig_line.update_traces(textposition="top center")
                 fig_line.update_layout(margin=dict(t=20, b=20, l=0, r=0), yaxis_title="Amount (₹)", xaxis_title="")
                 st.plotly_chart(fig_line, use_container_width=True)
@@ -63,27 +56,20 @@ def show_fee_management(current_m_idx):
                 st.info("No recent collections to show trend.")
                 
         st.markdown("---")
-        
-        # --- 4. CHARTS ROW 2 (Bar Chart for Class-wise Collection) ---
         st.markdown("#### 📊 Class-wise Revenue Generation")
-        c.execute('''SELECT s.class, SUM(f.amount) 
-                     FROM fee_log f 
-                     JOIN student_master s ON f.roll_no = s.roll_no 
-                     GROUP BY s.class''')
+        c.execute('''SELECT s.class, SUM(f.amount) FROM fee_log f JOIN student_master s ON f.roll_no = s.roll_no GROUP BY s.class''')
         cls_col_data = c.fetchall()
         if cls_col_data:
             df_cls = pd.DataFrame(cls_col_data, columns=['Class', 'Collected Amount'])
-            # Classes को सही क्रम में सेट करना
             df_cls['Class'] = pd.Categorical(df_cls['Class'], categories=c_list, ordered=True)
             df_cls = df_cls.sort_values('Class')
-            
-            fig_bar = px.bar(df_cls, x='Class', y='Collected Amount', text='Collected Amount', 
-                             color='Collected Amount', color_continuous_scale='Blues')
+            fig_bar = px.bar(df_cls, x='Class', y='Collected Amount', text='Collected Amount', color='Collected Amount', color_continuous_scale='Blues')
             fig_bar.update_traces(texttemplate='₹ %{text:.2s}', textposition='outside')
             fig_bar.update_layout(margin=dict(t=20, b=20, l=0, r=0), xaxis_title="Classes", yaxis_title="Total Collected (₹)")
             st.plotly_chart(fig_bar, use_container_width=True)
         else:
             st.info("No class-wise collection data available yet.")
+
     elif menu == "⚙️ Setup Fee Structure":
         st.subheader("Update Class-wise Base Fees")
         df_fees = pd.read_sql_query("SELECT * FROM fee_structure", conn)
@@ -214,8 +200,6 @@ def show_fee_management(current_m_idx):
     elif menu == "📝 Fee Collection & Print":
         if 'receipt_to_print' not in st.session_state: st.session_state.receipt_to_print = None
         st.subheader("Fee Receipts & Printing")
-        
-        # === 🖨️ RECEIPT PRINT PREVIEW SECTION ===
         if st.session_state.receipt_to_print:
             rec_no = st.session_state.receipt_to_print
             c.execute('''SELECT f.receipt_no, f.date, f.roll_no, s.name, s.class, f.head, f.amount, f.mode, s.father_name, s.medium, s.transport FROM fee_log f LEFT JOIN student_master s ON f.roll_no = s.roll_no WHERE f.receipt_no=?''', (rec_no,))
@@ -231,7 +215,6 @@ def show_fee_management(current_m_idx):
                 new_total_paid = prev_paid + amt_paid
                 c.execute("SELECT * FROM fee_structure WHERE class=?", (cls,))
                 fs = c.fetchone()
-                
                 heads = [('Registration Fee', fs[1], 1), ('Admission Fee', fs[2], 1), ('Other Fee', fs[9], 1)]
                 c.execute("SELECT item_name, amount FROM student_charges WHERE roll_no=?", (roll,))
                 for item in c.fetchall(): heads.append((f"{item[0]} (EXTRA)", item[1], 1))
@@ -255,7 +238,6 @@ def show_fee_management(current_m_idx):
                 components.html(html_code, height=900, scrolling=True)
                 st.write("---")
                 st.stop()
-        # ===============================================
 
         tab1, tab2 = st.tabs(["💰 Collect New Fee", "✏️ Edit / Delete Receipt"])
         with tab1:
@@ -303,7 +285,6 @@ def show_fee_management(current_m_idx):
         c.execute('''SELECT f.receipt_no, f.date, f.roll_no, s.name, s.class, f.head, f.amount, f.mode FROM fee_log f LEFT JOIN student_master s ON f.roll_no = s.roll_no ORDER BY f.date DESC LIMIT 20''')
         logs = c.fetchall()
         
-        # ✅ ORIGINAL INLINE PRINT BUTTONS (No Zero Index)
         if logs:
             cols = st.columns([1.5, 1.2, 0.8, 1.5, 0.8, 1.5, 1, 1, 1])
             cols[0].markdown("**Receipt No**")
