@@ -9,7 +9,7 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 BULLETPROOF UI CSS & PREMIUM STYLING
+# 🎨 PREMIUM CSS & GLOWING EFFECTS
 # ==========================================
 page_bg_css = """
 <style>
@@ -23,6 +23,7 @@ div[data-testid="stButton"] button:hover {
     background-color: #ff4b4b !important; transform: translateY(-3px) !important;
     box-shadow: 0 8px 15px rgba(255, 75, 75, 0.4) !important;
 }
+
 /* WhatsApp Custom Button */
 .wa-btn {
     display: inline-block; background-color: #25D366; color: white !important; font-weight: bold;
@@ -46,21 +47,58 @@ div[data-testid="stButton"] button:hover {
 }
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 800 !important; }
 
-/* Form 3D Effect */
-[data-testid="stForm"] {
-    background-color: var(--secondary-background-color); padding: 30px; border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important; border: 1px solid rgba(128, 128, 128, 0.2); transition: transform 0.3s ease;
+/* 🌟 GLOWING ANIMATED HERO BANNER 🌟 */
+.glowing-wrapper {
+    position: relative;
+    z-index: 0;
+    margin-bottom: 40px;
+    margin-top: 10px;
+    border-radius: 15px;
 }
-[data-testid="stForm"]:hover { transform: translateY(-2px); }
-.stTextInput input:focus, .stNumberInput input:focus { border-color: #ff4b4b !important; box-shadow: 0 0 10px rgba(255, 75, 75, 0.25) !important; }
+.glowing-wrapper:before {
+    content: '';
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    position: absolute;
+    top: -3px; left: -3px;
+    background-size: 400%;
+    z-index: -1;
+    filter: blur(8px);
+    width: calc(100% + 6px);
+    height: calc(100% + 6px);
+    animation: glowing 20s linear infinite;
+    opacity: 0.8;
+    border-radius: 15px;
+}
+.hero-inner {
+    background: linear-gradient(135deg, #183e6b, #2a5d91);
+    border-radius: 14px;
+    padding: 30px 20px;
+    text-align: center;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+@keyframes glowing {
+    0% { background-position: 0 0; }
+    50% { background-position: 400% 0; }
+    100% { background-position: 0 0; }
+}
 
-/* Notice Card Style */
-.notice-card {
-    background-color: #ffffff; border-left: 6px solid #ff4b4b; padding: 20px; 
-    margin-bottom: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    transition: transform 0.2s ease;
+/* Notice & Contact Cards */
+.modern-card {
+    background-color: #ffffff; padding: 20px; margin-bottom: 15px; 
+    border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #eee; transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.notice-card:hover { transform: scale(1.01); }
+.modern-card:hover { 
+    transform: translateY(-3px); 
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+.notice-border { border-left: 5px solid #ff4b4b; }
+.admin-border { border-top: 4px solid #1F497D; }
+
+/* Hide Streamlit Header elements slightly */
+header {visibility: hidden;}
+#MainMenu {visibility: hidden;}
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
@@ -81,26 +119,27 @@ if not st.session_state.logged_in:
         # --- 1. TOP NAVBAR ---
         col_logo, col_space, col_btn = st.columns([1, 7, 1.2])
         with col_logo:
-            st.markdown(f"<img src='{LOGO_BASE64}' width='80' style='margin-top:-15px;'>", unsafe_allow_html=True)
+            st.markdown(f"<img src='{LOGO_BASE64}' width='80' style='margin-top:-25px;'>", unsafe_allow_html=True)
         with col_btn:
             if st.button("Sign In ➔", use_container_width=True):
                 st.session_state.show_login = True
                 force_rerun()
                 
-        # --- 2. HERO BANNER SECTION ---
+        # --- 2. GLOWING HERO BANNER ---
         st.markdown("""
-        <div style='background: linear-gradient(135deg, #1F497D, #3b6b9e); padding: 50px 20px; border-radius: 15px; color: white; text-align: center; margin-bottom: 35px; box-shadow: 0 10px 25px rgba(31,73,125,0.3);'>
-            <h1 style='font-size: 60px; margin: 0; font-weight: 900; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'>M.S. PUBLIC SCHOOL</h1>
-            <h3 style='margin: 15px 0 0 0; font-weight: 400; opacity: 0.9; font-size: 22px;'>Learn. Lead. Grow. | Welcome to our Official Portal.</h3>
+        <div class="glowing-wrapper">
+            <div class="hero-inner">
+                <h1 style='font-size: 50px; margin: 0; font-weight: 900; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.4);'>M.S. PUBLIC SCHOOL</h1>
+                <p style='margin: 10px 0 0 0; font-weight: 400; opacity: 0.9; font-size: 20px;'>Learn. Lead. Grow. | Welcome to our Official Portal.</p>
+            </div>
         </div>
         """, unsafe_allow_html=True)
         
-        # --- 3. NOTICE BOARD & CONTACT INFO (TWO COLUMNS) ---
-        col_notices, col_contact = st.columns([2, 1])
+        # --- 3. NOTICE BOARD & CONTACT INFO ---
+        col_notices, col_space, col_contact = st.columns([2.2, 0.1, 1.2])
         
         with col_notices:
-            st.markdown("### 📢 Latest Notices & Updates")
-            st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px; border-top: 2px solid #1F497D;'>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color:#1F497D;'>📢 Latest Notices & Updates</h3>", unsafe_allow_html=True)
             
             try:
                 c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC")
@@ -108,40 +147,39 @@ if not st.session_state.logged_in:
                 if notices:
                     for n in notices:
                         st.markdown(f"""
-                        <div class="notice-card">
+                        <div class="modern-card notice-border">
                             <h4 style='color: #1F497D; margin-top: 0; margin-bottom: 8px;'>🗓️ {n[0]} | {n[1]}</h4>
                             <p style='color: #444; margin-bottom: 0; font-size: 15px; line-height: 1.5;'>{n[2]}</p>
                         </div>
                         """, unsafe_allow_html=True)
                 else:
-                    st.success("✨ No new notices at the moment. Have a great day!")
+                    st.markdown("""<div class="modern-card" style="border-left: 5px solid #28a745;"><p style="margin:0; color:#28a745; font-weight:bold;">✨ No new notices at the moment. Have a great day!</p></div>""", unsafe_allow_html=True)
             except:
                 st.warning("Notice board is currently being initialized.")
 
         with col_contact:
-            st.markdown("### 📞 Administration")
-            st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px; border-top: 2px solid #1F497D;'>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color:#1F497D;'>📞 Administration</h3>", unsafe_allow_html=True)
             
-            # Manager Card
-            st.info("**👨‍💼 School Manager**\n\n**Mr. Ram Prasad Patel**\n\n📞 +91 6307210754\n\n📞 +91 9455587731")
-            
-            # WhatsApp Button
             st.markdown("""
-            <a href="https://whatsapp.com/channel/0029VbBKarY8fewxeFBwEy1A" target="_blank" class="wa-btn">
-                🟢 Join WhatsApp Channel
-            </a>
+            <div class="modern-card admin-border">
+                <h4 style='margin:0 0 10px 0; color:#1F497D;'>👨‍💼 School Manager</h4>
+                <p style='margin:0 0 5px 0; font-weight:bold;'>Mr. Ram Prasad Patel</p>
+                <p style='margin:0 0 5px 0; color:#555;'>📞 +91 6307210754</p>
+                <p style='margin:0 0 15px 0; color:#555;'>📞 +91 9455587731</p>
+                
+                <h4 style='margin:0 0 10px 0; color:#1F497D;'>✉️ Email Us</h4>
+                <p style='margin:0 0 15px 0; color:#555;'>mspslarawak@gmail.com</p>
+                
+                <a href="https://whatsapp.com/channel/0029VbBKarY8fewxeFBwEy1A" target="_blank" class="wa-btn">
+                    🟢 Join WhatsApp Channel
+                </a>
+            </div>
             """, unsafe_allow_html=True)
-            
-            # Email Card
-            st.success("**✉️ Email Us**\n\nmspslarawak@gmail.com")
-            
-            # Location Card
-            st.warning("**📍 Location**\n\nLarawak, Kachhwa, Mirzapur\n\nUttar Pradesh - 231501")
 
         # --- 4. FOOTER ---
         st.markdown("""
-        <div style='text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; color: #888;'>
-            <p>© 2026 M.S. Public School. All Rights Reserved. | ERP System</p>
+        <div style='text-align: center; margin-top: 40px; padding-top: 15px; border-top: 1px solid #eee; color: #aaa; font-size: 14px;'>
+            <p>© 2026 M.S. Public School. All Rights Reserved. | Designed with ❤️</p>
         </div>
         """, unsafe_allow_html=True)
 
