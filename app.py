@@ -10,35 +10,46 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 ADAPTIVE CSS: LIGHT BORDERS & HOVER EFFECTS
+# 🎨 ADAPTIVE CSS: FIXED HEADER & STANDOUT BUTTON
 # ==========================================
 page_bg_css = """
 <style>
-/* Reset Padding */
-.block-container { max-width: 1300px; padding-top: 1rem !important; padding-left: 1rem; padding-right: 1rem; }
+/* Remove Streamlit Default Header Border & Gap */
+[data-testid="stHeader"] { 
+    background-color: transparent !important; 
+    box-shadow: none !important; 
+    border-bottom: none !important; 
+}
+.block-container { max-width: 1300px; padding-top: 1.5rem !important; padding-left: 1rem; padding-right: 1rem; }
 
 /* Navbar Area */
 .nav-links { display: flex; gap: 25px; color: var(--text-color); font-weight: 600; font-size: 15px; margin-top: 25px; justify-content: center;}
 .nav-links span { cursor: pointer; transition: color 0.3s; opacity: 0.9;}
 .nav-links span:hover { color: #0ea5e9; opacity: 1;}
 
-/* Official Buttons */
+/* 🌟 STANDOUT LOGIN BUTTON (Vibrant Gradient) 🌟 */
 div[data-testid="stButton"] button {
-    background-color: var(--primary-color) !important; color: white !important; border: none !important;
-    border-radius: 8px !important; font-weight: bold !important; padding: 0.5rem 1.5rem !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important; transition: all 0.3s ease !important;
-    margin-top: 15px;
+    background: linear-gradient(45deg, #e11d48, #be123c) !important; /* Standout Red/Rose Color */
+    color: #ffffff !important; 
+    border: none !important;
+    border-radius: 8px !important; 
+    font-weight: 800 !important; 
+    letter-spacing: 0.5px;
+    padding: 0.6rem 1.5rem !important;
+    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4) !important; 
+    transition: all 0.3s ease !important;
+    margin-top: 15px; 
 }
 div[data-testid="stButton"] button:hover {
     transform: translateY(-3px) !important;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.2) !important;
-    filter: brightness(1.1);
+    box-shadow: 0 8px 20px rgba(225, 29, 72, 0.6) !important;
+    background: linear-gradient(45deg, #be123c, #9f1239) !important;
 }
 
 /* 🌟 CONTENT BOXES (Halka Border + Adaptive Background) 🌟 */
 .content-box {
     background-color: var(--secondary-background-color);
-    border: 1px solid rgba(130, 130, 130, 0.3); /* Halka border jo dono theme me dikhega */
+    border: 1px solid rgba(130, 130, 130, 0.2); 
     border-radius: 12px;
     padding: 25px;
     transition: all 0.3s ease;
@@ -46,8 +57,8 @@ div[data-testid="stButton"] button:hover {
 }
 .content-box:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    border-color: #0ea5e9; /* Mouse aane par halka blue border */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: #0ea5e9; 
 }
 
 /* Hero Section */
@@ -179,7 +190,7 @@ if not st.session_state.logged_in:
 
         with col_side:
             # --- NOTICE BOARD ---
-            notices_html = '<div class="content-box" style="border-top: 3px solid #dc2626;">'
+            notices_html = '<div class="content-box" style="border-top: 3px solid #e11d48;">'
             notices_html += '<div class="side-card-header"><h3>📢 Latest News & Updates</h3></div>'
             try:
                 c.execute("SELECT n.date, n.title, n.content FROM school_notices n WHERE n.is_active=1 ORDER BY n.id DESC LIMIT 4")
