@@ -8,9 +8,11 @@ from helpers import *
 
 def show_fee_management(current_m_idx):
     
-    # 👇 TEACHER KO KYA DIKHEGA OR ADMIN KO KYA DIKHEGA (RBAC LOGIC)
-    if st.session_state.get('role') == 'Teacher':
-        menu = st.sidebar.radio("Teacher View (Statements Only)", ["🔍 Student Statement", "📈 Class Statement"])
+    role = st.session_state.get('role')
+    
+    # 👇 TEACHER KO SIRF STATEMENTS & PRINT RECEIPT DIKHEGA
+    if role == 'Teacher':
+        menu = st.sidebar.radio("Teacher Fee Menu", ["🔍 Student Statement", "📈 Class Statement", "🖨️ Print Receipts"])
     else:
         menu = st.sidebar.radio("Fee Menu", ["📊 Dashboard", "⚙️ Setup Fee Structure", "👥 Student Master", "🎒 Assign Extra Items", "📝 Fee Collection & Print", "🔍 Student Statement", "📈 Class Statement", "📅 Daily Collection"])
     
@@ -197,9 +199,15 @@ def show_fee_management(current_m_idx):
                             conn.commit(); st.success("Deleted!"); force_rerun()
             else: st.info("No charges found.")
 
-    elif menu == "📝 Fee Collection & Print":
+    # 👇 COMBINED FEE COLLECTION & PRINTING TAB (RBAC ENABLED)
+    elif menu in ["📝 Fee Collection & Print", "🖨️ Print Receipts"]:
         if 'receipt_to_print' not in st.session_state: st.session_state.receipt_to_print = None
-        st.subheader("Fee Receipts & Printing")
+        
+        if role == 'Teacher':
+            st.subheader("🖨️ View & Print Receipts")
+        else:
+            st.subheader("Fee Receipts & Printing")
+
         if st.session_state.receipt_to_print:
             rec_no = st.session_state.receipt_to_print
             c.execute('''SELECT f.receipt_no, f.date, f.roll_no, s.name, s.class, f.head, f.amount, f.mode, s.father_name, s.medium, s.transport FROM fee_log f LEFT JOIN student_master s ON f.roll_no = s.roll_no WHERE f.receipt_no=?''', (rec_no,))
@@ -239,46 +247,48 @@ def show_fee_management(current_m_idx):
                 st.write("---")
                 st.stop()
 
-        tab1, tab2 = st.tabs(["💰 Collect New Fee", "✏️ Edit / Delete Receipt"])
-        with tab1:
-            with st.form("fee_form", clear_on_submit=True):
-                col1, col2, col3 = st.columns(3)
-                next_rec = get_next_receipt_no()
-                col1.text_input("Receipt No (Auto)", value=next_rec, disabled=True)
-                roll_no = col2.number_input("Roll No", min_value=1, step=1)
-                date = col3.date_input("Date")
-                amount = col1.number_input("Amount Paid (₹)", min_value=0, step=10)
-                mode = col2.selectbox("Payment Mode", ["CASH", "ONLINE (UPI)", "BANK TRANSFER", "CHEQUE"])
-                head = col3.text_input("Fee Head Note", value="GENERAL PAYMENT")
-                if st.form_submit_button("Save Payment"):
-                    try:
-                        c.execute("INSERT INTO fee_log (receipt_no, date, roll_no, amount, mode, head, collected_by) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                                  (next_rec, str(date), roll_no, amount, mode, head.upper().strip(), st.session_state.admin_id))
-                        conn.commit(); st.success("Payment Saved!"); force_rerun()
-                    except: st.error("❌ Something went wrong!")
-        with tab2:
-            e_rec = st.text_input("Enter Receipt No to Edit")
-            if e_rec:
-                c.execute("SELECT * FROM fee_log WHERE receipt_no=?", (e_rec,))
-                rec_edit = c.fetchone()
-                if rec_edit:
-                    with st.form("edit_rec_form"):
-                        col1, col2, col3 = st.columns(3)
-                        er_roll = col1.number_input("Roll No", value=rec_edit[2], step=1)
-                        try: er_date = datetime.strptime(rec_edit[1], "%Y-%m-%d").date()
-                        except: er_date = datetime.today().date()
-                        er_date_in = col2.date_input("Date", value=er_date)
-                        er_amt = col3.number_input("Amount", value=rec_edit[3], step=10)
-                        modes = ["CASH", "ONLINE (UPI)", "BANK TRANSFER", "CHEQUE"]
-                        er_mode = col1.selectbox("Mode", modes, index=modes.index(rec_edit[4]) if rec_edit[4] in modes else 0)
-                        er_head = col2.text_input("Fee Head", value=rec_edit[5])
-                        c1, c2 = st.columns(2)
-                        if c1.form_submit_button("✅ Update"):
-                            c.execute("UPDATE fee_log SET roll_no=?, date=?, amount=?, mode=?, head=? WHERE receipt_no=?", (er_roll, str(er_date_in), er_amt, er_mode, er_head.upper().strip(), e_rec))
-                            conn.commit(); st.success("Updated!"); force_rerun()
-                        if c2.form_submit_button("❌ Delete"):
-                            c.execute("DELETE FROM fee_log WHERE receipt_no=?", (e_rec,))
-                            conn.commit(); st.error("Deleted!"); force_rerun()
+        # 👇 SIRF ADMIN KO ENTRY AUR EDIT KA OPTION DIKHEGA
+        if role == 'Admin':
+            tab1, tab2 = st.tabs(["💰 Collect New Fee", "✏️ Edit / Delete Receipt"])
+            with tab1:
+                with st.form("fee_form", clear_on_submit=True):
+                    col1, col2, col3 = st.columns(3)
+                    next_rec = get_next_receipt_no()
+                    col1.text_input("Receipt No (Auto)", value=next_rec, disabled=True)
+                    roll_no = col2.number_input("Roll No", min_value=1, step=1)
+                    date = col3.date_input("Date")
+                    amount = col1.number_input("Amount Paid (₹)", min_value=0, step=10)
+                    mode = col2.selectbox("Payment Mode", ["CASH", "ONLINE (UPI)", "BANK TRANSFER", "CHEQUE"])
+                    head = col3.text_input("Fee Head Note", value="GENERAL PAYMENT")
+                    if st.form_submit_button("Save Payment"):
+                        try:
+                            c.execute("INSERT INTO fee_log (receipt_no, date, roll_no, amount, mode, head, collected_by) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                                      (next_rec, str(date), roll_no, amount, mode, head.upper().strip(), st.session_state.admin_id))
+                            conn.commit(); st.success("Payment Saved!"); force_rerun()
+                        except: st.error("❌ Something went wrong!")
+            with tab2:
+                e_rec = st.text_input("Enter Receipt No to Edit")
+                if e_rec:
+                    c.execute("SELECT * FROM fee_log WHERE receipt_no=?", (e_rec,))
+                    rec_edit = c.fetchone()
+                    if rec_edit:
+                        with st.form("edit_rec_form"):
+                            col1, col2, col3 = st.columns(3)
+                            er_roll = col1.number_input("Roll No", value=rec_edit[2], step=1)
+                            try: er_date = datetime.strptime(rec_edit[1], "%Y-%m-%d").date()
+                            except: er_date = datetime.today().date()
+                            er_date_in = col2.date_input("Date", value=er_date)
+                            er_amt = col3.number_input("Amount", value=rec_edit[3], step=10)
+                            modes = ["CASH", "ONLINE (UPI)", "BANK TRANSFER", "CHEQUE"]
+                            er_mode = col1.selectbox("Mode", modes, index=modes.index(rec_edit[4]) if rec_edit[4] in modes else 0)
+                            er_head = col2.text_input("Fee Head", value=rec_edit[5])
+                            c1, c2 = st.columns(2)
+                            if c1.form_submit_button("✅ Update"):
+                                c.execute("UPDATE fee_log SET roll_no=?, date=?, amount=?, mode=?, head=? WHERE receipt_no=?", (er_roll, str(er_date_in), er_amt, er_mode, er_head.upper().strip(), e_rec))
+                                conn.commit(); st.success("Updated!"); force_rerun()
+                            if c2.form_submit_button("❌ Delete"):
+                                c.execute("DELETE FROM fee_log WHERE receipt_no=?", (e_rec,))
+                                conn.commit(); st.error("Deleted!"); force_rerun()
 
         st.write("---")
         st.write("### 💸 Recent Collections & Print")

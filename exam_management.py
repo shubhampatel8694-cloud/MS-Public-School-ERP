@@ -2,14 +2,20 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import streamlit.components.v1 as components
-from database import conn, c, c_list  # ✅ यहाँ से exam_list हटा दिया गया है
+from database import conn, c, c_list
 from helpers import *
 
 def show_exam_management():
     if 'admit_preview' not in st.session_state: st.session_state.admit_preview = None
     if 'report_preview' not in st.session_state: st.session_state.report_preview = None
 
-    exam_menu = st.sidebar.radio("Exam Menu", ["🎯 Exam Dashboard", "📅 Setup Admit Card", "📝 Bulk Marks Entry", "🖨️ Print Admit Card", "📄 Print Report Card"])
+    role = st.session_state.get('role')
+    
+    # 👇 TEACHER KO SIRF MARKS ENTRY DIKHEGA
+    if role == 'Teacher':
+        exam_menu = st.sidebar.radio("Teacher Exam Menu", ["📝 Bulk Marks Entry"])
+    else:
+        exam_menu = st.sidebar.radio("Exam Menu", ["🎯 Exam Dashboard", "📅 Setup Admit Card", "📝 Bulk Marks Entry", "🖨️ Print Admit Card", "📄 Print Report Card"])
     
     # ==========================================
     # 1. EXAM DASHBOARD
@@ -58,44 +64,25 @@ def show_exam_management():
         def get_idx(val, opts): return opts.index(val) if val in opts else 0
 
         c1, c2, c3, c4 = st.columns(4)
-        d1 = c1.date_input("Date 1", value=d_vals[0])
-        opts1 = get_opts(s_vals[0]); s1 = c2.selectbox("Sub 1", opts1, index=get_idx(s_vals[0], opts1))
+        d1 = c1.date_input("Date 1", value=d_vals[0]); opts1 = get_opts(s_vals[0]); s1 = c2.selectbox("Sub 1", opts1, index=get_idx(s_vals[0], opts1))
         if s1 != "---": selected_subs.append(s1)
-        
-        d6 = c3.date_input("Date 6", value=d_vals[5])
-        opts6 = get_opts(s_vals[5]); s6 = c4.selectbox("Sub 6", opts6, index=get_idx(s_vals[5], opts6))
+        d6 = c3.date_input("Date 6", value=d_vals[5]); opts6 = get_opts(s_vals[5]); s6 = c4.selectbox("Sub 6", opts6, index=get_idx(s_vals[5], opts6))
         if s6 != "---": selected_subs.append(s6)
-        
-        d2 = c1.date_input("Date 2", value=d_vals[1])
-        opts2 = get_opts(s_vals[1]); s2 = c2.selectbox("Sub 2", opts2, index=get_idx(s_vals[1], opts2))
+        d2 = c1.date_input("Date 2", value=d_vals[1]); opts2 = get_opts(s_vals[1]); s2 = c2.selectbox("Sub 2", opts2, index=get_idx(s_vals[1], opts2))
         if s2 != "---": selected_subs.append(s2)
-        
-        d7 = c3.date_input("Date 7", value=d_vals[6])
-        opts7 = get_opts(s_vals[6]); s7 = c4.selectbox("Sub 7", opts7, index=get_idx(s_vals[6], opts7))
+        d7 = c3.date_input("Date 7", value=d_vals[6]); opts7 = get_opts(s_vals[6]); s7 = c4.selectbox("Sub 7", opts7, index=get_idx(s_vals[6], opts7))
         if s7 != "---": selected_subs.append(s7)
-        
-        d3 = c1.date_input("Date 3", value=d_vals[2])
-        opts3 = get_opts(s_vals[2]); s3 = c2.selectbox("Sub 3", opts3, index=get_idx(s_vals[2], opts3))
+        d3 = c1.date_input("Date 3", value=d_vals[2]); opts3 = get_opts(s_vals[2]); s3 = c2.selectbox("Sub 3", opts3, index=get_idx(s_vals[2], opts3))
         if s3 != "---": selected_subs.append(s3)
-        
-        d8 = c3.date_input("Date 8", value=d_vals[7])
-        opts8 = get_opts(s_vals[7]); s8 = c4.selectbox("Sub 8", opts8, index=get_idx(s_vals[7], opts8))
+        d8 = c3.date_input("Date 8", value=d_vals[7]); opts8 = get_opts(s_vals[7]); s8 = c4.selectbox("Sub 8", opts8, index=get_idx(s_vals[7], opts8))
         if s8 != "---": selected_subs.append(s8)
-        
-        d4 = c1.date_input("Date 4", value=d_vals[3])
-        opts4 = get_opts(s_vals[3]); s4 = c2.selectbox("Sub 4", opts4, index=get_idx(s_vals[3], opts4))
+        d4 = c1.date_input("Date 4", value=d_vals[3]); opts4 = get_opts(s_vals[3]); s4 = c2.selectbox("Sub 4", opts4, index=get_idx(s_vals[3], opts4))
         if s4 != "---": selected_subs.append(s4)
-        
-        d9 = c3.date_input("Date 9", value=d_vals[8])
-        opts9 = get_opts(s_vals[8]); s9 = c4.selectbox("Sub 9", opts9, index=get_idx(s_vals[8], opts9))
+        d9 = c3.date_input("Date 9", value=d_vals[8]); opts9 = get_opts(s_vals[8]); s9 = c4.selectbox("Sub 9", opts9, index=get_idx(s_vals[8], opts9))
         if s9 != "---": selected_subs.append(s9)
-        
-        d5 = c1.date_input("Date 5", value=d_vals[4])
-        opts5 = get_opts(s_vals[4]); s5 = c2.selectbox("Sub 5", opts5, index=get_idx(s_vals[4], opts5))
+        d5 = c1.date_input("Date 5", value=d_vals[4]); opts5 = get_opts(s_vals[4]); s5 = c2.selectbox("Sub 5", opts5, index=get_idx(s_vals[4], opts5))
         if s5 != "---": selected_subs.append(s5)
-        
-        d10 = c3.date_input("Date 10", value=d_vals[9])
-        opts10 = get_opts(s_vals[9]); s10 = c4.selectbox("Sub 10", opts10, index=get_idx(s_vals[9], opts10))
+        d10 = c3.date_input("Date 10", value=d_vals[9]); opts10 = get_opts(s_vals[9]); s10 = c4.selectbox("Sub 10", opts10, index=get_idx(s_vals[9], opts10))
         if s10 != "---": selected_subs.append(s10)
 
         if st.button("💾 Save Timetable for this Class"):
@@ -143,7 +130,7 @@ def show_exam_management():
     # ==========================================
     elif exam_menu == "🖨️ Print Admit Card":
         st.subheader("Generate Hagaki (100x148mm) Admit Card")
-        
+        # (Rest of Admit card logic remains the same for Admin)
         if st.session_state.admit_preview:
             mode, val1, exam_sel = st.session_state.admit_preview
             st.markdown("### 🖨️ Admit Card Print View")
@@ -152,10 +139,8 @@ def show_exam_management():
             
             logo_tag = f'<img src="{LOGO_BASE64}" style="width: 65px; position: absolute; top: 8px; left: 12px;">' if LOGO_BASE64 else ''
             watermark = f'<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; z-index: -1;"><img src="{LOGO_BASE64}" style="width: 240px;"></div>' if LOGO_BASE64 else ''
-            
             def fd(d_str, s_str): return format_date(d_str) if s_str != "---" else ""
             def fs(s_str): return s_str if s_str != "---" else "-"
-
             students_to_print = []
             if mode == "SINGLE":
                 c.execute("SELECT roll_no, name, class, father_name FROM student_master WHERE roll_no=?", (val1,))
@@ -207,31 +192,7 @@ def show_exam_management():
                         </table>
                     </div>
                     """
-
-                final_html = f"""
-                <html><head><style>
-                    body {{ font-family: 'Calibri', Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; background: #fff; }}
-                    .card-container {{ width: 140mm; height: 94mm; margin: 10px auto; border: 2px solid #1F497D; padding: 8px 14px; position: relative; box-sizing: border-box; background: white; overflow: hidden; }}
-                    .header-table {{ width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 6px; }}
-                    .header-table h1 {{ color: #FF0000; margin: 0; font-size: 23px; font-family: 'Times New Roman', serif; }}
-                    .header-table h3 {{ color: #000; margin: 2px 0; font-size: 13px; text-transform: uppercase; }}
-                    .header-table h4 {{ color: #0000FF; margin: 0; text-decoration: underline; font-size: 13px; }}
-                    .info-table {{ width: 100%; border-collapse: collapse; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 12px; }}
-                    .info-table td {{ padding: 2px 0; }}
-                    .lbl {{ color: #000; width: 22%; }} .val {{ color: #0000FF; width: 48%; }}
-                    .time-lbl {{ color: #FF0000; font-weight: bold; font-size: 12px; margin-bottom: 2px; }}
-                    .tt-table {{ width: 100%; border-collapse: collapse; text-align: center; font-size: 11px; }}
-                    .tt-table th, .tt-table td {{ border: 1px solid #1F497D; padding: 4px; font-weight: bold; }}
-                    @media print {{ 
-                        @page {{ size: 148mm 100mm landscape; margin: 2mm; }} 
-                        body {{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }} 
-                        .card-container {{ width: 100%; height: 96mm; margin: 0; border: 2px solid #1F497D; page-break-after: always; }}
-                    }}
-                </style></head><body onload="setTimeout(() => window.print(), 500)">
-                    {all_cards_html}
-                </body></html>
-                """
-                
+                final_html = f"""<html><head><style>body {{ font-family: 'Calibri', Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; background: #fff; }} .card-container {{ width: 140mm; height: 94mm; margin: 10px auto; border: 2px solid #1F497D; padding: 8px 14px; position: relative; box-sizing: border-box; background: white; overflow: hidden; }} .header-table {{ width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 6px; }} .header-table h1 {{ color: #FF0000; margin: 0; font-size: 23px; font-family: 'Times New Roman', serif; }} .header-table h3 {{ color: #000; margin: 2px 0; font-size: 13px; text-transform: uppercase; }} .header-table h4 {{ color: #0000FF; margin: 0; text-decoration: underline; font-size: 13px; }} .info-table {{ width: 100%; border-collapse: collapse; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 12px; }} .info-table td {{ padding: 2px 0; }} .lbl {{ color: #000; width: 22%; }} .val {{ color: #0000FF; width: 48%; }} .time-lbl {{ color: #FF0000; font-weight: bold; font-size: 12px; margin-bottom: 2px; }} .tt-table {{ width: 100%; border-collapse: collapse; text-align: center; font-size: 11px; }} .tt-table th, .tt-table td {{ border: 1px solid #1F497D; padding: 4px; font-weight: bold; }} @media print {{ @page {{ size: 148mm 100mm landscape; margin: 2mm; }} body {{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }} .card-container {{ width: 100%; height: 96mm; margin: 0; border: 2px solid #1F497D; page-break-after: always; }} }}</style></head><body onload="setTimeout(() => window.print(), 500)">{all_cards_html}</body></html>"""
                 components.html(final_html, height=650, scrolling=True)
                 st.write("---"); st.stop()
 
@@ -244,7 +205,6 @@ def show_exam_management():
                 c.execute("SELECT name FROM student_master WHERE roll_no=?", (p_roll,))
                 if c.fetchone(): st.session_state.admit_preview = ("SINGLE", p_roll, p_exam); force_rerun()
                 else: st.error("Roll No not found!")
-
         with tab2:
             colA, colB = st.columns(2)
             b_cls = colA.selectbox("Select Class to Print All", c_list, key="batch_admit_cls")
@@ -255,7 +215,7 @@ def show_exam_management():
                 else: st.error("No students found in this class!")
 
     # ==========================================
-    # 5. PRINT REPORT CARD (FIXED A4 LAYOUT - NO BACKGROUND, SINGLE LINE)
+    # 5. PRINT REPORT CARD
     # ==========================================
     elif exam_menu == "📄 Print Report Card":
         st.subheader("Generate Full A4 Report Card (Official School Design)")
@@ -287,106 +247,7 @@ def show_exam_management():
                 final_result = "PASSED" if percentage >= 33 else "FAILED"
                 logo_tag = f'<img src="{LOGO_BASE64}" class="logo-img">' if LOGO_BASE64 else ''
                 
-                report_html = f"""
-                <html><head><style>
-                    body {{ font-family: 'Arial', sans-serif; font-size: 13px; color: black; background: #fff; margin: 0; padding: 0; }}
-                    .main-box {{ width: 210mm; min-height: 297mm; margin: 0 auto; padding: 30px 40px; box-sizing: border-box; text-transform: uppercase; position: relative; z-index: 1; }}
-                    
-                    .header-box {{ position: relative; text-align: center; margin-bottom: 5px; }}
-                    .reg-no {{ position: absolute; top: 0; right: 0; font-size: 14px; font-weight: bold; color: #000; }}
-                    .logo-img {{ position: absolute; top: 0; left: 0; width: 110px; }}
-                    .school-name {{ color: #FF0000; margin: 0; font-size: 36px; font-weight: bold; letter-spacing: 1px; padding-top: 15px; font-family: 'Times New Roman', serif; }}
-                    .school-address {{ margin: 5px 0 2px 0; font-size: 14px; font-weight: bold; color: #000; }}
-                    .session-text {{ margin: 0 0 10px 0; font-size: 14px; font-weight: bold; color: #000; }}
-                    
-                    .title-div {{ text-align: center; margin: 20px 0; }}
-                    .title-div span {{ color: #0000FF; font-size: 22px; text-decoration: underline; font-weight: bold; }}
-                    
-                    .info-table {{ width: 100%; border: none; font-weight: bold; font-size: 13px; margin-bottom: 25px; border-collapse: collapse; }}
-                    .info-table td {{ padding: 6px 0; border: none; }}
-                    
-                    .marks-table {{ width: 100%; border-collapse: collapse; text-align: center; font-weight: bold; margin-bottom: 30px; font-size: 12px; }}
-                    .marks-table th, .marks-table td {{ border: 1px solid #000; padding: 8px 5px; }}
-                    .marks-table th {{ background-color: #fff; font-size: 11px; }}
-                    
-                    .footer-table {{ width: 45%; font-weight: bold; margin-bottom: 60px; border-collapse: collapse; font-size: 12px; }}
-                    .footer-table td {{ border: 1px solid #000; padding: 6px 10px; }}
-                    
-                    .sign-container {{ display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-top: 60px; }}
-                    
-                    @media print {{ 
-                        @page {{ size: A4 portrait; margin: 5mm; }} 
-                        body {{ padding: 0; -webkit-print-color-adjust: exact !important; }} 
-                        .main-box {{ width: 100%; min-height: auto; padding: 15px 20px; }} 
-                    }}
-                </style></head><body onload="setTimeout(() => window.print(), 500)">
-                    <div class="main-box">
-                        <div class="header-box">
-                            <div class="reg-no">REG-1778</div>
-                            {logo_tag}
-                            <h1 class="school-name">M.S. PUBLIC SCHOOL</h1>
-                            <h3 class="school-address">LARAWAK KACHHAWA MIRZAPUR - 231501</h3>
-                            <h3 class="session-text">SESSION (2025-26)</h3>
-                        </div>
-                        
-                        <!-- CLEAN SINGLE LINE WITH TOP MARGIN -->
-                        <hr style="border: 1px solid black; margin-top: 15px; margin-bottom: 20px;">
-                        
-                        <div class="title-div">
-                            <span>PROGRESS REPORT CARD</span>
-                        </div>
-                        
-                        <table class="info-table">
-                            <tr>
-                                <td style="width: 15%;">NAME</td><td style="width: 45%;">: {s_name}</td>
-                                <td style="width: 15%;">CLASS</td><td style="width: 25%;">: {s_class}</td>
-                            </tr>
-                            <tr>
-                                <td>FATHER'S NAME</td><td>: {f_name}</td>
-                                <td>ROLL NO</td><td>: {r_roll}</td>
-                            </tr>
-                            <tr>
-                                <td>MOTHER'S NAME</td><td>: {m_name}</td>
-                                <td>SCH NO</td><td>: {s_sch}</td>
-                            </tr>
-                            <tr>
-                                <td></td><td></td>
-                                <td>DOB</td><td>: {s_dob}</td>
-                            </tr>
-                        </table>
-                        
-                        <table class="marks-table">
-                            <tr>
-                                <th style="text-align: left; padding-left: 10px;">SUBJECT</th>
-                                <th>UNIT TEST I<br>[15]</th>
-                                <th>HALF YEARLY<br>EXAM [35]</th>
-                                <th>UNIT TEST II<br>[15]</th>
-                                <th>ANNUAL<br>EXAM [35]</th>
-                                <th>GRAND TOTAL<br>[100]</th>
-                                <th>GRADE</th>
-                            </tr>
-                            {marks_html}
-                            <tr style="background-color: #f9f9f9;">
-                                <td style="text-align: left; padding-left: 10px;">TOTAL</td>
-                                <td>{t_ut1}</td><td>{t_hy}</td><td>{t_ut2}</td><td>{t_ann}</td><td>{t_grand}</td><td></td>
-                            </tr>
-                        </table>
-                        
-                        <table class="footer-table">
-                            <tr><td style="width: 40%;">RESULT</td><td>{final_result}</td></tr>
-                            <tr><td>PERCENTAGE</td><td>{percentage:.2f}%</td></tr>
-                            <tr><td>CHARACTER</td><td>GOOD</td></tr>
-                            <tr><td>DATE OF ISSUE</td><td>30-03-2026</td></tr>
-                        </table>
-                        
-                        <div class="sign-container">
-                            <div>SIGNATURE OF CLASS TEACHER</div>
-                            <div style="text-align: right;">HEADMASTER<br>SIGNATURE & SEAL</div>
-                        </div>
-                    </div>
-                </body></html>
-                """
-                
+                report_html = f"""<html><head><style>body {{ font-family: 'Arial', sans-serif; font-size: 13px; color: black; background: #fff; margin: 0; padding: 0; }} .main-box {{ width: 210mm; min-height: 297mm; margin: 0 auto; padding: 30px 40px; box-sizing: border-box; text-transform: uppercase; position: relative; z-index: 1; }} .header-box {{ position: relative; text-align: center; margin-bottom: 5px; }} .reg-no {{ position: absolute; top: 0; right: 0; font-size: 14px; font-weight: bold; color: #000; }} .logo-img {{ position: absolute; top: 0; left: 0; width: 110px; }} .school-name {{ color: #FF0000; margin: 0; font-size: 36px; font-weight: bold; letter-spacing: 1px; padding-top: 15px; font-family: 'Times New Roman', serif; }} .school-address {{ margin: 5px 0 2px 0; font-size: 14px; font-weight: bold; color: #000; }} .session-text {{ margin: 0 0 10px 0; font-size: 14px; font-weight: bold; color: #000; }} .title-div {{ text-align: center; margin: 20px 0; }} .title-div span {{ color: #0000FF; font-size: 22px; text-decoration: underline; font-weight: bold; }} .info-table {{ width: 100%; border: none; font-weight: bold; font-size: 13px; margin-bottom: 25px; border-collapse: collapse; }} .info-table td {{ padding: 6px 0; border: none; }} .marks-table {{ width: 100%; border-collapse: collapse; text-align: center; font-weight: bold; margin-bottom: 30px; font-size: 12px; }} .marks-table th, .marks-table td {{ border: 1px solid #000; padding: 8px 5px; }} .marks-table th {{ background-color: #fff; font-size: 11px; }} .footer-table {{ width: 45%; font-weight: bold; margin-bottom: 60px; border-collapse: collapse; font-size: 12px; }} .footer-table td {{ border: 1px solid #000; padding: 6px 10px; }} .sign-container {{ display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-top: 60px; }} @media print {{ @page {{ size: A4 portrait; margin: 5mm; }} body {{ padding: 0; -webkit-print-color-adjust: exact !important; }} .main-box {{ width: 100%; min-height: auto; padding: 15px 20px; }} }}</style></head><body onload="setTimeout(() => window.print(), 500)"><div class="main-box"><div class="header-box"><div class="reg-no">REG-1778</div>{logo_tag}<h1 class="school-name">M.S. PUBLIC SCHOOL</h1><h3 class="school-address">LARAWAK KACHHAWA MIRZAPUR - 231501</h3><h3 class="session-text">SESSION (2025-26)</h3></div><hr style="border: 1px solid black; margin-top: 15px; margin-bottom: 20px;"><div class="title-div"><span>PROGRESS REPORT CARD</span></div><table class="info-table"><tr><td style="width: 15%;">NAME</td><td style="width: 45%;">: {s_name}</td><td style="width: 15%;">CLASS</td><td style="width: 25%;">: {s_class}</td></tr><tr><td>FATHER'S NAME</td><td>: {f_name}</td><td>ROLL NO</td><td>: {r_roll}</td></tr><tr><td>MOTHER'S NAME</td><td>: {m_name}</td><td>SCH NO</td><td>: {s_sch}</td></tr><tr><td></td><td></td><td>DOB</td><td>: {s_dob}</td></tr></table><table class="marks-table"><tr><th style="text-align: left; padding-left: 10px;">SUBJECT</th><th>UNIT TEST I<br>[15]</th><th>HALF YEARLY<br>EXAM [35]</th><th>UNIT TEST II<br>[15]</th><th>ANNUAL<br>EXAM [35]</th><th>GRAND TOTAL<br>[100]</th><th>GRADE</th></tr>{marks_html}<tr style="background-color: #f9f9f9;"><td style="text-align: left; padding-left: 10px;">TOTAL</td><td>{t_ut1}</td><td>{t_hy}</td><td>{t_ut2}</td><td>{t_ann}</td><td>{t_grand}</td><td></td></tr></table><table class="footer-table"><tr><td style="width: 40%;">RESULT</td><td>{final_result}</td></tr><tr><td>PERCENTAGE</td><td>{percentage:.2f}%</td></tr><tr><td>CHARACTER</td><td>GOOD</td></tr><tr><td>DATE OF ISSUE</td><td>30-03-2026</td></tr></table><div class="sign-container"><div>SIGNATURE OF CLASS TEACHER</div><div style="text-align: right;">HEADMASTER<br>SIGNATURE & SEAL</div></div></div></body></html>"""
                 components.html(report_html, height=1100, scrolling=True)
                 st.write("---"); st.stop()
             else:
