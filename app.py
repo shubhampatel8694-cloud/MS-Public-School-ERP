@@ -10,7 +10,7 @@ from exam_management import show_exam_management
 st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
 
 # ==========================================
-# 🎨 ADAPTIVE CSS: FIXED SIDEBAR & PREMIUM UI
+# 🎨 ADAPTIVE CSS: EXACT UI MATCH & CLEAN LOOK
 # ==========================================
 page_bg_css = """
 <style>
@@ -27,42 +27,26 @@ page_bg_css = """
 .nav-links span { cursor: pointer; transition: color 0.3s; opacity: 0.9;}
 .nav-links span:hover { color: #0ea5e9; opacity: 1;}
 
-/* 🌟 STANDOUT BUTTONS 🌟 */
+/* 🌟 STANDARD BUTTONS 🌟 */
 div[data-testid="stButton"] button {
-    background: linear-gradient(45deg, #e11d48, #be123c) !important; 
+    background-color: #0b214a !important; /* Solid Dark Blue */
     color: #ffffff !important; 
     border: none !important;
     border-radius: 8px !important; 
     font-weight: 700 !important; 
     letter-spacing: 0.5px;
     padding: 0.6rem 1.5rem !important;
-    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4) !important; 
+    box-shadow: 0 4px 10px rgba(11, 33, 74, 0.2) !important; 
     transition: all 0.3s ease !important;
     margin-top: 10px; 
 }
 div[data-testid="stButton"] button:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 8px 20px rgba(225, 29, 72, 0.6) !important;
-    background: linear-gradient(45deg, #be123c, #9f1239) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 15px rgba(11, 33, 74, 0.4) !important;
+    background-color: #17366e !important;
 }
 
-/* 🌟 SIDEBAR MODERN TABS (FIXED) 🌟 */
-[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child { display: none !important; }
-[data-testid="stSidebar"] div[role="radiogroup"] label {
-    background-color: transparent !important; border: 1px solid rgba(130, 130, 130, 0.3) !important;
-    padding: 10px 15px !important; margin-bottom: 8px !important; border-radius: 8px !important;
-    width: 100% !important; transition: all 0.3s ease !important; display: block !important;
-}
-[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-    background-color: rgba(14, 165, 233, 0.1) !important; border-color: #0ea5e9 !important; transform: translateX(5px) !important;
-}
-[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
-    background: linear-gradient(45deg, #e11d48, #be123c) !important; border-color: #be123c !important; transform: translateX(8px) !important;
-    box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3) !important;
-}
-[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p { color: #ffffff !important; font-weight: 700 !important; }
-
-/* Content Boxes */
+/* 🌟 CONTENT BOXES 🌟 */
 .content-box {
     background-color: var(--secondary-background-color);
     border: 1px solid rgba(130, 130, 130, 0.2); 
@@ -113,23 +97,30 @@ div[data-testid="stButton"] button:hover {
 }
 .wa-btn:hover { background-color: #128C7E; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
 
-/* Login Form Styling */
+/* 🌟 LOGIN FORM PREMIUM DESIGN 🌟 */
 [data-testid="stForm"] {
     background-color: var(--secondary-background-color); 
-    padding: 40px 30px; 
+    padding: 30px 40px; 
     border-radius: 15px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important; 
-    border: 1px solid rgba(130, 130, 130, 0.2); 
-    border-top: 5px solid #e11d48; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important; 
+    border: 1px solid rgba(130, 130, 130, 0.15); 
     transition: transform 0.3s ease;
     margin-top: 10px;
 }
-[data-testid="stForm"]:hover { transform: translateY(-3px); }
+[data-testid="stForm"]:hover { transform: translateY(-2px); }
 
-/* Main Area Radio Buttons (Login Selection) */
-.main div[role="radiogroup"] {
+/* Make Radio Buttons Look Clean & Centered */
+div[role="radiogroup"] {
     justify-content: center;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
+    margin-top: 15px;
+}
+
+/* Customizing Input Labels to look like the design */
+.stTextInput label, .stNumberInput label, .stDateInput label {
+    font-weight: 700 !important;
+    color: var(--text-color) !important;
+    opacity: 0.8;
 }
 </style>
 """
@@ -260,7 +251,7 @@ if not st.session_state.logged_in:
 
     else:
         # ==========================================
-        # 🔐 BULLETPROOF & PREMIUM LOGIN SYSTEM
+        # 🔐 PREMIUM OFFICIAL LOGIN SCREEN
         # ==========================================
         col_back, col_space = st.columns([1, 8])
         with col_back:
@@ -268,45 +259,22 @@ if not st.session_state.logged_in:
                 st.session_state.show_login = False
                 force_rerun()
                 
-        colA, colB, colC = st.columns([1, 1.5, 1])
+        colA, colB, colC = st.columns([1, 1.2, 1])
         with colB:
-            st.markdown(f"<div style='text-align: center; margin-top: -10px;'><img src='{LOGO_BASE64}' width='100'></div>", unsafe_allow_html=True)
+            # Recreated the exact Header from the image
+            st.markdown("<div style='text-align: center; margin-top: -10px;'><h1 style='font-size: 55px; margin-bottom: 0px;'>🎓</h1></div>", unsafe_allow_html=True)
+            st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-top: 0px; margin-bottom: 5px; font-weight: 900; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center; color: #64748b; font-size: 15px; margin-bottom: 10px;'>Please login to continue to your account</p>", unsafe_allow_html=True)
             
-            st.markdown("<h2 style='text-align: center; color: var(--text-color); margin-top: 10px; margin-bottom: 25px; font-weight: 700; letter-spacing: 1px;'>OFFICIAL PORTAL</h2>", unsafe_allow_html=True)
-            
-            login_type = st.radio("Select Portal Access", ["Admin Portal", "Teacher Portal", "Student Portal"], horizontal=True, label_visibility="collapsed")
+            # Sorted Order: Student -> Teacher -> Admin
+            login_type = st.radio("Select Portal Access", ["Student Portal", "Teacher Portal", "Admin Portal"], horizontal=True, label_visibility="collapsed")
             
             with st.form("login_form"):
-                if login_type == "Admin Portal":
-                    st.markdown("<h3 style='text-align: center; color: #e11d48; margin-bottom: 25px; font-weight: 700;'>👨‍💻 Secure Admin Access</h3>", unsafe_allow_html=True)
-                    username = st.text_input("Admin Username / Mobile", placeholder="Enter your ID...")
-                    password = st.text_input("Password", type="password", placeholder="Enter Password...")
+                if login_type == "Student Portal":
+                    s_roll = st.number_input("👤 Roll No", min_value=1, step=1)
+                    s_dob_obj = st.date_input("🔒 Date of Birth", value=datetime(2015, 1, 1), min_value=datetime(1990, 1, 1), max_value=datetime.today())
                     st.markdown("<br>", unsafe_allow_html=True)
-                    submit = st.form_submit_button("Secure Login ➔", use_container_width=True)
-                    if submit:
-                        if username in ADMIN_USERS and password == ADMIN_USERS[username]:
-                            st.session_state.logged_in = True; st.session_state.role = "Admin"; st.session_state.admin_id = username; force_rerun()
-                        else: st.error("❌ Invalid Admin Credentials!")
-                
-                elif login_type == "Teacher Portal":
-                    st.markdown("<h3 style='text-align: center; color: #0ea5e9; margin-bottom: 25px; font-weight: 700;'>👨‍🏫 Teacher Dashboard</h3>", unsafe_allow_html=True)
-                    t_id = st.text_input("Teacher ID", placeholder="Enter your Login ID...")
-                    t_pass = st.text_input("Password", type="password", placeholder="Enter Password...")
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    submit = st.form_submit_button("Secure Login ➔", use_container_width=True)
-                    if submit:
-                        c.execute("SELECT * FROM teacher_master WHERE teacher_id=? AND password=?", (t_id.strip(), t_pass.strip()))
-                        tch = c.fetchone()
-                        if tch:
-                            st.session_state.logged_in = True; st.session_state.role = "Teacher"; st.session_state.user_data = tch; force_rerun()
-                        else: st.error("❌ Invalid Teacher ID or Password!")
-                
-                else:
-                    st.markdown("<h3 style='text-align: center; color: #16a34a; margin-bottom: 25px; font-weight: 700;'>🎓 Student Dashboard</h3>", unsafe_allow_html=True)
-                    s_roll = st.number_input("Roll No", min_value=1, step=1)
-                    s_dob_obj = st.date_input("Date of Birth", value=datetime(2015, 1, 1), min_value=datetime(1990, 1, 1), max_value=datetime.today())
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    submit = st.form_submit_button("View Profile ➔", use_container_width=True)
+                    submit = st.form_submit_button("Login ➔", use_container_width=True)
                     if submit:
                         s_dob_str = s_dob_obj.strftime("%d-%m-%Y") 
                         c.execute("SELECT * FROM student_master WHERE roll_no=? AND dob=?", (s_roll, s_dob_str))
@@ -314,6 +282,28 @@ if not st.session_state.logged_in:
                         if stu:
                             st.session_state.logged_in = True; st.session_state.role = "Student"; st.session_state.user_data = stu; force_rerun()
                         else: st.error("❌ Roll No or Date of Birth is incorrect!")
+                
+                elif login_type == "Teacher Portal":
+                    t_id = st.text_input("👤 Teacher ID", placeholder="Enter your Teacher ID")
+                    t_pass = st.text_input("🔒 Password", type="password", placeholder="Enter your Password")
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    submit = st.form_submit_button("Login ➔", use_container_width=True)
+                    if submit:
+                        c.execute("SELECT * FROM teacher_master WHERE teacher_id=? AND password=?", (t_id.strip(), t_pass.strip()))
+                        tch = c.fetchone()
+                        if tch:
+                            st.session_state.logged_in = True; st.session_state.role = "Teacher"; st.session_state.user_data = tch; force_rerun()
+                        else: st.error("❌ Invalid Teacher ID or Password!")
+                        
+                else: # Admin Portal
+                    username = st.text_input("👤 Admin ID / Mobile", placeholder="Enter your Admin ID")
+                    password = st.text_input("🔒 Password", type="password", placeholder="Enter your Password")
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    submit = st.form_submit_button("Login ➔", use_container_width=True)
+                    if submit:
+                        if username in ADMIN_USERS and password == ADMIN_USERS[username]:
+                            st.session_state.logged_in = True; st.session_state.role = "Admin"; st.session_state.admin_id = username; force_rerun()
+                        else: st.error("❌ Invalid Admin Credentials!")
 
 # ==========================================
 # 🎓 STUDENT PORTAL
