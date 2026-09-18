@@ -114,6 +114,16 @@ div[data-baseweb="calendar"] span {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
 }
+/* 🔥 SPECIFIC FIX FOR DATE OF BIRTH TEXT 🔥 */
+div[data-testid="stDateInput"] div[data-baseweb="input"] *,
+div[data-testid="stDateInput"] input {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-weight: 900 !important;
+}
+div[data-baseweb="calendar"] * {
+    color: #000000 !important;
+}
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
