@@ -124,6 +124,49 @@ div[data-testid="stDateInput"] input {
 div[data-baseweb="calendar"] * {
     color: #000000 !important;
 }
+/* 🔥 PREMIUM DARK THEME FOR ALL DATAFRAMES & TABLES 🔥 */
+[data-testid="stDataFrame"] {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(14, 165, 233, 0.4) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+    /* MAGIC TRICK: Converts Streamlit's default white table to Dark Theme perfectly */
+    filter: invert(0.92) hue-rotate(180deg) brightness(1.15) !important;
+    transition: all 0.3s ease !important;
+    margin-bottom: 20px !important;
+}
+
+[data-testid="stDataFrame"]:hover {
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 10px 30px rgba(14, 165, 233, 0.4) !important;
+    transform: translateY(-4px) !important;
+}
+
+/* For Standard HTML Tables (If used anywhere) */
+table {
+    width: 100% !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    color: #ffffff !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    border-collapse: collapse !important;
+    border: 1px solid rgba(14, 165, 233, 0.3) !important;
+}
+th {
+    background-color: rgba(14, 165, 233, 0.15) !important;
+    color: #38bdf8 !important;
+    font-weight: 800 !important;
+    padding: 12px !important;
+    border-bottom: 2px solid #0ea5e9 !important;
+}
+td {
+    padding: 10px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    color: #f8fafc !important;
+}
+tr:hover td {
+    background-color: rgba(14, 165, 233, 0.2) !important;
+}
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
