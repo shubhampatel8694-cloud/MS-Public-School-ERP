@@ -251,11 +251,30 @@ def show_fee_management(current_m_idx):
         if role == 'Admin':
             tab1, tab2 = st.tabs(["💰 Collect New Fee", "✏️ Edit / Delete Receipt"])
             with tab1:
+                # 🔍 SMART STUDENT SEARCH SYSTEM
+                c.execute("SELECT roll_no, name, class, father_name FROM student_master")
+                all_students = c.fetchall()
+                search_options = ["🔍 --- Type Name to Search Student ---"]
+                for s in all_students:
+                    search_options.append(f"Roll: {s[0]} | Name: {s[1]} | Class: {s[2]} | Father: {s[3]}")
+                
+                selected_student = st.selectbox("Search & Select Student:", search_options)
+                if selected_student != "🔍 --- Type Name to Search Student ---":
+                    auto_roll = int(selected_student.split("|")[0].replace("Roll:", "").strip())
+                    st.success(f"✅ Auto-Selected: {selected_student.split('|')[1].strip()}")
+                else:
+                    auto_roll = 1 # Default
+
                 with st.form("fee_form", clear_on_submit=True):
                     col1, col2, col3 = st.columns(3)
                     next_rec = get_next_receipt_no()
                     col1.text_input("Receipt No (Auto)", value=next_rec, disabled=True)
-                    roll_no = col2.number_input("Roll No", min_value=1, step=1)
+                    
+                    if selected_student != "🔍 --- Type Name to Search Student ---":
+                        roll_no = col2.number_input("👤 Student Roll No", value=auto_roll, disabled=True)
+                    else:
+                        roll_no = col2.number_input("👤 Enter Roll No Manually", min_value=1, step=1)
+                    
                     date = col3.date_input("Date")
                     amount = col1.number_input("Amount Paid (₹)", min_value=0, step=10)
                     mode = col2.selectbox("Payment Mode", ["CASH", "ONLINE (UPI)", "BANK TRANSFER", "CHEQUE"])
