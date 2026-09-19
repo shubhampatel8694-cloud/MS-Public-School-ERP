@@ -13,7 +13,6 @@ st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon
 # 🎨 ADAPTIVE CSS: 3D GLOW HOVER & FIXED GAPS
 # ==========================================
 page_bg_css = """
-page_bg_css = """
 <style>
 /* 🌟 PERFECT HEADER: HIDE ON DESKTOP, SHOW MENU BUTTON ON MOBILE 🌟 */
 #MainMenu { visibility: hidden !important; display: none !important; }
