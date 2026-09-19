@@ -452,7 +452,7 @@ elif st.session_state.role == "Admin":
         
         c.execute("SELECT SUM(amount) FROM fee_log")
         tot_fee = c.fetchone()[0] or 0
-        
+
         # 🔥 CALCULATE TOTAL PENDING DUE DYNAMICALLY 🔥
         c.execute("SELECT roll_no FROM student_master")
         all_students = c.fetchall()
@@ -466,17 +466,6 @@ elif st.session_state.role == "Admin":
             st.markdown(f'<div class="content-box" style="border-left: 5px solid #10b981; display:flex; gap:20px; align-items:center;"><div style="width:65px; height:65px; background:rgba(16, 185, 129, 0.2); color:#10b981; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:28px; box-shadow:0 4px 10px rgba(0,0,0,0.2);">₹</div><div><p style="margin:0; font-size:15px; font-weight:800; opacity:0.8;">Total Collected</p><p style="margin:0; font-size:30px; font-weight:900;">₹ {tot_fee:,}</p><p style="margin:5px 0 0 0; font-size:13px; font-weight:800; color:#10b981;">↑ Updated Live</p></div></div>', unsafe_allow_html=True)
         with m3:
             st.markdown(f'<div class="content-box" style="border-left: 5px solid #ef4444; display:flex; gap:20px; align-items:center;"><div style="width:65px; height:65px; background:rgba(239, 68, 68, 0.2); color:#ef4444; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:28px; box-shadow:0 4px 10px rgba(0,0,0,0.2);">⚠</div><div><p style="margin:0; font-size:15px; font-weight:800; opacity:0.8;">Total Pending Due</p><p style="margin:0; font-size:30px; font-weight:900;">₹ {tot_pending:,}</p><p style="margin:5px 0 0 0; font-size:13px; font-weight:800; color:#ef4444;">↓ Action Required</p></div></div>', unsafe_allow_html=True)
-            
-        st.info("💡 **Tip:** Switch to the 'Fee Management' or 'Result & Admit Card' tabs from the left sidebar to manage core operations.")
-        with m1:
-            st.markdown(f'<div class="content-box" style="border-left: 5px solid #3b82f6; display:flex; gap:20px; align-items:center;"><div style="width:65px; height:65px; background:rgba(59, 130, 246, 0.2); color:#3b82f6; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:28px; box-shadow:0 4px 10px rgba(0,0,0,0.2);">👥</div><div><p style="margin:0; font-size:15px; font-weight:800; opacity:0.8;">Total Students</p><p style="margin:0; font-size:30px; font-weight:900;">{tot_stu}</p><p style="margin:5px 0 0 0; font-size:13px; font-weight:800; color:#10b981;">↑ Updated Live</p></div></div>', unsafe_allow_html=True)
-        with m2:
-            st.markdown(f'<div class="content-box" style="border-left: 5px solid #10b981; display:flex; gap:20px; align-items:center;"><div style="width:65px; height:65px; background:rgba(16, 185, 129, 0.2); color:#10b981; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:28px; box-shadow:0 4px 10px rgba(0,0,0,0.2);">₹</div><div><p style="margin:0; font-size:15px; font-weight:800; opacity:0.8;">Total Collected</p><p style="margin:0; font-size:30px; font-weight:900;">₹ {tot_fee:,}</p><p style="margin:5px 0 0 0; font-size:13px; font-weight:800; color:#10b981;">↑ Updated Live</p></div></div>', unsafe_allow_html=True)
-        with m3:
-            st.markdown(f'<div class="content-box" style="border-left: 5px solid #ef4444; display:flex; gap:20px; align-items:center;"><div style="width:65px; height:65px; background:rgba(239, 68, 68, 0.2); color:#ef4444; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:28px; box-shadow:0 4px 10px rgba(0,0,0,0.2);">⚠</div><div><p style="margin:0; font-size:15px; font-weight:800; opacity:0.8;">Total Pending Due</p><p style="margin:0; font-size:30px; font-weight:900;">₹ --</p><p style="margin:5px 0 0 0; font-size:13px; font-weight:800; color:#ef4444;">↓ Action Required</p></div></div>', unsafe_allow_html=True)
-            
-        st.info("💡 **Tip:** Switch to the 'Fee Management' or 'Result & Admit Card' tabs from the left sidebar to manage core operations.")
-
     elif active_module == "💰 Fee Management":
         st.markdown("<h2 style='color:#ffffff; font-weight:800;'>💰 Fee Management System</h2>", unsafe_allow_html=True)
         show_fee_management(current_m_idx)
