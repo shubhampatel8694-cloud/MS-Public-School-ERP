@@ -14,10 +14,21 @@ st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon
 # ==========================================
 page_bg_css = """
 <style>
-/* 🌟 HIDE TOP MENU BUT KEEP HEADER TRANSPARENT FOR MOBILE MENU 🌟 */
-#MainMenu { visibility: hidden !important; display: none !important; }
-footer { visibility: hidden !important; display: none !important; }
-[data-testid="stHeader"] { background-color: transparent !important; }
+/* 🌟 SMART HEADER: HIDE ON LAPTOP, SHOW ONLY MENU ON MOBILE 🌟 */
+#MainMenu { display: none !important; }
+footer { display: none !important; }
+/* Share, Deploy aur 3-dots wale faltu toolbar ko hamesha ke liye chupayein */
+[data-testid="stToolbar"] { display: none !important; visibility: hidden !important; } 
+
+/* Laptop/Desktop ke liye (Header poori tarah hide jisse clean look aaye) */
+@media (min-width: 769px) {
+    [data-testid="stHeader"] { display: none !important; visibility: hidden !important; }
+}
+
+/* Mobile/Tablet ke liye (Sirf transparent background taaki menu khul sake) */
+@media (max-width: 768px) {
+    [data-testid="stHeader"] { background-color: transparent !important; }
+}
 
 /* 🌟 UNIFIED APP BACKGROUND (Dark Blue) 🌟 */
 .stApp { background-color: #0b214a !important; }
