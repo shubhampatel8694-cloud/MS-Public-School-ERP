@@ -13,32 +13,27 @@ st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon
 # 🎨 ADAPTIVE CSS: 3D GLOW HOVER & FIXED GAPS
 # ==========================================
 page_bg_css = """
-/* 🌟 PERFECT MENU FIX FOR BOTH LAPTOP & MOBILE 🌟 */
+page_bg_css = """
+<style>
+/* 🌟 PERFECT HEADER: HIDE ON DESKTOP, SHOW MENU BUTTON ON MOBILE 🌟 */
 #MainMenu { visibility: hidden !important; display: none !important; }
 footer { visibility: hidden !important; display: none !important; }
-
-/* ❌ सिर्फ दाईं तरफ के फालतू Share/Deploy बटन्स को छुपाएं */
+/* Share aur Deploy wale buttons ko hamesha chhupayein */
 [data-testid="stToolbar"] { visibility: hidden !important; display: none !important; } 
 
-/* ✅ हेडर को ट्रांसपेरेंट रखें ताकि डिज़ाइन ना बिगड़े और मेनू बटन बचा रहे */
-[data-testid="stHeader"] { 
-    background-color: transparent !important; 
+/* Desktop View (Header poori tarah gayab) */
+@media (min-width: 769px) {
+    [data-testid="stHeader"] { display: none !important; visibility: hidden !important; }
 }
 
-/* ✅ मेनू (☰) बटन को लैपटॉप और मोबाइल दोनों में चमकदार और साफ़ दिखाएं */
-[data-testid="collapsedControl"] { 
-    display: flex !important; 
-    visibility: visible !important; 
-    color: #ffffff !important; 
-    background-color: rgba(255, 255, 255, 0.1) !important; 
-    border-radius: 8px !important; 
-    margin: 5px !important;
-    z-index: 999999 !important; /* बटन हमेशा सबसे ऊपर रहेगा */
+/* Mobile View (Header transparent rahega aur Menu Button dikhega) */
+@media (max-width: 768px) {
+    [data-testid="stHeader"] { display: block !important; background-color: transparent !important; }
+    /* Menu Button (☰) ko clearly visible aur white banaya hai */
+    [data-testid="collapsedControl"] { display: flex !important; visibility: visible !important; color: #ffffff !important; background-color: rgba(255, 255, 255, 0.1) !important; border-radius: 8px !important; margin: 10px !important; }
+    [data-testid="collapsedControl"]:hover { background-color: rgba(255, 255, 255, 0.2) !important; }
 }
-
-[data-testid="collapsedControl"]:hover { 
-    background-color: rgba(14, 165, 233, 0.5) !important; /* होवर करने पर ब्लू इफ़ेक्ट */
-}
+<style>
 /* 🌟 UNIFIED APP BACKGROUND (Dark Blue) 🌟 */
 .stApp { background-color: #0b214a !important; }
 [data-testid="stSidebar"] { background-color: #0b214a !important; border-right: 1px solid rgba(255,255,255,0.1) !important; }
