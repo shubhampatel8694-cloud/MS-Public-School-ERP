@@ -7,8 +7,7 @@ from fee_management import show_fee_management
 from exam_management import show_exam_management
 
 # Page Config (Make sure to set layout="wide")
-st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫")
-
+st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon="🏫", initial_sidebar_state="expanded")
 # ==========================================
 # 🎨 ADAPTIVE CSS: 3D GLOW HOVER & FIXED GAPS
 # ==========================================
@@ -21,11 +20,17 @@ footer { display: none !important; }
 [data-testid="stHeader"] { background-color: transparent !important; }
 
 [data-testid="collapsedControl"] { 
-    display: flex !important; visibility: visible !important; color: #ffffff !important; 
-    background-color: rgba(255, 255, 255, 0.1) !important; border-radius: 8px !important; 
-    margin: 5px !important; z-index: 999999 !important; 
+    color: #ffffff !important; 
+    background-color: rgba(255, 255, 255, 0.1) !important; 
+    border-radius: 8px !important; 
+    z-index: 999999 !important; 
 }
-[data-testid="collapsedControl"]:hover { background-color: rgba(14, 165, 233, 0.5) !important; }
+[data-testid="collapsedControl"] svg { 
+    fill: #ffffff !important; 
+}
+[data-testid="collapsedControl"]:hover { 
+    background-color: rgba(14, 165, 233, 0.5) !important; 
+}
 /* 🌟 UNIFIED APP BACKGROUND (Dark Blue) 🌟 */
 .stApp { background-color: #0b214a !important; }
 [data-testid="stSidebar"] { background-color: #0b214a !important; border-right: 1px solid rgba(255,255,255,0.1) !important; }
