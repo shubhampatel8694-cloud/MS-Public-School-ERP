@@ -14,10 +14,10 @@ st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon
 # ==========================================
 page_bg_css = """
 <style>
-/* 🌟 HIDE TOP MENU & HEADER COMPLETELY 🌟 */
+/* 🌟 HIDE TOP MENU BUT KEEP HEADER TRANSPARENT FOR MOBILE MENU 🌟 */
 #MainMenu { visibility: hidden !important; display: none !important; }
-[data-testid="stHeader"] { visibility: hidden !important; display: none !important; }
 footer { visibility: hidden !important; display: none !important; }
+[data-testid="stHeader"] { background-color: transparent !important; }
 
 /* 🌟 UNIFIED APP BACKGROUND (Dark Blue) 🌟 */
 .stApp { background-color: #0b214a !important; }
