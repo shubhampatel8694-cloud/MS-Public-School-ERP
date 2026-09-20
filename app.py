@@ -13,27 +13,42 @@ st.set_page_config(page_title="M.S. Public School ERP", layout="wide", page_icon
 # ==========================================
 page_bg_css = """
 <style>
-/* 🌟 PERFECT MENU FIX FOR BOTH LAPTOP & MOBILE 🌟 */
+/* 🌟 PERFECT MENU FIX (GUARANTEED 3-LINE BUTTON) 🌟 */
 #MainMenu { display: none !important; }
 footer { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; } 
-[data-testid="stHeader"] { background-color: transparent !important; }
+[data-testid="stDecoration"] { display: none !important; } /* ❌ Upar ka border hatane ke liye */
 
+/* ✅ Header ko transparent kiya taaki sirf button dikhe */
+[data-testid="stHeader"] { 
+    background-color: transparent !important; 
+}
+
+/* 🔒 SIDEBAR PERMANENT FIX: menu ab kabhi gayab/collapse nahi hoga */
+[data-testid="stSidebar"] {
+    min-width: 320px !important;
+    width: 320px !important;
+    background-color: #0b214a !important;
+    border-right: 1px solid rgba(255,255,255,0.1) !important;
+    transform: none !important;
+    visibility: visible !important;
+}
+/* Purane/naye dono Streamlit versions me collapsed state ko wapas force-open karta hai */
+[data-testid="stSidebar"][aria-expanded="false"] {
+    min-width: 320px !important;
+    width: 320px !important;
+    margin-left: 0px !important;
+}
+[data-testid="stSidebar"] > div:first-child {
+    width: 320px !important;
+    margin-left: 0px !important;
+}
+/* Collapse arrow hi hata diya - ab sidebar collapse hoga hi nahi, isliye button ki zaroorat nahi */
 [data-testid="collapsedControl"] { 
-    color: #ffffff !important; 
-    background-color: rgba(255, 255, 255, 0.1) !important; 
-    border-radius: 8px !important; 
-    z-index: 999999 !important; 
-}
-[data-testid="collapsedControl"] svg { 
-    fill: #ffffff !important; 
-}
-[data-testid="collapsedControl"]:hover { 
-    background-color: rgba(14, 165, 233, 0.5) !important; 
+    display: none !important;
 }
 /* 🌟 UNIFIED APP BACKGROUND (Dark Blue) 🌟 */
 .stApp { background-color: #0b214a !important; }
-[data-testid="stSidebar"] { background-color: #0b214a !important; border-right: 1px solid rgba(255,255,255,0.1) !important; }
 .block-container { max-width: 1350px; padding-top: 2rem !important; padding-left: 2rem; padding-right: 2rem; }
 
 /* Force General Text to White */
