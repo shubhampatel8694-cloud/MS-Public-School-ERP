@@ -167,6 +167,10 @@ div[data-baseweb="calendar"] * {
     /* डार्क कैनवास को क्लीन वाइट बैकग्राउंड और ब्लैक टेक्स्ट में बदलने की ट्रिक */
     filter: invert(0.95) hue-rotate(180deg) brightness(1.05) !important;
 }
+/* 🔧 Table ke upar wala hover-toolbar (search/download/fullscreen icons) black dikh raha tha - ab wahi invert-trick isse bhi laga di taaki match kare */
+[data-testid="stElementToolbar"] {
+    filter: invert(0.95) hue-rotate(180deg) brightness(1.05) !important;
+}
 </style>
 """
 st.markdown(page_bg_css, unsafe_allow_html=True)
@@ -332,7 +336,9 @@ if not st.session_state.logged_in:
                     st.markdown("<br>", unsafe_allow_html=True)
                     submit = st.form_submit_button("Login ➔", use_container_width=True)
                     if submit:
-                        c.execute("SELECT * FROM teacher_master WHERE teacher_id=? AND password=?", (t_id.strip(), t_pass.strip()))
+                        import hashlib
+                        hashed_pass = hashlib.sha256(t_pass.strip().encode()).hexdigest()
+                        c.execute("SELECT * FROM teacher_master WHERE teacher_id=? AND password=?", (t_id.strip(), hashed_pass))
                         tch = c.fetchone()
                         if tch:
                             st.session_state.logged_in = True; st.session_state.role = "Teacher"; st.session_state.user_data = tch; force_rerun()
@@ -387,9 +393,10 @@ elif st.session_state.role == "Student":
         c.execute("SELECT * FROM fee_structure WHERE class=?", (stu[2],))
         fs = c.fetchone()
         heads = [('Registration Fee', fs[1], 1), ('Admission Fee', fs[2], 1), ('Other Fee', fs[9], 1)]
-        c.execute("SELECT item_name, amount FROM student_charges WHERE roll_no=?", (stu[0],))
-        for item in c.fetchall(): heads.append((f"{item[0]} (EXTRA)", item[1], 1))
+        c.execute("SELECT item_name, amount, date FROM student_charges WHERE roll_no=?", (stu[0],))
+        for item in c.fetchall(): heads.append((f"{item[0]} (EXTRA)", item[1], get_m_idx_for_date(item[2])))
         heads.extend([('April Tuition', fs[3], 1), ('May Tuition', fs[3], 2), ('June Tuition', fs[3], 3), ('July Tuition', fs[3], 4), ('Quarterly Exam', fs[4], 4), ('August Tuition', fs[3], 5), ('September Tuition', fs[3], 6), ('October Tuition', fs[3], 7), ('Half-Yearly Exam', fs[5], 7), ('November Tuition', fs[3], 8), ('December Tuition', fs[3], 9), ('January Tuition', fs[3], 10), ('February Tuition', fs[3], 11), ('March Tuition', fs[3], 12), ('Yearly Exam', fs[6], 12)])
+        heads.sort(key=lambda h: h[2])  # 🔧 EXTRA charge ab jis month me lagi usi jagah pool consume karegi, sabse aage nahi
         
         pool = paid; table_data = []
         for h_name, base_amt, m_idx in heads:
@@ -525,7 +532,9 @@ elif st.session_state.role == "Admin":
                 if st.form_submit_button("💾 Save Teacher Details"):
                     if t_name and t_id and t_pass:
                         try:
-                            c.execute("INSERT INTO teacher_master (teacher_id, name, mobile, password) VALUES (?, ?, ?, ?)", (t_id.strip(), t_name.strip(), t_mob.strip(), t_pass.strip()))
+                            import hashlib
+                            hashed_pass = hashlib.sha256(t_pass.strip().encode()).hexdigest()
+                            c.execute("INSERT INTO teacher_master (teacher_id, name, mobile, password) VALUES (?, ?, ?, ?)", (t_id.strip(), t_name.strip(), t_mob.strip(), hashed_pass))
                             conn.commit(); st.success(f"✅ Teacher '{t_name}' Added Successfully!"); force_rerun()
                         except: st.error("❌ This Teacher ID already exists! Please use a different one.")
                     else: st.warning("⚠️ Name, Login ID, and Password are required fields.")
@@ -534,7 +543,8 @@ elif st.session_state.role == "Admin":
             c.execute("SELECT id, teacher_id, name, mobile, password FROM teacher_master ORDER BY id DESC")
             t_data = c.fetchall()
             if t_data:
-                df_t = pd.DataFrame(t_data, columns=["DB ID", "Teacher ID", "Teacher Name", "Mobile No", "Password"])
+                safe_t_data = [[t[0], t[1], t[2], t[3], "********"] for t in t_data]
+                df_t = pd.DataFrame(safe_t_data, columns=["DB ID", "Teacher ID", "Teacher Name", "Mobile No", "Password"])
                 st.dataframe(df_t, use_container_width=True, hide_index=True)
                 with st.form("del_teacher_form"):
                     del_id = st.number_input("Enter 'DB ID' to Remove Teacher", min_value=0, step=1)

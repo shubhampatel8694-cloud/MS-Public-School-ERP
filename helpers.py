@@ -5,11 +5,11 @@ import streamlit as st
 from database import c, c_list
 
 # --- SETTINGS ---
-ADMIN_USERS = {
-    "9455587731": "Msps&@7731",
-    "admin2": "1234",   
-    "admin3": "1234"    
-}
+try:
+    ADMIN_USERS = st.secrets["admin_users"]
+except Exception:
+    ADMIN_USERS = {"admin": "admin"} # Fallback
+    
 exam_list = ["QUARTERLY EXAM", "HALF-YEARLY EXAM", "YEARLY EXAM", "YEARLY EXAMINATION 2026"]
 
 def get_base64_image(image_path):
@@ -23,6 +23,16 @@ LOGO_BASE64 = get_base64_image("msps png.png")
 # --- FUNCTIONS ---
 def get_current_m_idx():
     m = datetime.today().month
+    return m - 3 if m >= 4 else m + 9
+
+def get_m_idx_for_date(date_str):
+    # 🔧 Kisi bhi charge ki date ko uske fee-year month-index (April=1...March=12) me convert karta hai,
+    # taaki EXTRA/Book jaisi charges heads list me apni sahi month-position par lagein, hamesha 1 par nahi.
+    try:
+        d = datetime.strptime(str(date_str)[:10], "%Y-%m-%d")
+    except Exception:
+        return 1
+    m = d.month
     return m - 3 if m >= 4 else m + 9
 
 def get_next_receipt_no():

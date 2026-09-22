@@ -3,8 +3,7 @@ import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine, text
 
-# 👇 Connection Link
-DB_URI = "postgresql://postgres.bddsmybawhqwnleqtzsf:Msps%40larawak2026@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+DB_URI = st.secrets["DB_URI"]
 
 # ==========================================
 # 🪄 MAGIC DATAFRAME (Fixes KeyError crashes)
