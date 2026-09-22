@@ -8,7 +8,8 @@ from database import c, c_list
 try:
     ADMIN_USERS = st.secrets["admin_users"]
 except Exception:
-    ADMIN_USERS = {"admin": "admin"} # Fallback
+    st.error("⚠️ Admin credentials securely configured nahi hain. System lock kiya ja raha hai.")
+    st.stop()
     
 exam_list = ["QUARTERLY EXAM", "HALF-YEARLY EXAM", "YEARLY EXAM", "YEARLY EXAMINATION 2026"]
 
