@@ -7,7 +7,15 @@ def apply_custom_css():
     #MainMenu { display: none !important; }
     footer { display: none !important; }
     [data-testid="stDecoration"] { display: none !important; }
-    [data-testid="stToolbar"] { display: none !important; }
+    
+    /* Strict rules to hide all top-right icons */
+    [data-testid="stToolbar"], 
+    [data-testid="stActionElements"], 
+    .stAppToolbar { 
+        display: none !important; 
+        visibility: hidden !important; 
+        opacity: 0 !important;
+    }
 
     /* Header ko background color se match kar diya taaki black patti na dikhe */
     [data-testid="stHeader"] { 
