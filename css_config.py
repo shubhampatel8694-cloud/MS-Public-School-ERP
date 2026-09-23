@@ -6,7 +6,8 @@ def apply_custom_css():
     /* 🌟 CLEAN HEADER & MENU BUTTON FIX 🌟 */
     #MainMenu { display: none !important; }
     footer { display: none !important; }
-    [data-testid="stDecoration"] { display: none !important; } 
+    [data-testid="stDecoration"] { display: none !important; }
+    [data-testid="stToolbar"] { display: none !important; }
 
     /* Header ko background color se match kar diya taaki black patti na dikhe */
     [data-testid="stHeader"] { 
