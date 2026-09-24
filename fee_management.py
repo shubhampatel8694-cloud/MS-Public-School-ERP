@@ -199,71 +199,129 @@ def show_fee_management(current_m_idx):
                             conn.commit(); st.success("Deleted!"); force_rerun()
             else: st.info("No charges found.")
 
+# 👇 RECEIPT PRINTING OVERLAY (WORKS ACROSS ALL MENUS)
+    if st.session_state.get('receipt_to_print'):
+        rec_no = st.session_state.receipt_to_print
+        c.execute('''SELECT f.receipt_no, f.date, f.roll_no, s.name, s.class, f.head, f.amount, f.mode, s.father_name, s.medium, s.transport FROM fee_log f LEFT JOIN student_master s ON f.roll_no = s.roll_no WHERE f.receipt_no=?''', (rec_no,))
+        r = c.fetchone()
+        if r:
+            st.markdown("### 🖨️ A5 Receipt Print View")
+            if st.button("❌ Close Receipt & Go Back"):
+                st.session_state.receipt_to_print = None; force_rerun()
+            rec_no, rec_date, roll, name, cls, fee_head_note, amt_paid, mode, fname, medium, transport = r
+            name, cls, fname = name or "N/A", cls or "N/A", fname or "N/A"
+            
+            is_ext_receipt = str(fee_head_note).upper().startswith("EXTRA")
+            
+            # Fetch ONLY payments made BEFORE this specific receipt
+            c.execute("SELECT amount, head FROM fee_log WHERE roll_no=? AND receipt_no < ? ORDER BY receipt_no ASC", (roll, rec_no))
+            prev_payments = c.fetchall()
+            
+            prev_gen_paid = 0
+            prev_ext_paid = 0
+            for p_amt, p_head in prev_payments:
+                if str(p_head).upper().startswith("EXTRA"): prev_ext_paid += p_amt
+                else: prev_gen_paid += p_amt
+                    
+            new_gen_paid = prev_gen_paid + (0 if is_ext_receipt else amt_paid)
+            new_ext_paid = prev_ext_paid + (amt_paid if is_ext_receipt else 0)
+
+            # Build Fee Heads Table
+            c.execute("SELECT * FROM fee_structure WHERE class=?", (cls,))
+            fs = c.fetchone()
+            heads = [('Registration Fee', fs[1], 1, False), ('Admission Fee', fs[2], 1, False), ('Other Fee', fs[9], 1, False)]
+            
+            c.execute("SELECT item_name, amount, date FROM student_charges WHERE roll_no=?", (roll,))
+            for item in c.fetchall(): heads.append((f"{item[0]} (EXTRA)", item[1], get_m_idx_for_date(item[2]), True))
+            
+            heads.extend([('April Tuition', fs[3], 1, False), ('May Tuition', fs[3], 2, False), ('June Tuition', fs[3], 3, False), ('July Tuition', fs[3], 4, False), ('Quarterly Exam', fs[4], 4, False), ('August Tuition', fs[3], 5, False), ('September Tuition', fs[3], 6, False), ('October Tuition', fs[3], 7, False), ('Half-Yearly Exam', fs[5], 7, False), ('November Tuition', fs[3], 8, False), ('December Tuition', fs[3], 9, False), ('January Tuition', fs[3], 10, False), ('February Tuition', fs[3], 11, False), ('March Tuition', fs[3], 12, False), ('Yearly Exam', fs[6], 12, False)])
+            heads.sort(key=lambda h: h[2])
+            
+            # 🔥 TIME CAPSULE FIX: Receipt ki date ke hisaab se logic check hoga
+            try:
+                rec_m_idx = get_m_idx_for_date(rec_date)
+            except:
+                rec_m_idx = get_current_m_idx() # fallback
+                
+            allocation_rows_html = ""
+            cum_gen_payable = 0
+            cum_ext_payable = 0
+            hist_pay = 0 # Theek us din tak total fee kitni banti thi
+            
+            for h_name, base_amt, m_idx, is_ext in heads:
+                head_payable = base_amt
+                if "Tuition" in h_name:
+                    if transport == "Van": head_payable += fs[7]
+                    if medium == "ENGLISH": head_payable += fs[8]
+                    
+                if is_ext:
+                    prev_paid_head = min(head_payable, max(0, prev_ext_paid - cum_ext_payable))
+                    new_paid_head = min(head_payable, max(0, new_ext_paid - cum_ext_payable))
+                    cum_ext_payable += head_payable
+                else:
+                    prev_paid_head = min(head_payable, max(0, prev_gen_paid - cum_gen_payable))
+                    new_paid_head = min(head_payable, max(0, new_gen_paid - cum_gen_payable))
+                    cum_gen_payable += head_payable
+                    
+                allocated = new_paid_head - prev_paid_head
+                
+                # 🔥 Calculate Total Expected Fee EXACTLY till the date of this receipt
+                if m_idx <= rec_m_idx:
+                    hist_pay += head_payable
+                
+                # Extra Receipt mein sirf Extra Item dikhega
+                if is_ext_receipt and not is_ext:
+                    continue
+                    
+                already_paid = (prev_paid_head >= head_payable and head_payable > 0)
+                unpaid_portion = head_payable - prev_paid_head - allocated
+                is_due_month = (m_idx <= rec_m_idx) # Only mark DUE if month had arrived BEFORE receipt date
+                
+                if allocated > 0:
+                    if is_due_month and unpaid_portion > 0:
+                        alloc_str = f"<b style='color:#006100;'>₹ {int(allocated):,}</b><br><span style='color:#9C0006; font-size:10px;'>(DUE: ₹ {int(unpaid_portion):,})</span>"
+                    else:
+                        alloc_str = f"<b style='color:#006100;'>₹ {int(allocated):,}</b>"
+                elif already_paid:
+                    alloc_str = "<b style='color:#006100; font-size:11px;'>PAID</b>"
+                elif is_due_month:
+                    alloc_str = f"<b style='color:#9C0006; font-size:11px;'>DUE: ₹ {int(unpaid_portion):,}</b>"
+                else:
+                    alloc_str = "<span style='color:#ccc;'>-</span>"
+                    
+                allocation_rows_html += f"<tr><td style='border: 1px solid black; padding: 1px 5px;'>{h_name.upper()}</td><td style='border: 1px solid black; padding: 1px 5px; text-align: center;'>₹ {head_payable:,}</td><td style='border: 1px solid black; padding: 1px 5px; text-align: center;'>{alloc_str}</td></tr>"
+                
+            # 🔥 Calculate EXACT HISTORICAL Due and Advance based on receipt time
+            hist_paid = new_gen_paid + new_ext_paid
+            hist_due = max(0, hist_pay - hist_paid)
+            hist_adv = max(0, hist_paid - hist_pay)
+            
+            # HTML Render
+            html_code = f"""<html><head><style>body {{ font-family: 'Calibri', Arial, sans-serif; font-size: 11px; color: black; background: #fff; padding: 10px; margin: 0; }} table {{ width: 100%; border-collapse: collapse; }} td {{ padding: 2px 5px; }} .main-box {{ width: 100%; max-width: 148mm; margin: 0 auto; border: 1px solid #000; padding: 8px; background: white; }} .lbl {{ background-color: #E7E6E6; border: 1px solid black; text-align: right; font-weight: bold; width: 35%; }} .val {{ border: 1px solid black; text-transform: uppercase; font-weight: bold; color: #0000FF; }} @media print {{ @page {{ size: A5 portrait; margin: 4mm; }} body {{ padding: 0; margin: 0; }} .main-box {{ border: 2px solid #000; padding: 5px; width: 98%; max-width: none; box-sizing: border-box; }} * {{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }} }}</style></head><body onload="setTimeout(() => window.print(), 500)"><div class="main-box"><table style="border: 2px solid black; margin-bottom: 5px; width: 100%;"><tr><td style="background-color: #1F497D; color: white; text-align: center; font-size: 20px; font-weight: bold; padding: 4px;">M.S. PUBLIC SCHOOL</td></tr><tr><td style="text-align: center; font-size: 11px; font-weight: bold; padding: 2px; color: #222; border-bottom: 1px solid black;">Larawak, Kachhwa, Mirzapur - 231501 &nbsp;|&nbsp; Mob No: 6307210754, 9455587731</td></tr><tr><td style="background-color: #DCE6F1; text-align: center; font-size: 13px; font-weight: bold; padding: 2px;">FEE RECEIPT</td></tr></table><table style="margin-bottom: 5px; text-align: center;"><tr><td style="width: 25%; text-align: right; font-weight: bold;">Receipt No:</td><td style="width: 25%; background-color: #FFFF99; border: 1px solid black; font-weight: bold; font-size: 12px; color: #000;">{rec_no}</td><td style="width: 20%; background-color: #E7E6E6; border: 1px solid black; font-weight: bold;">Date:</td><td style="width: 30%; border: 1px solid black; color: red; font-weight: bold; font-size: 12px;">{rec_date}</td></tr></table><table style="margin-bottom: 5px;"><tr><td class="lbl">Roll No:</td><td class="val" style="color:#000;">{roll}</td></tr><tr><td class="lbl">Student Name:</td><td class="val">{name}</td></tr><tr><td class="lbl">Father Name:</td><td class="val">{fname}</td></tr><tr><td class="lbl">Class & Medium:</td><td class="val">{cls} ({medium})</td></tr><tr><td class="lbl">Fee Head Note:</td><td class="val" style="color:#000;">{fee_head_note}</td></tr><tr><td class="lbl">Payment Mode:</td><td class="val" style="color:#000;">{mode}</td></tr><tr><td class="lbl">Amount Paid:</td><td class="val" style="text-align: right; font-weight: bold; font-size: 14px; color:#000;">₹ {amt_paid:,}</td></tr></table><table style="margin-bottom: 5px;"><tr><td colspan="3" style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; padding: 3px; border: 1px solid black;">PAYMENT ALLOCATION BREAKDOWN</td></tr><tr><td style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; border: 1px solid black; width: 45%;">Fee Head</td><td style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; border: 1px solid black; width: 25%;">Amount Payable</td><td style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; border: 1px solid black; width: 30%;">Amount Applied</td></tr>{allocation_rows_html}</table><div style="text-align: center; font-size: 9px; font-style: italic; margin-bottom: 5px;">* Any excess advance amount is carried forward automatically.</div><table style="margin-bottom: 5px;"><tr><td colspan="2" style="background-color: #1F497D; color: white; text-align: center; font-weight: bold; padding: 3px; border: 1px solid black;">ACCOUNT STATUS (AS ON RECEIPT DATE)</td></tr><tr><td class="lbl" style="width: 60%;">Current Balance Due:</td><td class="val" style="font-weight: bold; color: #9C0006; background-color: #FFC7CE;">₹ {hist_due:,}</td></tr><tr><td class="lbl">Advance Paid (If Any):</td><td class="val" style="font-weight: bold; color: #006100; background-color: #C6EFCE;">₹ {hist_adv:,}</td></tr></table><div style="text-align: right; font-weight: bold; font-size: 11px; margin-top: 20px; padding-right: 10px;">_________________________<br>Authorized Signatory</div></div></body></html>"""
+            components.html(html_code, height=900, scrolling=True)
+            st.write("---")
+            st.stop()
+
     # 👇 COMBINED FEE COLLECTION & PRINTING TAB (RBAC ENABLED)
-    elif menu in ["📝 Fee Collection & Print", "🖨️ Print Receipts"]:
-        if 'receipt_to_print' not in st.session_state: st.session_state.receipt_to_print = None
-        
+    if menu in ["📝 Fee Collection & Print", "🖨️ Print Receipts"]:
         if role == 'Teacher':
             st.subheader("🖨️ View & Print Receipts")
         else:
             st.subheader("Fee Receipts & Printing")
-
-        if st.session_state.receipt_to_print:
-            rec_no = st.session_state.receipt_to_print
-            c.execute('''SELECT f.receipt_no, f.date, f.roll_no, s.name, s.class, f.head, f.amount, f.mode, s.father_name, s.medium, s.transport FROM fee_log f LEFT JOIN student_master s ON f.roll_no = s.roll_no WHERE f.receipt_no=?''', (rec_no,))
-            r = c.fetchone()
-            if r:
-                st.markdown("### 🖨️ A5 Receipt Print View")
-                if st.button("❌ Close Receipt & Go Back"):
-                    st.session_state.receipt_to_print = None; force_rerun()
-                rec_no, rec_date, roll, name, cls, fee_head_note, amt_paid, mode, fname, medium, transport = r
-                name, cls, fname = name or "N/A", cls or "N/A", fname or "N/A"
-                c.execute("SELECT amount, receipt_no FROM fee_log WHERE roll_no=? ORDER BY date ASC, receipt_no ASC", (roll,))
-                prev_paid = sum([row[0] for row in c.fetchall() if row[1] != rec_no])
-                new_total_paid = prev_paid + amt_paid
-                c.execute("SELECT * FROM fee_structure WHERE class=?", (cls,))
-                fs = c.fetchone()
-                heads = [('Registration Fee', fs[1], 1), ('Admission Fee', fs[2], 1), ('Other Fee', fs[9], 1)]
-                c.execute("SELECT item_name, amount FROM student_charges WHERE roll_no=?", (roll,))
-                for item in c.fetchall(): heads.append((f"{item[0]} (EXTRA)", item[1], 1))
-                heads.extend([('April Tuition', fs[3], 1), ('May Tuition', fs[3], 2), ('June Tuition', fs[3], 3), ('July Tuition', fs[3], 4), ('Quarterly Exam', fs[4], 4), ('August Tuition', fs[3], 5), ('September Tuition', fs[3], 6), ('October Tuition', fs[3], 7), ('Half-Yearly Exam', fs[5], 7), ('November Tuition', fs[3], 8), ('December Tuition', fs[3], 9), ('January Tuition', fs[3], 10), ('February Tuition', fs[3], 11), ('March Tuition', fs[3], 12), ('Yearly Exam', fs[6], 12)])
-                
-                allocation_rows_html, cum_payable_prev = "", 0
-                for h_name, base_amt, m_idx in heads:
-                    head_payable = base_amt
-                    if "Tuition" in h_name:
-                        if transport == "Van": head_payable += fs[7]
-                        if medium == "ENGLISH": head_payable += fs[8]
-                    prev_paid_head = min(head_payable, max(0, prev_paid - cum_payable_prev))
-                    new_paid_head = min(head_payable, max(0, new_total_paid - cum_payable_prev))
-                    allocated = new_paid_head - prev_paid_head
-                    alloc_str = f"<b style='color:#006100;'>₹ {int(allocated):,}</b>" if allocated > 0 else "<span style='color:#ccc;'>-</span>"
-                    allocation_rows_html += f"<tr><td style='border: 1px solid black; padding: 1px 5px;'>{h_name.upper()}</td><td style='border: 1px solid black; padding: 1px 5px; text-align: center;'>₹ {head_payable:,}</td><td style='border: 1px solid black; padding: 1px 5px; text-align: center;'>{alloc_str}</td></tr>"
-                    cum_payable_prev += head_payable
-                    
-                pay, paid, due, adv, _ = get_student_financials(roll, get_current_m_idx())
-                html_code = f"""<html><head><style>body {{ font-family: 'Calibri', Arial, sans-serif; font-size: 11px; color: black; background: #fff; padding: 10px; margin: 0; }} table {{ width: 100%; border-collapse: collapse; }} td {{ padding: 2px 5px; }} .main-box {{ width: 100%; max-width: 148mm; margin: 0 auto; border: 1px solid #000; padding: 8px; background: white; }} .lbl {{ background-color: #E7E6E6; border: 1px solid black; text-align: right; font-weight: bold; width: 35%; }} .val {{ border: 1px solid black; text-transform: uppercase; font-weight: bold; color: #0000FF; }} @media print {{ @page {{ size: A5 portrait; margin: 4mm; }} body {{ padding: 0; margin: 0; }} .main-box {{ border: 2px solid #000; padding: 5px; width: 98%; max-width: none; box-sizing: border-box; }} * {{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }} }}</style></head><body onload="setTimeout(() => window.print(), 500)"><div class="main-box"><table style="border: 2px solid black; margin-bottom: 5px; width: 100%;"><tr><td style="background-color: #1F497D; color: white; text-align: center; font-size: 20px; font-weight: bold; padding: 4px;">M.S. PUBLIC SCHOOL</td></tr><tr><td style="text-align: center; font-size: 11px; font-weight: bold; padding: 2px; color: #222; border-bottom: 1px solid black;">Larawak, Kachhwa, Mirzapur - 231501 &nbsp;|&nbsp; Mob No: 6307210754, 9455587731</td></tr><tr><td style="background-color: #DCE6F1; text-align: center; font-size: 13px; font-weight: bold; padding: 2px;">FEE RECEIPT</td></tr></table><table style="margin-bottom: 5px; text-align: center;"><tr><td style="width: 25%; text-align: right; font-weight: bold;">Receipt No:</td><td style="width: 25%; background-color: #FFFF99; border: 1px solid black; font-weight: bold; font-size: 12px; color: #000;">{rec_no}</td><td style="width: 20%; background-color: #E7E6E6; border: 1px solid black; font-weight: bold;">Date:</td><td style="width: 30%; border: 1px solid black; color: red; font-weight: bold; font-size: 12px;">{rec_date}</td></tr></table><table style="margin-bottom: 5px;"><tr><td class="lbl">Roll No:</td><td class="val" style="color:#000;">{roll}</td></tr><tr><td class="lbl">Student Name:</td><td class="val">{name}</td></tr><tr><td class="lbl">Father Name:</td><td class="val">{fname}</td></tr><tr><td class="lbl">Class & Medium:</td><td class="val">{cls} ({medium})</td></tr><tr><td class="lbl">Fee Head Note:</td><td class="val" style="color:#000;">{fee_head_note}</td></tr><tr><td class="lbl">Payment Mode:</td><td class="val" style="color:#000;">{mode}</td></tr><tr><td class="lbl">Amount Paid:</td><td class="val" style="text-align: right; font-weight: bold; font-size: 14px; color:#000;">₹ {amt_paid:,}</td></tr></table><table style="margin-bottom: 5px;"><tr><td colspan="3" style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; padding: 3px; border: 1px solid black;">PAYMENT ALLOCATION BREAKDOWN</td></tr><tr><td style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; border: 1px solid black; width: 45%;">Fee Head</td><td style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; border: 1px solid black; width: 25%;">Amount Payable</td><td style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; border: 1px solid black; width: 30%;">Amount Applied</td></tr>{allocation_rows_html}</table><div style="text-align: center; font-size: 9px; font-style: italic; margin-bottom: 5px;">* Any excess advance amount is carried forward automatically.</div><table style="margin-bottom: 5px;"><tr><td colspan="2" style="background-color: #1F497D; color: white; text-align: center; font-weight: bold; padding: 3px; border: 1px solid black;">ACCOUNT STATUS (AS OF TODAY)</td></tr><tr><td class="lbl" style="width: 60%;">Total Payable (Till Month):</td><td class="val" style="font-weight: bold; color:#000;">₹ {pay:,}</td></tr><tr><td class="lbl">Total Paid (All Time):</td><td class="val" style="font-weight: bold; color:#000;">₹ {paid:,}</td></tr><tr><td class="lbl">Current Balance Due:</td><td class="val" style="font-weight: bold; color: #9C0006; background-color: #FFC7CE;">₹ {due:,}</td></tr><tr><td class="lbl">Advance Paid (If Any):</td><td class="val" style="font-weight: bold; color: #006100; background-color: #C6EFCE;">₹ {adv:,}</td></tr></table><div style="text-align: right; font-weight: bold; font-size: 11px; margin-top: 20px; padding-right: 10px;">_________________________<br>Authorized Signatory</div></div></body></html>"""
-                components.html(html_code, height=900, scrolling=True)
-                st.write("---")
-                st.stop()
-
-        # 👇 SIRF ADMIN KO ENTRY AUR EDIT KA OPTION DIKHEGA
-        if role == 'Admin':
-            tab1, tab2 = st.tabs(["💰 Collect New Fee", "✏️ Edit / Delete Receipt"])
+            tab1, tab2, tab3 = st.tabs(["💰 Collect New Fee", "🛍️ Collect Extra Charge", "✏️ Edit / Delete Receipt"])
+            
             with tab1:
-                # 🔍 SMART STUDENT SEARCH SYSTEM
+                # 🔍 SMART STUDENT SEARCH SYSTEM (GENERAL FEE)
                 c.execute("SELECT roll_no, name, class, father_name FROM student_master")
                 all_students = c.fetchall()
                 search_options = ["🔍 --- Type Name to Search Student ---"]
                 for s in all_students:
                     search_options.append(f"Roll: {s[0]} | Name: {s[1]} | Class: {s[2]} | Father: {s[3]}")
                 
-                selected_student = st.selectbox("Search & Select Student:", search_options)
+                selected_student = st.selectbox("Search & Select Student:", search_options, key="search_gen")
+                auto_roll = 1
                 if selected_student != "🔍 --- Type Name to Search Student ---":
                     auto_roll = int(selected_student.split("|")[0].replace("Roll:", "").strip())
-                    st.success(f"✅ Auto-Selected: {selected_student.split('|')[1].strip()}")
-                else:
-                    auto_roll = 1 # Default
 
                 with st.form("fee_form", clear_on_submit=True):
                     col1, col2, col3 = st.columns(3)
@@ -278,14 +336,85 @@ def show_fee_management(current_m_idx):
                     date = col3.date_input("Date")
                     amount = col1.number_input("Amount Paid (₹)", min_value=0, step=10)
                     mode = col2.selectbox("Payment Mode", ["CASH", "ONLINE (UPI)", "BANK TRANSFER", "CHEQUE"])
-                    head = col3.text_input("Fee Head Note", value="GENERAL PAYMENT")
-                    if st.form_submit_button("Save Payment"):
-                        try:
-                            c.execute("INSERT INTO fee_log (receipt_no, date, roll_no, amount, mode, head, collected_by) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                                      (next_rec, str(date), roll_no, amount, mode, head.upper().strip(), st.session_state.admin_id))
-                            conn.commit(); st.success("Payment Saved!"); force_rerun()
-                        except: st.error("❌ Something went wrong!")
+                    head = col3.text_input("Fee Head Note (DO NOT use 'EXTRA')", value="GENERAL PAYMENT")
+                    
+                    if st.form_submit_button("Save General Payment"):
+                        if str(head).upper().startswith("EXTRA"):
+                            st.error("❌ General Payment head cannot start with 'EXTRA'. Use the Extra Charge tab.")
+                        else:
+                            try:
+                                c.execute("INSERT INTO fee_log (receipt_no, date, roll_no, amount, mode, head, collected_by) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                                          (next_rec, str(date), roll_no, amount, mode, head.upper().strip(), st.session_state.admin_id))
+                                conn.commit(); st.success("General Payment Saved!"); force_rerun()
+                            except: st.error("❌ Something went wrong!")
+
             with tab2:
+                # 🛍️ MULTI-SELECT EXTRA CHARGE COLLECTION 
+                st.markdown("### Collect Extra Charge (Items/Fines)")
+                selected_student_ext = st.selectbox("Search & Select Student:", search_options, key="search_ext")
+                auto_roll_ext = 1
+                if selected_student_ext != "🔍 --- Type Name to Search Student ---":
+                    auto_roll_ext = int(selected_student_ext.split("|")[0].replace("Roll:", "").strip())
+                    
+                c.execute("SELECT item_name, amount FROM student_charges WHERE roll_no=?", (auto_roll_ext,))
+                all_extras = c.fetchall()
+                c.execute("SELECT SUM(amount) FROM fee_log WHERE roll_no=? AND head LIKE ?", (auto_roll_ext, 'EXTRA%'))
+                tot_ext_paid_so_far = c.fetchone()[0] or 0
+                
+                pool = tot_ext_paid_so_far
+                pending_options = []
+                for e_item, e_amt in all_extras:
+                    if pool >= e_amt:
+                        pool -= e_amt
+                    else:
+                        due = e_amt - pool
+                        pool = 0
+                        if due > 0:
+                            pending_options.append(f"{e_item} (Due: ₹{due})")
+
+                with st.form("extra_charge_form", clear_on_submit=True):
+                    col1, col2, col3 = st.columns(3)
+                    next_rec_ext = get_next_receipt_no() 
+                    col1.text_input("Receipt No (Auto)", value=next_rec_ext, disabled=True, key="r_ext")
+                    
+                    if selected_student_ext != "🔍 --- Type Name to Search Student ---":
+                        roll_no_ext = col2.number_input("👤 Student Roll No", value=auto_roll_ext, disabled=True, key="roll_ext_d")
+                    else:
+                        roll_no_ext = col2.number_input("👤 Enter Roll No", min_value=1, step=1, value=auto_roll_ext, key="roll_ext_m")
+
+                    date_ext = col3.date_input("Date", key="d_ext")
+                    
+                    selected_items = st.multiselect("Select Extra Item(s) to Pay (Can choose multiple)", pending_options)
+                    max_amt_payable = sum([int(x.split('₹')[1].replace(')', '')) for x in selected_items]) if selected_items else 0
+                    
+                    if selected_items:
+                        item_names = [x.split(" (Due")[0] for x in selected_items]
+                        default_head = f"EXTRA - {', '.join(item_names)}"
+                    else:
+                        default_head = "EXTRA CHARGE"
+                        
+                    amount_ext = col1.number_input(f"Amount Paid (Max Due: ₹{max_amt_payable})", min_value=0, step=10, value=max_amt_payable, key="a_ext")
+                    mode_ext = col2.selectbox("Payment Mode", ["CASH", "ONLINE (UPI)", "BANK TRANSFER", "CHEQUE"], key="m_ext")
+                    head_ext = col3.text_input("Fee Head Note (Must start with EXTRA)", value=default_head, key="h_ext")
+                    
+                    if st.form_submit_button("Save Extra Charge"):
+                        if not selected_items:
+                            st.warning("Please select at least one Extra Item from the dropdown.")
+                        elif amount_ext <= 0:
+                            st.warning("Amount must be greater than 0.")
+                        elif amount_ext > max_amt_payable:
+                            st.error(f"❌ Cannot accept more than pending due (₹{max_amt_payable}) for selected items!")
+                        elif not head_ext.upper().startswith("EXTRA"):
+                            st.error("❌ Fee Head Note must start with 'EXTRA'.")
+                        else:
+                            try:
+                                c.execute("INSERT INTO fee_log (receipt_no, date, roll_no, amount, mode, head, collected_by) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                                          (next_rec_ext, str(date_ext), roll_no_ext, amount_ext, mode_ext, head_ext.upper().strip(), st.session_state.admin_id))
+                                conn.commit(); st.success("✅ Extra Charge Saved!"); force_rerun()
+                            except Exception as e: st.error(f"❌ Error: {e}")
+
+            with tab3:
+                # EDIT / DELETE RECEIPT
                 e_rec = st.text_input("Enter Receipt No to Edit")
                 if e_rec:
                     c.execute("SELECT * FROM fee_log WHERE receipt_no=?", (e_rec,))
@@ -308,7 +437,7 @@ def show_fee_management(current_m_idx):
                             if c2.form_submit_button("❌ Delete"):
                                 c.execute("DELETE FROM fee_log WHERE receipt_no=?", (e_rec,))
                                 conn.commit(); st.error("Deleted!"); force_rerun()
-
+                                
         st.write("---")
         st.write("### 💸 Recent Collections & Print")
         c.execute('''SELECT f.receipt_no, f.date, f.roll_no, s.name, s.class, f.head, f.amount, f.mode FROM fee_log f LEFT JOIN student_master s ON f.roll_no = s.roll_no ORDER BY f.date DESC LIMIT 20''')
@@ -344,42 +473,104 @@ def show_fee_management(current_m_idx):
             st.info("No collections recorded yet.")
 
     elif menu == "🔍 Student Statement":
-        st.subheader("Month-by-Month Student Fee Statement")
-        roll = st.number_input("Enter Roll No:", min_value=1, step=1)
-        if st.button("Generate Excel-Style Statement"):
+        st.subheader("Student Fee Statement & History")
+        
+        col1, col2 = st.columns([1, 2])
+        active_roll = st.session_state.get('stmt_roll', 0)
+        roll = col1.number_input("Enter Roll No:", min_value=1, step=1, value=active_roll if active_roll > 0 else 1)
+        
+        if col2.button("🔍 Generate / Refresh Statement") or active_roll > 0:
+            st.session_state.stmt_roll = roll
             pay, paid, due, adv, stu = get_student_financials(roll, current_m_idx)
+            
             if stu:
-                st.markdown(f"""<div style="background-color:#1F497D; padding:15px; border-radius:8px; color:#FFFFFF; font-size:16px;">
+                st.markdown(f"""<div style="background-color:#1F497D; padding:15px; border-radius:8px; color:#FFFFFF; font-size:16px; margin-top:10px;">
                 <span style="color:#A9D0F5;"><b>Student Name:</b></span> {stu[1].upper()} &nbsp; | &nbsp; <span style="color:#A9D0F5;"><b>Class:</b></span> {stu[2]} &nbsp; | &nbsp; <span style="color:#A9D0F5;"><b>Transport:</b></span> {stu[4]} &nbsp; | &nbsp; <span style="color:#A9D0F5;"><b>Medium:</b></span> {stu[5]}<br>
                 <span style="color:#A9D0F5;"><b>Father Name:</b></span> {stu[3].upper()}</div><br>""", unsafe_allow_html=True)
+                
                 c1, c2, c3 = st.columns(3)
                 c1.info(f"Total Expected: ₹{pay:,}"); c2.success(f"Total Paid: ₹{paid:,}")
                 if due > 0: c3.error(f"Current Due: ₹{due:,}")
                 else: c3.success(f"Advance Rcvd: ₹{adv:,}")
                 
+                # Fetch Payments to Create Pools
+                c.execute("SELECT amount, head FROM fee_log WHERE roll_no=?", (roll,))
+                all_logs = c.fetchall()
+                tot_gen_paid = sum([x[0] for x in all_logs if not str(x[1]).upper().startswith("EXTRA")])
+                tot_ext_paid = sum([x[0] for x in all_logs if str(x[1]).upper().startswith("EXTRA")])
+                
+                # --- GENERAL FEE TABLE ---
+                st.markdown("#### 📘 Regular Fee Statement")
                 c.execute("SELECT * FROM fee_structure WHERE class=?", (stu[2],))
                 fs = c.fetchone()
-                heads = [('Registration Fee', fs[1], 1), ('Admission Fee', fs[2], 1), ('Other Fee', fs[9], 1)]
-                c.execute("SELECT item_name, amount FROM student_charges WHERE roll_no=?", (roll,))
-                for item in c.fetchall(): heads.append((f"{item[0]} (EXTRA)", item[1], 1))
-                heads.extend([('April Tuition', fs[3], 1), ('May Tuition', fs[3], 2), ('June Tuition', fs[3], 3), ('July Tuition', fs[3], 4), ('Quarterly Exam', fs[4], 4), ('August Tuition', fs[3], 5), ('September Tuition', fs[3], 6), ('October Tuition', fs[3], 7), ('Half-Yearly Exam', fs[5], 7), ('November Tuition', fs[3], 8), ('December Tuition', fs[3], 9), ('January Tuition', fs[3], 10), ('February Tuition', fs[3], 11), ('March Tuition', fs[3], 12), ('Yearly Exam', fs[6], 12)])
+                gen_heads = [('Registration Fee', fs[1], 1), ('Admission Fee', fs[2], 1), ('Other Fee', fs[9], 1)]
+                gen_heads.extend([('April Tuition', fs[3], 1), ('May Tuition', fs[3], 2), ('June Tuition', fs[3], 3), ('July Tuition', fs[3], 4), ('Quarterly Exam', fs[4], 4), ('August Tuition', fs[3], 5), ('September Tuition', fs[3], 6), ('October Tuition', fs[3], 7), ('Half-Yearly Exam', fs[5], 7), ('November Tuition', fs[3], 8), ('December Tuition', fs[3], 9), ('January Tuition', fs[3], 10), ('February Tuition', fs[3], 11), ('March Tuition', fs[3], 12), ('Yearly Exam', fs[6], 12)])
+                gen_heads.sort(key=lambda h: h[2])
                 
-                pool = paid; table_data = []
-                for h_name, base_amt, m_idx in heads:
+                gen_pool = tot_gen_paid; gen_table = []
+                for h_name, base_amt, m_idx in gen_heads:
                     amt = base_amt
                     if "Tuition" in h_name:
                         if stu[4] == "Van": amt += fs[7]
                         if stu[5] == "ENGLISH": amt += fs[8]
-                    paid_here = min(amt, max(0, pool))
-                    pool -= paid_here
+                    paid_here = min(amt, max(0, gen_pool))
+                    gen_pool -= paid_here
                     if amt <= 0: status = "-"
                     elif paid_here >= amt: status = "🟢 Paid"
                     elif paid_here > 0: status = "🟡 Partial"
                     elif m_idx <= current_m_idx: status = "🔴 Due"
                     else: status = "⚪ Upcoming"
                     curr_due = max(0, amt - paid_here) if m_idx <= current_m_idx else 0
-                    table_data.append([h_name.upper(), f"₹{amt:,}", f"₹{paid_here:,}", status, f"₹{curr_due:,}"])
-                st.dataframe(pd.DataFrame(table_data, columns=["Fee Head / Month", "Payable", "Paid", "Status", "Current Due"]), use_container_width=True, hide_index=True)
+                    gen_table.append([h_name.upper(), f"₹{amt:,}", f"₹{paid_here:,}", status, f"₹{curr_due:,}"])
+                st.dataframe(pd.DataFrame(gen_table, columns=["Fee Head / Month", "Payable", "Paid", "Status", "Current Due"]), use_container_width=True, hide_index=True)
+                
+                # --- EXTRA CHARGES TABLE ---
+                st.markdown("#### 🎒 Extra Charges Statement")
+                c.execute("SELECT item_name, amount FROM student_charges WHERE roll_no=?", (roll,))
+                ext_items = c.fetchall()
+                if ext_items:
+                    ext_pool = tot_ext_paid; ext_table = []
+                    for e_name, e_amt in ext_items:
+                        paid_here = min(e_amt, max(0, ext_pool))
+                        ext_pool -= paid_here
+                        if e_amt <= 0: status = "-"
+                        elif paid_here >= e_amt: status = "🟢 Paid"
+                        elif paid_here > 0: status = "🟡 Partial"
+                        else: status = "🔴 Due"
+                        curr_due = max(0, e_amt - paid_here)
+                        ext_table.append([e_name.upper(), f"₹{e_amt:,}", f"₹{paid_here:,}", status, f"₹{curr_due:,}"])
+                    st.dataframe(pd.DataFrame(ext_table, columns=["Extra Item", "Payable", "Paid", "Status", "Current Due"]), use_container_width=True, hide_index=True)
+                else:
+                    st.info("No Extra Charges assigned to this student.")
+                
+                # --- RECENT PAYMENTS WITH VIEW BUTTON ---
+                st.write("---")
+                st.markdown("#### 💸 Payment History & Receipts")
+                c.execute("SELECT receipt_no, date, head, amount, mode FROM fee_log WHERE roll_no=? ORDER BY receipt_no DESC", (roll,))
+                recent_logs = c.fetchall()
+                if recent_logs:
+                    cols = st.columns([1.5, 1.2, 2, 1, 1, 1])
+                    cols[0].markdown("**Receipt No**")
+                    cols[1].markdown("**Date**")
+                    cols[2].markdown("**Fee Head**")
+                    cols[3].markdown("**Amount**")
+                    cols[4].markdown("**Mode**")
+                    cols[5].markdown("**Action**")
+                    st.markdown("<hr style='margin:0; padding:0;'>", unsafe_allow_html=True)
+                    
+                    for r in recent_logs:
+                        c1, c2, c3, c4, c5, c6 = st.columns([1.5, 1.2, 2, 1, 1, 1])
+                        c1.write(r[0])
+                        c2.write(r[1])
+                        c3.write(r[2])
+                        c4.write(f"₹ {r[3]:,}")
+                        c5.write(r[4])
+                        if c6.button("🖨️ View", key=f"stmt_print_{r[0]}"):
+                            st.session_state.receipt_to_print = r[0]
+                            force_rerun()
+                else:
+                    st.info("No payment history found for this student.")
+                    
             else: st.error("Roll No not found!")
 
     elif menu == "📈 Class Statement":
