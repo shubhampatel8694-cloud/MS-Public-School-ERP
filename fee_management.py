@@ -93,7 +93,16 @@ def show_fee_management(current_m_idx):
 
     elif menu == "👥 Student Master":
         st.subheader("Student Database Management")
-        tab1, tab2 = st.tabs(["➕ Add New Student", "✏️ Edit Existing Student"])
+        
+        # 🔍 1. DYNAMIC COLUMNS FETCHING LOGIC
+        c.execute("SELECT * FROM student_master LIMIT 0")
+        all_cols = [desc[0] for desc in c.description]
+        std_cols = ['roll_no', 'name', 'class', 'father_name', 'transport', 'medium', 'mother_name', 'dob', 'sch_no']
+        # Extract custom columns that are not standard (ignoring internal 'id' if any)
+        custom_cols = [col for col in all_cols if col not in std_cols and col != 'id']
+
+        tab1, tab2, tab3 = st.tabs(["➕ Add New Student", "✏️ Edit Existing Student", "⚙️ Manage Custom Fields"])
+        
         with tab1:
             with st.form("student_form", clear_on_submit=True):
                 col1, col2, col3 = st.columns(3)
@@ -106,35 +115,128 @@ def show_fee_management(current_m_idx):
                 cls = col1.selectbox("Class", c_list)
                 transport = col2.radio("Transport Mode", ["Self", "Van"], horizontal=True)
                 medium = col3.radio("Medium", ["HINDI", "ENGLISH"], horizontal=True)
+                
+                # 🔥 DYNAMIC TEXT BOXES FOR CUSTOM FIELDS
+                custom_vals = {}
+                if custom_cols:
+                    st.markdown("#### 🔹 Extra Details (Dynamic)")
+                    dyn_cols = st.columns(3)
+                    for i, c_name in enumerate(custom_cols):
+                        c_title = c_name.replace("_", " ").title()
+                        custom_vals[c_name] = dyn_cols[i % 3].text_input(c_title)
+                
                 if st.form_submit_button("Save Student"):
                     try:
                         dob_str = dob_obj.strftime("%d-%m-%Y")
-                        c.execute("INSERT INTO student_master (roll_no, name, class, father_name, transport, medium, mother_name, dob, sch_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                                  (roll_no, name.upper().strip(), cls, father.upper().strip(), transport, medium, mother.upper().strip(), dob_str, sch_no.upper().strip()))
+                        
+                        cols_to_insert = std_cols + custom_cols
+                        placeholders = ", ".join(["?"] * len(cols_to_insert))
+                        
+                        vals_to_insert = [roll_no, name.upper().strip(), cls, father.upper().strip(), transport, medium, mother.upper().strip(), dob_str, sch_no.upper().strip()]
+                        
+                        # Add custom values to insertion array
+                        for c_name in custom_cols:
+                            vals_to_insert.append(custom_vals[c_name].upper().strip() if custom_vals[c_name] else "")
+                            
+                        query = f"INSERT INTO student_master ({', '.join(cols_to_insert)}) VALUES ({placeholders})"
+                        c.execute(query, tuple(vals_to_insert))
                         conn.commit(); st.success("✅ Student Added!"); force_rerun()
-                    except: st.error("❌ Roll No already exists!")
+                    except Exception as e: st.error(f"❌ Error: {e}")
+
         with tab2:
             edit_roll = st.number_input("Enter Roll No to Edit", min_value=1, step=1)
-            c.execute("SELECT roll_no, name, class, father_name, transport, medium, mother_name, dob, sch_no FROM student_master WHERE roll_no=?", (edit_roll,))
+            query_cols = ", ".join(std_cols + custom_cols)
+            c.execute(f"SELECT {query_cols} FROM student_master WHERE roll_no=?", (edit_roll,))
             stu_edit = c.fetchone()
+            
             if stu_edit:
                 with st.form("edit_stu_form"):
                     col1, col2, col3 = st.columns(3)
-                    e_sch = col1.text_input("Scholar No", value=stu_edit[8])
-                    e_dob = col2.text_input("DOB (DD-MM-YYYY)", value=stu_edit[7])
-                    e_name = col3.text_input("Student Name", value=stu_edit[1])
-                    e_father = col1.text_input("Father's Name", value=stu_edit[3])
-                    e_mother = col2.text_input("Mother's Name", value=stu_edit[6])
-                    e_cls = col3.selectbox("Class", c_list, index=c_list.index(stu_edit[2]))
-                    e_trans = col1.radio("Transport", ["Self", "Van"], index=0 if stu_edit[4]=="Self" else 1, horizontal=True)
-                    e_med = col2.radio("Medium", ["HINDI", "ENGLISH"], index=0 if stu_edit[5]=="HINDI" else 1, horizontal=True)
+                    e_sch = col1.text_input("Scholar No", value=stu_edit[std_cols.index('sch_no')])
+                    e_dob = col2.text_input("DOB (DD-MM-YYYY)", value=stu_edit[std_cols.index('dob')])
+                    e_name = col3.text_input("Student Name", value=stu_edit[std_cols.index('name')])
+                    e_father = col1.text_input("Father's Name", value=stu_edit[std_cols.index('father_name')])
+                    e_mother = col2.text_input("Mother's Name", value=stu_edit[std_cols.index('mother_name')])
+                    e_cls = col3.selectbox("Class", c_list, index=c_list.index(stu_edit[std_cols.index('class')]) if stu_edit[std_cols.index('class')] in c_list else 0)
+                    e_trans = col1.radio("Transport", ["Self", "Van"], index=0 if stu_edit[std_cols.index('transport')]=="Self" else 1, horizontal=True)
+                    e_med = col2.radio("Medium", ["HINDI", "ENGLISH"], index=0 if stu_edit[std_cols.index('medium')]=="HINDI" else 1, horizontal=True)
+                    
+                    # 🔥 DYNAMIC PRE-FILLED TEXT BOXES FOR EDITING
+                    e_custom_vals = {}
+                    if custom_cols:
+                        st.markdown("#### 🔹 Extra Details (Dynamic)")
+                        dyn_cols = st.columns(3)
+                        for i, c_name in enumerate(custom_cols):
+                            c_title = c_name.replace("_", " ").title()
+                            idx = len(std_cols) + i
+                            e_custom_vals[c_name] = dyn_cols[i % 3].text_input(c_title, value=stu_edit[idx] or "")
+                    
                     if st.form_submit_button("Update Details"):
-                        c.execute("UPDATE student_master SET name=?, class=?, father_name=?, transport=?, medium=?, mother_name=?, dob=?, sch_no=? WHERE roll_no=?", 
-                                  (e_name.upper().strip(), e_cls, e_father.upper().strip(), e_trans, e_med, e_mother.upper().strip(), e_dob, e_sch.upper().strip(), edit_roll))
-                        conn.commit(); st.success("Updated!"); force_rerun()
-        st.write("---")
-        st.dataframe(pd.read_sql_query("SELECT roll_no, sch_no, name, class, father_name, mother_name, dob FROM student_master ORDER BY class, roll_no", conn), use_container_width=True, hide_index=True)
+                        try:
+                            set_clauses = ["name=?", "class=?", "father_name=?", "transport=?", "medium=?", "mother_name=?", "dob=?", "sch_no=?"]
+                            update_vals = [e_name.upper().strip(), e_cls, e_father.upper().strip(), e_trans, e_med, e_mother.upper().strip(), e_dob, e_sch.upper().strip()]
+                            
+                            for c_name in custom_cols:
+                                set_clauses.append(f"{c_name}=?")
+                                update_vals.append(e_custom_vals[c_name].upper().strip())
+                                
+                            update_vals.append(edit_roll)
+                            
+                            query = f"UPDATE student_master SET {', '.join(set_clauses)} WHERE roll_no=?"
+                            c.execute(query, tuple(update_vals))
+                            conn.commit(); st.success("Updated!"); force_rerun()
+                        except Exception as e: st.error(f"❌ Error: {e}")
 
+        with tab3:
+            # ⚙️ ADMIN ONLY: MANAGE CUSTOM FIELDS
+            if role == 'Admin':
+                st.info("💡 Add fields like 'Aadhar No', 'Address', or 'Blood Group'. They will automatically appear in the forms.")
+                
+                if custom_cols:
+                    st.markdown("##### 📌 Currently Active Custom Fields:")
+                    st.markdown("`" + "` | `".join([c.replace("_", " ").title() for c in custom_cols]) + "`")
+                    st.write("---")
+                
+                colA, colB = st.columns(2)
+                with colA:
+                    with st.form("add_field_form"):
+                        st.markdown("#### ➕ Create New Field")
+                        new_field = st.text_input("Enter Field Name (e.g., Aadhar No)")
+                        if st.form_submit_button("Add Field"):
+                            if new_field.strip():
+                                safe_col = new_field.strip().lower().replace(" ", "_").replace("-", "_")
+                                if safe_col in all_cols:
+                                    st.error("Field already exists!")
+                                else:
+                                    try:
+                                        c.execute(f'ALTER TABLE student_master ADD COLUMN "{safe_col}" TEXT')
+                                        conn.commit(); st.success(f"Added {new_field}!"); force_rerun()
+                                    except Exception as e:
+                                        st.error(f"Database Error: {e}")
+                            else:
+                                st.warning("Please enter a field name.")
+                                
+                with colB:
+                    if custom_cols:
+                        with st.form("del_field_form"):
+                            st.markdown("#### 🗑️ Delete Field")
+                            del_col = st.selectbox("Select Field to Delete", custom_cols, format_func=lambda x: x.replace("_", " ").title())
+                            st.warning("⚠️ Deleting a field will permanently delete its data for all students.")
+                            if st.form_submit_button("Delete Field"):
+                                try:
+                                    c.execute(f'ALTER TABLE student_master DROP COLUMN "{del_col}"')
+                                    conn.commit(); st.success("Field Deleted!"); force_rerun()
+                                except Exception as e:
+                                    st.error(f"Error: Cannot delete column. {e}")
+            else:
+                st.warning("Only Admin can manage custom database fields.")
+
+        st.write("---")
+        df_stu = pd.read_sql_query("SELECT * FROM student_master ORDER BY class, roll_no", conn)
+        # Reformat column headers for the display table to look neat
+        df_stu.columns = [col.replace("_", " ").title() for col in df_stu.columns]
+        st.dataframe(df_stu, use_container_width=True, hide_index=True)
+        
     elif menu == "🎒 Assign Extra Items":
         st.subheader("Manage Extra Items & Charges")
         tab1, tab2, tab3, tab4 = st.tabs(["👤 Assign Individual", "🏫 Assign to Class", "✏️ Edit Individual", "🗑️ Batch Delete (Class)"])
