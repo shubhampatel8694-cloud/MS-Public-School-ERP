@@ -3,42 +3,103 @@ import streamlit as st
 def apply_custom_css():
     page_bg_css = """
     <style>
-    /* 🌟 CLEAN HEADER & MENU BUTTON FIX 🌟 */
-    #MainMenu { display: none !important; }
-    footer { display: none !important; }
-    [data-testid="stDecoration"] { display: none !important; }
+    /* 🌟 1. HIDE SHARE/DEPLOY BUTTON SAFELY 🌟 */
+    #MainMenu, footer, [data-testid="stDecoration"] { display: none !important; }
     
-    /* Strict rules to hide all top-right icons */
-    [data-testid="stToolbar"], 
-    [data-testid="stActionElements"], 
-    .stAppToolbar { 
+    /* Streamlit ke naye versions mein in classes se Share button hat-ta hai */
+    .stDeployButton, .stAppDeployButton, [data-testid="stToolbar"] { 
         display: none !important; 
-        visibility: hidden !important; 
-        opacity: 0 !important;
+        visibility: hidden !important;
     }
 
-    /* Header ko background color se match kar diya taaki black patti na dikhe */
+    /* 🌟 2. HEADER KO BACKGROUND MEIN MILA DENA 🌟 */
     [data-testid="stHeader"] { 
         background-color: #0b214a !important; 
+        z-index: 99998 !important;
     }
 
-    /* Menu Button ko White aur visible karna */
-    [data-testid="collapsedControl"], [data-testid="collapsedControl"] svg, button[kind="header"] svg {
-        color: #ffffff !important;
-        fill: #ffffff !important;
-        visibility: visible !important;
-        display: flex !important;
+    /* 🌟 3. SIDEBAR MENU TOGGLE - pure HTML checkbox+label (zero JavaScript),
+       isliye reliably kaam karta hai. Streamlit ke apne purane buttons jo
+       kaam nahi kar rahe the, unhe hamesha ke liye hata diya */
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapseButton"],
+    button[aria-label="Close sidebar"],
+    button[kind="header"] {
+        display: none !important;
     }
+    section[data-testid="stSidebar"] > div > div:first-child {
+        height: 28px !important;
+        min-height: 28px !important;
+        overflow: hidden !important;
+        visibility: hidden !important;
+    }
+    #msps-toggle-cb {
+        position: absolute !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+    label[for="msps-toggle-cb"] {
+        display: none !important;
+    }
+    /* Laptop: sidebar hamesha khula rahega, koi toggle button yahan nahi */
+    @media (min-width: 769px) {
+        [data-testid="stSidebar"] {
+            min-width: 320px !important;
+            width: 320px !important;
+            margin-left: 0px !important;
+            transform: none !important;
+            visibility: visible !important;
+        }
+    }
+    /* Phone: sidebar by-default band, "☰" button (top se thoda neeche) tap
+       karne par khulega */
+    @media (max-width: 768px) {
+        label[for="msps-toggle-cb"] {
+            display: flex !important;
+            position: fixed !important;
+            top: 60px !important;
+            left: 14px !important;
+            width: 44px !important;
+            height: 44px !important;
+            background-color: #0b214a !important;
+            color: #ffffff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5) !important;
+            z-index: 999999 !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 24px !important;
+            cursor: pointer !important;
+        }
+        [data-testid="stSidebar"] {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            height: 100vh !important;
+            width: 280px !important;
+            min-width: 280px !important;
+            z-index: 999997 !important;
+            transform: translateX(-100%) !important;
+            transition: transform 0.25s ease-in-out !important;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.5) !important;
+        }
+        body:has(#msps-toggle-cb:checked) [data-testid="stSidebar"] {
+            transform: translateX(0) !important;
+        }
+    }
+
+    /* 🌟 UNIFIED APP BACKGROUND (Dark Blue) 🌟 */
+    .stApp { background-color: #0b214a !important; }
+    .block-container { max-width: 1350px; padding-top: 2rem !important; padding-left: 2rem; padding-right: 2rem; }
 
     /* Sidebar Theme */
     [data-testid="stSidebar"] {
         background-color: #0b214a !important;
         border-right: 1px solid rgba(255,255,255,0.1) !important;
     }
-
-    /* 🌟 UNIFIED APP BACKGROUND (Dark Blue) 🌟 */
-    .stApp { background-color: #0b214a !important; }
-    .block-container { max-width: 1350px; padding-top: 2rem !important; padding-left: 2rem; padding-right: 2rem; }
 
     /* Force General Text to White */
     .stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp span, .stApp label, .stApp div { color: #f8fafc; }
@@ -95,6 +156,12 @@ def apply_custom_css():
     div[role="radiogroup"] label {
         background-color: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.2) !important;
         padding: 12px 25px !important; border-radius: 8px !important; cursor: pointer !important;
+        transition: all 0.3s ease !important;
+    }
+    div[role="radiogroup"] label:not(:has(input:checked)):hover {
+        transform: translateY(-3px) !important;
+        border-color: #0ea5e9 !important;
+        box-shadow: 0 6px 15px rgba(14, 165, 233, 0.35) !important;
     }
     .main div[role="radiogroup"] label:has(input:checked) {
         background: linear-gradient(45deg, #e11d48, #be123c) !important; border-color: #ff4d6d !important; transform: translateY(-4px) !important;
@@ -114,3 +181,7 @@ def apply_custom_css():
     </style>
     """
     st.markdown(page_bg_css, unsafe_allow_html=True)
+    st.markdown("""
+    <input type="checkbox" id="msps-toggle-cb">
+    <label for="msps-toggle-cb">&#9776;</label>
+    """, unsafe_allow_html=True)
