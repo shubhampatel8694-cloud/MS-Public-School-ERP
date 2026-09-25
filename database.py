@@ -1,9 +1,15 @@
+import re
 import psycopg2
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine, text
 
 DB_URI = st.secrets["DB_URI"]
+# Normalize to plain "postgresql://" so it always resolves to the psycopg2
+# driver. Supabase (and similar providers) can hand out "postgres://" or
+# "postgresql+psycopg://" (psycopg v3) URIs, but this app only installs
+# psycopg2-binary — that mismatch is what caused "No module named 'psycopg'".
+DB_URI = re.sub(r'^postgres(ql)?(\+\w+)?://', 'postgresql://', DB_URI, count=1)
 
 # ==========================================
 # 🪄 MAGIC DATAFRAME (Fixes KeyError crashes)
@@ -71,6 +77,7 @@ try:
     c = conn.cursor()
 except Exception as e:
     st.error(f"Database Connection Failed: {e}")
+    st.stop()
 
 _original_read_sql_query = pd.read_sql_query
 def safe_read_sql_query(sql, con, params=None, *args, **kwargs):
@@ -149,18 +156,14 @@ try:
         id SERIAL PRIMARY KEY, username TEXT, role TEXT, login_time TEXT
     )''')
 
-except Exception:
-    pass
-    
-    # 👇 NEW TABLE FOR DYNAMIC STUDENT FIELDS (Yeh naya add karna hai)
+    # 👇 NEW TABLE FOR DYNAMIC STUDENT FIELDS
     c.execute('''CREATE TABLE IF NOT EXISTS custom_student_fields (
         id SERIAL PRIMARY KEY, field_name TEXT UNIQUE, field_type TEXT
     )''')
-    
-    # 🕵️ SECURITY: Login History Tracker
-    c.execute('''CREATE TABLE IF NOT EXISTS login_logs (
-        id SERIAL PRIMARY KEY, username TEXT, role TEXT, login_time TEXT
-    )''')
+
+except Exception as e:
+    st.error(f"Table Setup Error: {e}")
+
 # ==========================================
 # ⚙️ AUTO-HEAL & DEFAULT SETTINGS
 # ==========================================
