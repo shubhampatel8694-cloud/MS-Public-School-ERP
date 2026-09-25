@@ -1,15 +1,10 @@
-import re
 import psycopg2
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import make_url
 
 DB_URI = st.secrets["DB_URI"]
-# Normalize to plain "postgresql://" so it always resolves to the psycopg2
-# driver. Supabase (and similar providers) can hand out "postgres://" or
-# "postgresql+psycopg://" (psycopg v3) URIs, but this app only installs
-# psycopg2-binary — that mismatch is what caused "No module named 'psycopg'".
-DB_URI = re.sub(r'^postgres(ql)?(\+\w+)?://', 'postgresql://', DB_URI, count=1)
 
 # ==========================================
 # 🪄 MAGIC DATAFRAME (Fixes KeyError crashes)
@@ -60,10 +55,21 @@ class DBCursor:
     def __getattr__(self, name): return getattr(self.cursor, name)
 
 class DBConn:
-    def __init__(self, uri):
-        self.conn = psycopg2.connect(uri)
+    def __init__(self, raw_uri):
+        # Parse whatever format Supabase gives us (postgres://, postgresql://,
+        # postgresql+psycopg://...) with SQLAlchemy's own URL parser, then
+        # FORCE the drivername to psycopg2. This guarantees SQLAlchemy never
+        # loads the psycopg (v3) dialect, which isn't installed — only
+        # psycopg2-binary is in requirements.txt. That's what
+        # "No module named 'psycopg'" actually means.
+        url = make_url(raw_uri).set(drivername="postgresql+psycopg2")
+        conn_kwargs = dict(host=url.host, port=url.port, user=url.username,
+                            password=url.password, dbname=url.database)
+        if 'sslmode' in url.query:
+            conn_kwargs['sslmode'] = url.query['sslmode']
+        self.conn = psycopg2.connect(**conn_kwargs)
         self.conn.autocommit = True
-        self.engine = create_engine(uri)
+        self.engine = create_engine(url)
     def cursor(self): return DBCursor(self.conn.cursor())
     def commit(self): self.conn.commit()
     def __getattr__(self, name): return getattr(self.engine, name)
