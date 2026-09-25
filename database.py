@@ -143,9 +143,24 @@ try:
     c.execute('''CREATE TABLE IF NOT EXISTS teacher_master (
         id SERIAL PRIMARY KEY, teacher_id TEXT UNIQUE, name TEXT, mobile TEXT, password TEXT
     )''')
+
+    # 🕵️ SECURITY: Login History Tracker
+    c.execute('''CREATE TABLE IF NOT EXISTS login_logs (
+        id SERIAL PRIMARY KEY, username TEXT, role TEXT, login_time TEXT
+    )''')
+
 except Exception:
     pass
-
+    
+    # 👇 NEW TABLE FOR DYNAMIC STUDENT FIELDS (Yeh naya add karna hai)
+    c.execute('''CREATE TABLE IF NOT EXISTS custom_student_fields (
+        id SERIAL PRIMARY KEY, field_name TEXT UNIQUE, field_type TEXT
+    )''')
+    
+    # 🕵️ SECURITY: Login History Tracker
+    c.execute('''CREATE TABLE IF NOT EXISTS login_logs (
+        id SERIAL PRIMARY KEY, username TEXT, role TEXT, login_time TEXT
+    )''')
 # ==========================================
 # ⚙️ AUTO-HEAL & DEFAULT SETTINGS
 # ==========================================

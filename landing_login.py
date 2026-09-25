@@ -154,6 +154,9 @@ def show_landing_and_login():
                         c.execute("SELECT * FROM teacher_master WHERE teacher_id=? AND password=?", (t_id.strip(), hashed_pass))
                         tch = c.fetchone()
                         if tch:
+                            current_time = datetime.now().strftime("%d-%b-%Y %I:%M %p")
+                            c.execute("INSERT INTO login_logs (username, role, login_time) VALUES (?, ?, ?)", (t_id.strip(), "Teacher", current_time))
+                            conn.commit()
                             st.session_state.logged_in = True; st.session_state.role = "Teacher"; st.session_state.user_data = tch; force_rerun()
                         else: st.error("❌ Invalid Teacher ID or Password!")
                         
@@ -164,5 +167,8 @@ def show_landing_and_login():
                     submit = st.form_submit_button("Login ➔", use_container_width=True)
                     if submit:
                         if username in ADMIN_USERS and password == ADMIN_USERS[username]:
+                            current_time = datetime.now().strftime("%d-%b-%Y %I:%M %p")
+                            c.execute("INSERT INTO login_logs (username, role, login_time) VALUES (?, ?, ?)", (username, "Admin", current_time))
+                            conn.commit()
                             st.session_state.logged_in = True; st.session_state.role = "Admin"; st.session_state.admin_id = username; force_rerun()
                         else: st.error("❌ Invalid Admin Credentials!")

@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 import hashlib
 from datetime import datetime
-from database import conn, c
+from database import conn, c, c_list
 from helpers import *
 from fee_management import show_fee_management
 from exam_management import show_exam_management
@@ -43,6 +44,64 @@ def show_admin_portal():
         with m3:
             st.markdown(f'<div class="content-box" style="border-left: 5px solid #ef4444; display:flex; gap:20px; align-items:center;"><div style="width:65px; height:65px; background:rgba(239, 68, 68, 0.2); color:#ef4444; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:28px; box-shadow:0 4px 10px rgba(0,0,0,0.2);">⚠</div><div><p style="margin:0; font-size:15px; font-weight:800; opacity:0.8;">Total Pending Due</p><p style="margin:0; font-size:30px; font-weight:900;">₹ {tot_pending:,}</p><p style="margin:5px 0 0 0; font-size:13px; font-weight:800; color:#ef4444;">↓ Action Required</p></div></div>', unsafe_allow_html=True)
             
+        # 🔥 MERGED CHARTS AND SECURITY LOGS
+        st.markdown("---")
+        colA, colB = st.columns(2)
+        with colA:
+            st.markdown("#### 💰 Fee Collection Status")
+            pie_data = pd.DataFrame({'Status': ['Collected', 'Pending Due'], 'Amount': [tot_fee, tot_pending]})
+            if tot_fee > 0 or tot_pending > 0:
+                fig_pie = px.pie(pie_data, values='Amount', names='Status', hole=0.5, color='Status', color_discrete_map={'Collected':'#28a745', 'Pending Due':'#dc3545'})
+                fig_pie.update_layout(margin=dict(t=20, b=20, l=0, r=0))
+                st.plotly_chart(fig_pie, use_container_width=True)
+            else:
+                st.info("No fee data available yet.")
+                
+        with colB:
+            st.markdown("#### 📈 Last 7 Days Collection Trend")
+            c.execute('''SELECT date, SUM(amount) as daily_total FROM fee_log GROUP BY date ORDER BY date DESC LIMIT 7''')
+            trend_data = c.fetchall()
+            if trend_data:
+                df_trend = pd.DataFrame(trend_data, columns=['Date', 'Amount'])
+                df_trend['Date'] = pd.to_datetime(df_trend['Date'])
+                df_trend = df_trend.sort_values('Date')
+                fig_line = px.line(df_trend, x='Date', y='Amount', markers=True, text='Amount', color_discrete_sequence=['#1F497D'])
+                fig_line.update_traces(textposition="top center")
+                fig_line.update_layout(margin=dict(t=20, b=20, l=0, r=0), yaxis_title="Amount (₹)", xaxis_title="")
+                st.plotly_chart(fig_line, use_container_width=True)
+            else:
+                st.info("No recent collections to show trend.")
+                
+        st.markdown("---")
+        colC, colD = st.columns([2, 1])
+        with colC:
+            st.markdown("#### 📊 Class-wise Revenue Generation")
+            c.execute('''SELECT s.class, SUM(f.amount) FROM fee_log f JOIN student_master s ON f.roll_no = s.roll_no GROUP BY s.class''')
+            cls_col_data = c.fetchall()
+            if cls_col_data:
+                df_cls = pd.DataFrame(cls_col_data, columns=['Class', 'Collected Amount'])
+                df_cls['Class'] = pd.Categorical(df_cls['Class'], categories=c_list, ordered=True)
+                df_cls = df_cls.sort_values('Class')
+                fig_bar = px.bar(df_cls, x='Class', y='Collected Amount', text='Collected Amount', color='Collected Amount', color_continuous_scale='Blues')
+                fig_bar.update_traces(texttemplate='₹ %{text:.2s}', textposition='outside')
+                fig_bar.update_layout(margin=dict(t=20, b=20, l=0, r=0), xaxis_title="Classes", yaxis_title="Total Collected (₹)")
+                st.plotly_chart(fig_bar, use_container_width=True)
+            else:
+                st.info("No class-wise collection data available yet.")
+                
+        with colD:
+            st.markdown("#### 🕵️ Recent Logins Tracker")
+            c.execute("SELECT username, role, login_time FROM login_logs ORDER BY id DESC LIMIT 5")
+            logs = c.fetchall()
+            if logs:
+                for log in logs:
+                    if log[1] == 'Admin':
+                        st.info(f"🛡️ **{log[1]}** ({log[0]}) logged in at 🕒 {log[2]}")
+                    else:
+                        st.warning(f"👤 **{log[1]}** ({log[0]}) logged in at 🕒 {log[2]}")
+            else:
+                st.write("No login history found.")
+
     elif active_module == "💰 Fee Management":
         st.markdown("<h2 style='color:#ffffff; font-weight:800;'>💰 Fee Management System</h2>", unsafe_allow_html=True)
         show_fee_management(current_m_idx)
