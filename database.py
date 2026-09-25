@@ -143,10 +143,24 @@ try:
     c.execute('''CREATE TABLE IF NOT EXISTS marks_entry (
         id SERIAL PRIMARY KEY, roll_no INTEGER, subject TEXT, ut1 INTEGER, hy INTEGER, ut2 INTEGER, annual INTEGER
     )''')
+    # 👇 UPDATED: Admit Timetable mein ab 'medium' bhi save hoga
     c.execute('''CREATE TABLE IF NOT EXISTS admit_timetable (
-        class TEXT, exam_name TEXT, time_slot TEXT,
+        class TEXT, medium TEXT, exam_name TEXT, time_slot TEXT,
         d1 TEXT, s1 TEXT, d2 TEXT, s2 TEXT, d3 TEXT, s3 TEXT, d4 TEXT, s4 TEXT, d5 TEXT, s5 TEXT,
         d6 TEXT, s6 TEXT, d7 TEXT, s7 TEXT, d8 TEXT, s8 TEXT, d9 TEXT, s9 TEXT, d10 TEXT, s10 TEXT
+    )''')
+    
+    # 🛡️ SAFE GUARD: Agar purana table pehle se bana hai, toh usme 'medium' column add kar dega
+    try:
+        c.execute("ALTER TABLE admit_timetable ADD COLUMN medium TEXT DEFAULT 'Hindi'")
+        conn.commit()
+    except Exception:
+        c.execute("ROLLBACK")
+        pass
+
+    # 👇 NEW TABLE: Class aur Medium ke hisaab se Subjects save karne ke liye
+    c.execute('''CREATE TABLE IF NOT EXISTS class_subjects (
+        id SERIAL PRIMARY KEY, class_name TEXT, medium TEXT, subject_name TEXT
     )''')
     c.execute('''CREATE TABLE IF NOT EXISTS school_notices (
         id SERIAL PRIMARY KEY, date TEXT, title TEXT, content TEXT, is_active INTEGER DEFAULT 1

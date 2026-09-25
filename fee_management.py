@@ -6,20 +6,81 @@ import plotly.express as px
 from database import conn, c, c_list
 from helpers import *
 
+# 🔥 ULTRA-PREMIUM NEON TABLE GENERATOR (Exact Match with your Form)
+def render_premium_table(df):
+    if df.empty:
+        st.info("No data available to display.")
+        return
+        
+    # Wrapper for Neon Border matching the bottom form
+    html = """
+    <div style='
+        margin-bottom: 25px; 
+        border-radius: 10px; 
+        border: 2px solid #00E5FF; 
+        box-shadow: 0 0 10px #00E5FF, inset 0 0 5px #00E5FF; 
+        background-color: transparent; 
+        overflow: hidden;
+    '>
+        <div style='overflow-x:auto;'>
+            <table style='
+                width: 100%; 
+                border-collapse: collapse; 
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; 
+                text-align: center; 
+                color: #E2E8F0; 
+                background-color: transparent; 
+                white-space: nowrap;
+                font-size: 13px;
+            '>
+    """
+    
+    # Headers
+    html += "<thead><tr style='background-color: rgba(30, 58, 138, 0.6); color: #7DD3FC; text-transform: uppercase; letter-spacing: 0.5px;'>"
+    for col in df.columns:
+        html += f"<th style='padding: 10px 8px; border-right: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid #00E5FF;'>{col}</th>"
+    html += "</tr></thead><tbody>"
+    
+    # Rows with subtle hover scale effect
+    for i, row in df.iterrows():
+        bg_col = "rgba(15, 23, 42, 0.8)" if i % 2 == 0 else "rgba(30, 41, 59, 0.8)"
+        hover_style = "this.style.backgroundColor='rgba(56, 189, 248, 0.2)'; this.style.transform='scale(1.01)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.3)';"
+        normal_style = f"this.style.backgroundColor='{bg_col}'; this.style.transform='scale(1)'; this.style.boxShadow='none';"
+        
+        html += f"<tr style='background-color: {bg_col}; border-bottom: 1px solid rgba(255,255,255,0.05); transition: all 0.2s ease-in-out;' onmouseover=\"{hover_style}\" onmouseout=\"{normal_style}\">"
+        
+        for val in row:
+            html += f"<td style='padding: 10px 8px; border-right: 1px solid rgba(255,255,255,0.05);'>{val}</td>"
+        html += "</tr>"
+        
+    html += "</tbody></table></div></div>"
+    st.markdown(html, unsafe_allow_html=True)
+
+
 def show_fee_management(current_m_idx):
     
     role = st.session_state.get('role')
     
-    # 👇 TEACHER KO SIRF STATEMENTS & PRINT RECEIPT DIKHEGA
     if role == 'Teacher':
         menu = st.sidebar.radio("Teacher Fee Menu", ["🔍 Student Statement", "📈 Class Statement", "🖨️ Print Receipts"])
     else:
         menu = st.sidebar.radio("Fee Menu", ["⚙️ Setup Fee Structure", "👥 Student Master", "🎒 Assign Extra Items", "📝 Fee Collection & Print", "🔍 Student Statement", "📈 Class Statement", "📅 Daily Collection"])
 
+    # ==========================================
+    # 1. SETUP FEE STRUCTURE
+    # ==========================================
     if menu == "⚙️ Setup Fee Structure":
         st.subheader("Update Class-wise Base Fees")
+        
         df_fees = pd.read_sql_query("SELECT * FROM fee_structure", conn)
-        st.dataframe(df_fees, use_container_width=True, hide_index=True)
+        
+        for col in df_fees.columns:
+            if col != 'class':
+                df_fees[col] = df_fees[col].apply(lambda x: f"₹ {x:,}" if pd.notnull(x) else "₹ 0")
+        
+        # 🔥 USE PREMIUM TABLE HERE
+        render_premium_table(df_fees)
+
         with st.form("update_fee"):
             col1, col2, col3, col4 = st.columns(4)
             edit_cls = col1.selectbox("Select Class", df_fees['class'].tolist())
@@ -35,14 +96,15 @@ def show_fee_management(current_m_idx):
                           (n_reg, n_adm, n_tui, n_qex, n_hex, n_yex, n_van, n_eng, n_oth, edit_cls))
                 conn.commit(); st.success("✅ Fees Updated!"); force_rerun()
 
+    # ==========================================
+    # 2. STUDENT MASTER
+    # ==========================================
     elif menu == "👥 Student Master":
         st.subheader("Student Database Management")
         
-        # 🔍 1. DYNAMIC COLUMNS FETCHING LOGIC
         c.execute("SELECT * FROM student_master LIMIT 0")
         all_cols = [desc[0] for desc in c.description]
         std_cols = ['roll_no', 'name', 'class', 'father_name', 'transport', 'medium', 'mother_name', 'dob', 'sch_no']
-        # Extract custom columns that are not standard (ignoring internal 'id' if any)
         custom_cols = [col for col in all_cols if col not in std_cols and col != 'id']
 
         tab1, tab2, tab3 = st.tabs(["➕ Add New Student", "✏️ Edit Existing Student", "⚙️ Manage Custom Fields"])
@@ -60,7 +122,6 @@ def show_fee_management(current_m_idx):
                 transport = col2.radio("Transport Mode", ["Self", "Van"], horizontal=True)
                 medium = col3.radio("Medium", ["HINDI", "ENGLISH"], horizontal=True)
                 
-                # 🔥 DYNAMIC TEXT BOXES FOR CUSTOM FIELDS
                 custom_vals = {}
                 if custom_cols:
                     st.markdown("#### 🔹 Extra Details (Dynamic)")
@@ -72,13 +133,10 @@ def show_fee_management(current_m_idx):
                 if st.form_submit_button("Save Student"):
                     try:
                         dob_str = dob_obj.strftime("%d-%m-%Y")
-                        
                         cols_to_insert = std_cols + custom_cols
                         placeholders = ", ".join(["?"] * len(cols_to_insert))
-                        
                         vals_to_insert = [roll_no, name.upper().strip(), cls, father.upper().strip(), transport, medium, mother.upper().strip(), dob_str, sch_no.upper().strip()]
                         
-                        # Add custom values to insertion array
                         for c_name in custom_cols:
                             vals_to_insert.append(custom_vals[c_name].upper().strip() if custom_vals[c_name] else "")
                             
@@ -105,7 +163,6 @@ def show_fee_management(current_m_idx):
                     e_trans = col1.radio("Transport", ["Self", "Van"], index=0 if stu_edit[std_cols.index('transport')]=="Self" else 1, horizontal=True)
                     e_med = col2.radio("Medium", ["HINDI", "ENGLISH"], index=0 if stu_edit[std_cols.index('medium')]=="HINDI" else 1, horizontal=True)
                     
-                    # 🔥 DYNAMIC PRE-FILLED TEXT BOXES FOR EDITING
                     e_custom_vals = {}
                     if custom_cols:
                         st.markdown("#### 🔹 Extra Details (Dynamic)")
@@ -132,10 +189,8 @@ def show_fee_management(current_m_idx):
                         except Exception as e: st.error(f"❌ Error: {e}")
 
         with tab3:
-            # ⚙️ ADMIN ONLY: MANAGE CUSTOM FIELDS
             if role == 'Admin':
                 st.info("💡 Add fields like 'Aadhar No', 'Address', or 'Blood Group'. They will automatically appear in the forms.")
-                
                 if custom_cols:
                     st.markdown("##### 📌 Currently Active Custom Fields:")
                     st.markdown("`" + "` | `".join([c.replace("_", " ").title() for c in custom_cols]) + "`")
@@ -149,16 +204,13 @@ def show_fee_management(current_m_idx):
                         if st.form_submit_button("Add Field"):
                             if new_field.strip():
                                 safe_col = new_field.strip().lower().replace(" ", "_").replace("-", "_")
-                                if safe_col in all_cols:
-                                    st.error("Field already exists!")
+                                if safe_col in all_cols: st.error("Field already exists!")
                                 else:
                                     try:
                                         c.execute(f'ALTER TABLE student_master ADD COLUMN "{safe_col}" TEXT')
                                         conn.commit(); st.success(f"Added {new_field}!"); force_rerun()
-                                    except Exception as e:
-                                        st.error(f"Database Error: {e}")
-                            else:
-                                st.warning("Please enter a field name.")
+                                    except Exception as e: st.error(f"Database Error: {e}")
+                            else: st.warning("Please enter a field name.")
                                 
                 with colB:
                     if custom_cols:
@@ -170,17 +222,19 @@ def show_fee_management(current_m_idx):
                                 try:
                                     c.execute(f'ALTER TABLE student_master DROP COLUMN "{del_col}"')
                                     conn.commit(); st.success("Field Deleted!"); force_rerun()
-                                except Exception as e:
-                                    st.error(f"Error: Cannot delete column. {e}")
-            else:
-                st.warning("Only Admin can manage custom database fields.")
+                                except Exception as e: st.error(f"Error: Cannot delete column. {e}")
+            else: st.warning("Only Admin can manage custom database fields.")
 
         st.write("---")
         df_stu = pd.read_sql_query("SELECT * FROM student_master ORDER BY class, roll_no", conn)
-        # Reformat column headers for the display table to look neat
         df_stu.columns = [col.replace("_", " ").title() for col in df_stu.columns]
-        st.dataframe(df_stu, use_container_width=True, hide_index=True)
         
+        # 🔥 USE PREMIUM TABLE HERE
+        render_premium_table(df_stu)
+        
+    # ==========================================
+    # 3. ASSIGN EXTRA ITEMS
+    # ==========================================
     elif menu == "🎒 Assign Extra Items":
         st.subheader("Manage Extra Items & Charges")
         tab1, tab2, tab3, tab4 = st.tabs(["👤 Assign Individual", "🏫 Assign to Class", "✏️ Edit Individual", "🗑️ Batch Delete (Class)"])
@@ -213,7 +267,12 @@ def show_fee_management(current_m_idx):
                         conn.commit(); st.success("✅ Added to Class Successfully!"); force_rerun()
         with tab3:
             df_charges = pd.read_sql_query("SELECT c.id as ID, c.roll_no as Roll_No, s.name as Student_Name, s.class as Class, c.item_name as Item_Name, c.amount as Amount FROM student_charges c JOIN student_master s ON c.roll_no = s.roll_no ORDER BY c.id DESC LIMIT 30", conn)
-            st.dataframe(df_charges, use_container_width=True, hide_index=True)
+            
+            if not df_charges.empty:
+                df_charges['Amount'] = df_charges['Amount'].apply(lambda x: f"₹ {x:,}")
+            # 🔥 USE PREMIUM TABLE HERE
+            render_premium_table(df_charges)
+            
             edit_id = st.number_input("Enter ID from above to Edit/Delete", min_value=1, step=1)
             c.execute("SELECT * FROM student_charges WHERE id=?", (edit_id,))
             chg = c.fetchone()
@@ -245,7 +304,7 @@ def show_fee_management(current_m_idx):
                             conn.commit(); st.success("Deleted!"); force_rerun()
             else: st.info("No charges found.")
 
-# 👇 RECEIPT PRINTING OVERLAY (WORKS ACROSS ALL MENUS)
+# 👇 RECEIPT PRINTING OVERLAY
     if st.session_state.get('receipt_to_print'):
         rec_no = st.session_state.receipt_to_print
         c.execute('''SELECT f.receipt_no, f.date, f.roll_no, s.name, s.class, f.head, f.amount, f.mode, s.father_name, s.medium, s.transport FROM fee_log f LEFT JOIN student_master s ON f.roll_no = s.roll_no WHERE f.receipt_no=?''', (rec_no,))
@@ -259,7 +318,6 @@ def show_fee_management(current_m_idx):
             
             is_ext_receipt = str(fee_head_note).upper().startswith("EXTRA")
             
-            # Fetch ONLY payments made BEFORE this specific receipt
             c.execute("SELECT amount, head FROM fee_log WHERE roll_no=? AND receipt_no < ? ORDER BY receipt_no ASC", (roll, rec_no))
             prev_payments = c.fetchall()
             
@@ -272,7 +330,6 @@ def show_fee_management(current_m_idx):
             new_gen_paid = prev_gen_paid + (0 if is_ext_receipt else amt_paid)
             new_ext_paid = prev_ext_paid + (amt_paid if is_ext_receipt else 0)
 
-            # Build Fee Heads Table
             c.execute("SELECT * FROM fee_structure WHERE class=?", (cls,))
             fs = c.fetchone()
             heads = [('Registration Fee', fs[1], 1, False), ('Admission Fee', fs[2], 1, False), ('Other Fee', fs[9], 1, False)]
@@ -283,16 +340,13 @@ def show_fee_management(current_m_idx):
             heads.extend([('April Tuition', fs[3], 1, False), ('May Tuition', fs[3], 2, False), ('June Tuition', fs[3], 3, False), ('July Tuition', fs[3], 4, False), ('Quarterly Exam', fs[4], 4, False), ('August Tuition', fs[3], 5, False), ('September Tuition', fs[3], 6, False), ('October Tuition', fs[3], 7, False), ('Half-Yearly Exam', fs[5], 7, False), ('November Tuition', fs[3], 8, False), ('December Tuition', fs[3], 9, False), ('January Tuition', fs[3], 10, False), ('February Tuition', fs[3], 11, False), ('March Tuition', fs[3], 12, False), ('Yearly Exam', fs[6], 12, False)])
             heads.sort(key=lambda h: h[2])
             
-            # 🔥 TIME CAPSULE FIX: Receipt ki date ke hisaab se logic check hoga
-            try:
-                rec_m_idx = get_m_idx_for_date(rec_date)
-            except:
-                rec_m_idx = get_current_m_idx() # fallback
+            try: rec_m_idx = get_m_idx_for_date(rec_date)
+            except: rec_m_idx = get_current_m_idx() 
                 
             allocation_rows_html = ""
             cum_gen_payable = 0
             cum_ext_payable = 0
-            hist_pay = 0 # Theek us din tak total fee kitni banti thi
+            hist_pay = 0 
             
             for h_name, base_amt, m_idx, is_ext in heads:
                 head_payable = base_amt
@@ -311,44 +365,31 @@ def show_fee_management(current_m_idx):
                     
                 allocated = new_paid_head - prev_paid_head
                 
-                # 🔥 Calculate Total Expected Fee EXACTLY till the date of this receipt
-                if m_idx <= rec_m_idx:
-                    hist_pay += head_payable
-                
-                # Extra Receipt mein sirf Extra Item dikhega
-                if is_ext_receipt and not is_ext:
-                    continue
+                if m_idx <= rec_m_idx: hist_pay += head_payable
+                if is_ext_receipt and not is_ext: continue
                     
                 already_paid = (prev_paid_head >= head_payable and head_payable > 0)
                 unpaid_portion = head_payable - prev_paid_head - allocated
-                is_due_month = (m_idx <= rec_m_idx) # Only mark DUE if month had arrived BEFORE receipt date
+                is_due_month = (m_idx <= rec_m_idx)
                 
                 if allocated > 0:
-                    if is_due_month and unpaid_portion > 0:
-                        alloc_str = f"<b style='color:#006100;'>₹ {int(allocated):,}</b><br><span style='color:#9C0006; font-size:10px;'>(DUE: ₹ {int(unpaid_portion):,})</span>"
-                    else:
-                        alloc_str = f"<b style='color:#006100;'>₹ {int(allocated):,}</b>"
-                elif already_paid:
-                    alloc_str = "<b style='color:#006100; font-size:11px;'>PAID</b>"
-                elif is_due_month:
-                    alloc_str = f"<b style='color:#9C0006; font-size:11px;'>DUE: ₹ {int(unpaid_portion):,}</b>"
-                else:
-                    alloc_str = "<span style='color:#ccc;'>-</span>"
+                    if is_due_month and unpaid_portion > 0: alloc_str = f"<b style='color:#006100;'>₹ {int(allocated):,}</b><br><span style='color:#9C0006; font-size:10px;'>(DUE: ₹ {int(unpaid_portion):,})</span>"
+                    else: alloc_str = f"<b style='color:#006100;'>₹ {int(allocated):,}</b>"
+                elif already_paid: alloc_str = "<b style='color:#006100; font-size:11px;'>PAID</b>"
+                elif is_due_month: alloc_str = f"<b style='color:#9C0006; font-size:11px;'>DUE: ₹ {int(unpaid_portion):,}</b>"
+                else: alloc_str = "<span style='color:#ccc;'>-</span>"
                     
                 allocation_rows_html += f"<tr><td style='border: 1px solid black; padding: 1px 5px;'>{h_name.upper()}</td><td style='border: 1px solid black; padding: 1px 5px; text-align: center;'>₹ {head_payable:,}</td><td style='border: 1px solid black; padding: 1px 5px; text-align: center;'>{alloc_str}</td></tr>"
                 
-            # 🔥 Calculate EXACT HISTORICAL Due and Advance based on receipt time
             hist_paid = new_gen_paid + new_ext_paid
             hist_due = max(0, hist_pay - hist_paid)
             hist_adv = max(0, hist_paid - hist_pay)
             
-            # HTML Render
             html_code = f"""<html><head><style>body {{ font-family: 'Calibri', Arial, sans-serif; font-size: 11px; color: black; background: #fff; padding: 10px; margin: 0; }} table {{ width: 100%; border-collapse: collapse; }} td {{ padding: 2px 5px; }} .main-box {{ width: 100%; max-width: 148mm; margin: 0 auto; border: 1px solid #000; padding: 8px; background: white; }} .lbl {{ background-color: #E7E6E6; border: 1px solid black; text-align: right; font-weight: bold; width: 35%; }} .val {{ border: 1px solid black; text-transform: uppercase; font-weight: bold; color: #0000FF; }} @media print {{ @page {{ size: A5 portrait; margin: 4mm; }} body {{ padding: 0; margin: 0; }} .main-box {{ border: 2px solid #000; padding: 5px; width: 98%; max-width: none; box-sizing: border-box; }} * {{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }} }}</style></head><body onload="setTimeout(() => window.print(), 500)"><div class="main-box"><table style="border: 2px solid black; margin-bottom: 5px; width: 100%;"><tr><td style="background-color: #1F497D; color: white; text-align: center; font-size: 20px; font-weight: bold; padding: 4px;">M.S. PUBLIC SCHOOL</td></tr><tr><td style="text-align: center; font-size: 11px; font-weight: bold; padding: 2px; color: #222; border-bottom: 1px solid black;">Larawak, Kachhwa, Mirzapur - 231501 &nbsp;|&nbsp; Mob No: 6307210754, 9455587731</td></tr><tr><td style="background-color: #DCE6F1; text-align: center; font-size: 13px; font-weight: bold; padding: 2px;">FEE RECEIPT</td></tr></table><table style="margin-bottom: 5px; text-align: center;"><tr><td style="width: 25%; text-align: right; font-weight: bold;">Receipt No:</td><td style="width: 25%; background-color: #FFFF99; border: 1px solid black; font-weight: bold; font-size: 12px; color: #000;">{rec_no}</td><td style="width: 20%; background-color: #E7E6E6; border: 1px solid black; font-weight: bold;">Date:</td><td style="width: 30%; border: 1px solid black; color: red; font-weight: bold; font-size: 12px;">{rec_date}</td></tr></table><table style="margin-bottom: 5px;"><tr><td class="lbl">Roll No:</td><td class="val" style="color:#000;">{roll}</td></tr><tr><td class="lbl">Student Name:</td><td class="val">{name}</td></tr><tr><td class="lbl">Father Name:</td><td class="val">{fname}</td></tr><tr><td class="lbl">Class & Medium:</td><td class="val">{cls} ({medium})</td></tr><tr><td class="lbl">Fee Head Note:</td><td class="val" style="color:#000;">{fee_head_note}</td></tr><tr><td class="lbl">Payment Mode:</td><td class="val" style="color:#000;">{mode}</td></tr><tr><td class="lbl">Amount Paid:</td><td class="val" style="text-align: right; font-weight: bold; font-size: 14px; color:#000;">₹ {amt_paid:,}</td></tr></table><table style="margin-bottom: 5px;"><tr><td colspan="3" style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; padding: 3px; border: 1px solid black;">PAYMENT ALLOCATION BREAKDOWN</td></tr><tr><td style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; border: 1px solid black; width: 45%;">Fee Head</td><td style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; border: 1px solid black; width: 25%;">Amount Payable</td><td style="background-color: #4F81BD; color: white; text-align: center; font-weight: bold; border: 1px solid black; width: 30%;">Amount Applied</td></tr>{allocation_rows_html}</table><div style="text-align: center; font-size: 9px; font-style: italic; margin-bottom: 5px;">* Any excess advance amount is carried forward automatically.</div><table style="margin-bottom: 5px;"><tr><td colspan="2" style="background-color: #1F497D; color: white; text-align: center; font-weight: bold; padding: 3px; border: 1px solid black;">ACCOUNT STATUS (AS ON RECEIPT DATE)</td></tr><tr><td class="lbl" style="width: 60%;">Current Balance Due:</td><td class="val" style="font-weight: bold; color: #9C0006; background-color: #FFC7CE;">₹ {hist_due:,}</td></tr><tr><td class="lbl">Advance Paid (If Any):</td><td class="val" style="font-weight: bold; color: #006100; background-color: #C6EFCE;">₹ {hist_adv:,}</td></tr></table><div style="text-align: right; font-weight: bold; font-size: 11px; margin-top: 20px; padding-right: 10px;">_________________________<br>Authorized Signatory</div></div></body></html>"""
             components.html(html_code, height=900, scrolling=True)
             st.write("---")
             st.stop()
 
-    # 👇 COMBINED FEE COLLECTION & PRINTING TAB (RBAC ENABLED)
     if menu in ["📝 Fee Collection & Print", "🖨️ Print Receipts"]:
         if role == 'Teacher':
             st.subheader("🖨️ View & Print Receipts")
@@ -357,7 +398,6 @@ def show_fee_management(current_m_idx):
             tab1, tab2, tab3 = st.tabs(["💰 Collect New Fee", "🛍️ Collect Extra Charge", "✏️ Edit / Delete Receipt"])
             
             with tab1:
-                # 🔍 SMART STUDENT SEARCH SYSTEM (GENERAL FEE)
                 c.execute("SELECT roll_no, name, class, father_name FROM student_master")
                 all_students = c.fetchall()
                 search_options = ["🔍 --- Type Name to Search Student ---"]
@@ -395,7 +435,6 @@ def show_fee_management(current_m_idx):
                             except: st.error("❌ Something went wrong!")
 
             with tab2:
-                # 🛍️ MULTI-SELECT EXTRA CHARGE COLLECTION 
                 st.markdown("### Collect Extra Charge (Items/Fines)")
                 selected_student_ext = st.selectbox("Search & Select Student:", search_options, key="search_ext")
                 auto_roll_ext = 1
@@ -460,7 +499,6 @@ def show_fee_management(current_m_idx):
                             except Exception as e: st.error(f"❌ Error: {e}")
 
             with tab3:
-                # EDIT / DELETE RECEIPT
                 e_rec = st.text_input("Enter Receipt No to Edit")
                 if e_rec:
                     c.execute("SELECT * FROM fee_log WHERE receipt_no=?", (e_rec,))
@@ -539,13 +577,11 @@ def show_fee_management(current_m_idx):
                 if due > 0: c3.error(f"Current Due: ₹{due:,}")
                 else: c3.success(f"Advance Rcvd: ₹{adv:,}")
                 
-                # Fetch Payments to Create Pools
                 c.execute("SELECT amount, head FROM fee_log WHERE roll_no=?", (roll,))
                 all_logs = c.fetchall()
                 tot_gen_paid = sum([x[0] for x in all_logs if not str(x[1]).upper().startswith("EXTRA")])
                 tot_ext_paid = sum([x[0] for x in all_logs if str(x[1]).upper().startswith("EXTRA")])
                 
-                # --- GENERAL FEE TABLE ---
                 st.markdown("#### 📘 Regular Fee Statement")
                 c.execute("SELECT * FROM fee_structure WHERE class=?", (stu[2],))
                 fs = c.fetchone()
@@ -568,9 +604,11 @@ def show_fee_management(current_m_idx):
                     else: status = "⚪ Upcoming"
                     curr_due = max(0, amt - paid_here) if m_idx <= current_m_idx else 0
                     gen_table.append([h_name.upper(), f"₹{amt:,}", f"₹{paid_here:,}", status, f"₹{curr_due:,}"])
-                st.dataframe(pd.DataFrame(gen_table, columns=["Fee Head / Month", "Payable", "Paid", "Status", "Current Due"]), use_container_width=True, hide_index=True)
                 
-                # --- EXTRA CHARGES TABLE ---
+                # 🔥 USE PREMIUM TABLE HERE
+                df_gen = pd.DataFrame(gen_table, columns=["Fee Head / Month", "Payable", "Paid", "Status", "Current Due"])
+                render_premium_table(df_gen)
+                
                 st.markdown("#### 🎒 Extra Charges Statement")
                 c.execute("SELECT item_name, amount FROM student_charges WHERE roll_no=?", (roll,))
                 ext_items = c.fetchall()
@@ -585,11 +623,13 @@ def show_fee_management(current_m_idx):
                         else: status = "🔴 Due"
                         curr_due = max(0, e_amt - paid_here)
                         ext_table.append([e_name.upper(), f"₹{e_amt:,}", f"₹{paid_here:,}", status, f"₹{curr_due:,}"])
-                    st.dataframe(pd.DataFrame(ext_table, columns=["Extra Item", "Payable", "Paid", "Status", "Current Due"]), use_container_width=True, hide_index=True)
+                    
+                    # 🔥 USE PREMIUM TABLE HERE
+                    df_ext = pd.DataFrame(ext_table, columns=["Extra Item", "Payable", "Paid", "Status", "Current Due"])
+                    render_premium_table(df_ext)
                 else:
                     st.info("No Extra Charges assigned to this student.")
                 
-                # --- RECENT PAYMENTS WITH VIEW BUTTON ---
                 st.write("---")
                 st.markdown("#### 💸 Payment History & Receipts")
                 c.execute("SELECT receipt_no, date, head, amount, mode FROM fee_log WHERE roll_no=? ORDER BY receipt_no DESC", (roll,))
@@ -636,7 +676,10 @@ def show_fee_management(current_m_idx):
             col1.metric("Total Students", len(students)); col2.metric("Total Expected", f"₹ {tot_pay_all:,}")
             col3.metric("Total Collected", f"₹ {tot_paid_all:,}"); col4.metric("Total Balance Due", f"₹ {tot_due_all:,}")
             st.write("---")
-            st.dataframe(pd.DataFrame(report, columns=["Roll No", "Name", "Class", "Payable", "Paid", "Due", "Advance", "Status"]), use_container_width=True, hide_index=True)
+            
+            # 🔥 USE PREMIUM TABLE HERE
+            df_rep = pd.DataFrame(report, columns=["Roll No", "Name", "Class", "Payable", "Paid", "Due", "Advance", "Status"])
+            render_premium_table(df_rep)
 
     elif menu == "📅 Daily Collection":
         st.subheader("Daily Collection Report (By Admin ID)")
@@ -649,5 +692,7 @@ def show_fee_management(current_m_idx):
         df_db = pd.read_sql_query(query, conn)
         if not df_db.empty:
             for col in ["Total", "Cash", "Online_UPI", "Bank", "Cheque"]: df_db[col] = df_db[col].apply(lambda x: f"₹ {x:,}")
-            st.dataframe(df_db, use_container_width=True, hide_index=True)
+            
+            # 🔥 USE PREMIUM TABLE HERE
+            render_premium_table(df_db)
         else: st.info("No collections recorded yet.")
